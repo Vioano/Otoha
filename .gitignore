@@ -20,3 +20,9 @@ __pycache__/
 dist/
 coverage/
 *.log
+
+# Component-local runtime state
+.archify-design/
+.state/
+*.sqlite3
+*.sqlite3-*

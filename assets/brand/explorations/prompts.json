@@ -1,0 +1,41 @@
+{
+  "generator": "built-in image_gen",
+  "status": "exploration; no final logo selected",
+  "rounds": [
+    {
+      "round": 1,
+      "concepts": [
+        {
+          "id": "A",
+          "name": "共振环",
+          "prompt": "Use case: logo-brand. Create a sophisticated first-round logo direction presentation for Otoha, a human-and-multi-agent collaboration infrastructure. Direction A: Resonance loop. An original compact open circular emblem built from three gently curved ribbon-like strokes that remain independent yet form one coherent O, with an intentional quiet opening suggesting human direction and ongoing conversation. Distinctive silhouette, carefully controlled negative space, calm and precise, contemporary software identity with a subtle organic character. Flat vector-friendly geometry, no 3D, no texture, no shadows. Present one large primary mark on a nearly black background, one smaller monochrome light-background version, a small app-icon size test, and a tasteful Otoha wordmark. Only text: 'A', 'Otoha'. Generous space. The same identical logo design across all applications. Avoid generic hub-and-spoke networks, nodes-and-lines, hexagons, infinity symbols, sparkles, robots, gradients that conceal geometry, and similarities to famous AI logos. This is a direction sample, not a final SVG."
+        },
+        {
+          "id": "B",
+          "name": "交织路径",
+          "prompt": "Use case: logo-brand. Create a sophisticated first-round logo direction presentation for Otoha, an infrastructure for human intention and independent agents to collaborate. Direction B: Woven paths. Invent a compact asymmetric O-shaped emblem from two flat broad paths that interleave once with clear over-under negative space; each path has its own course but they produce a shared legible form. Strong graphic silhouette, more architectural than floral, elegant rounded corners and tension between precision and movement. Flat vector-friendly geometry, no 3D, no texture, no shadows. Present one large primary mark on a nearly black background, one smaller monochrome light-background version, a small app-icon size test, and a tasteful Otoha wordmark. Only text: 'B', 'Otoha'. Generous space. The same identical logo design across all applications. Avoid generic hub-and-spoke networks, nodes-and-lines, hexagons, infinity symbols, sparkles, robots, gradients that conceal geometry, and similarities to famous AI logos. This is a direction sample, not a final SVG."
+        },
+        {
+          "id": "C",
+          "name": "叶片回声",
+          "prompt": "Use case: logo-brand. Create a sophisticated first-round logo direction presentation for Otoha, software infrastructure that lets people shape intentions and independent agents work together. Direction C: Leaf echo. An original compact emblem using two or three offset folded leaf-like geometric surfaces and a clean crescent of negative space. Suggest listening, growth and collective motion without drawing a literal tree or audio equalizer. Gentle yet exact, slightly more expressive than a corporate network logo, recognizable as a tiny desktop app icon. Flat vector-friendly design, no 3D, no texture, no shadows. Present one large primary mark on a nearly black background, one smaller monochrome light-background version, a small app-icon size test, and a tasteful Otoha wordmark. Only text: 'C', 'Otoha'. Generous space. The same identical logo design across all applications. Avoid generic hub-and-spoke networks, nodes-and-lines, hexagons, infinity symbols, sparkles, robots, gradients that conceal geometry, and similarities to famous AI logos. This is a direction sample, not a final SVG."
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "concepts": [
+        {
+          "id": "D",
+          "prompt": "Edit this Otoha logo exploration. Preserve its restrained simplicity, elegant open O silhouette, quiet presentation and controlled negative space. Refine the main emblem toward musical orchestration and multiple independent voices: use only three clean, gently curved strokes with intentional rhythmic offsets, as if three musical phrases are listening and responding around one shared silent center. Let the meaning emerge from spacing, curvature and rhythm, not added symbols. Make the paths lighter and more disciplined than the original broad leaf forms, but still legible at tiny size. No literal music notes, no staff, no waveform, no graph nodes, no extra ornaments or complexity. Preserve cream, muted sage and soft periwinkle accents on near black; monochrome companion on warm white must be the SAME geometry. Flat vector-friendly shapes with no gradients or texture. Keep the same presentation structure and Otoha wordmark; change direction label to 'D'. A calm, distinctive professional software mark, not a music player badge.",
+          "reference": "A"
+        },
+        {
+          "id": "E",
+          "prompt": "Edit this Otoha logo exploration. Preserve the simple compact O-based identity and premium quiet presentation, but replace the heavy interwoven bands with an original very minimal counterpoint motif: two or three slender rounded musical-phrase-like curves, slightly staggered in time and carefully nested, that together imply an open O and coordinated independent motion. The musical and multi-agent orchestration associations must come solely from rhythm, intervals and harmony between separate strokes. Do NOT add a literal note, treble clef, staff, waveform, connected dots, conductor, star or any secondary symbol. Aim for the clarity of a two- or three-stroke calligraphic sign, balanced and memorable at app-icon scale. Retain restrained cream and sage on nearly black; show the identical mark in monochrome on warm white plus small app-icon application. Flat, precise, vector-friendly, no gradients or texture. Same Otoha wordmark and layout. Direction label 'E'. Keep it simpler than the reference, never busier.",
+          "reference": "B"
+        }
+      ]
+    }
+  ]
+}

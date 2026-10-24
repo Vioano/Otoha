@@ -1,0 +1,26 @@
+/* The explorer owns the available viewport. The diagram keeps its logical
+   viewBox; only its reading surface stretches, never the nodes or text. */
+.header,.cards,.focus-chip,.guided-views,#btn-theme,#btn-preset{display:none!important}
+html{height:100%;overflow:hidden;background:var(--bg)}
+body{height:100%;min-height:0!important;padding:0!important;overflow:hidden;background:var(--bg)!important}
+.container{display:flex;flex-direction:column;width:100%!important;max-width:none!important;height:100%!important;min-height:0;margin:0!important}
+.diagram-container{flex:1 1 0;display:flex;align-items:center;justify-content:center;min-width:0;min-height:0;width:100%;margin:0!important;padding:56px 12px 72px!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.diagram-container::before,.diagram-container::after{display:none!important}
+.diagram-container>svg{display:block;flex:1 1 0;width:100%;height:100%;min-width:0;min-height:0}
+.diagram-container.otoha-gesturing svg{transition:none!important}
+.toolbar{top:12px;right:12px}
+@media(max-width:600px){
+  .diagram-container{padding:52px 8px 64px!important}
+  .toolbar{top:10px;right:10px}
+}
+
+/* A continuous reading surface; the SVG grid remains in canonical exports. */
+.diagram-container{background-image:linear-gradient(color-mix(in srgb,var(--grid) 55%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--grid) 55%,transparent) 1px,transparent 1px)!important;background-size:var(--otoha-grid-size,40px 40px)!important;background-position:var(--otoha-grid-position,0 0)!important}
+.diagram-container>svg>rect[fill="url(#grid)"]{opacity:0;pointer-events:none}
+
+/* Leave the focus-mode exit, inspector and settings controls at top right. */
+html[data-otoha-focus=true] .toolbar{left:12px;right:auto}
+
+/* Display projection only; hidden graph objects remain in the accepted model. */
+[data-otoha-filter-hidden=true]{display:none!important}
+[data-otoha-filter-context=true]>.otoha-card-surface{stroke-dasharray:5 3}

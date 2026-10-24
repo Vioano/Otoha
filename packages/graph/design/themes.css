@@ -1,0 +1,50 @@
+/* Aero palette adapted from Music Agent's workbench/static/themes/aero.css.
+   The original semantic component colors remain distinct inside the diagram. */
+[data-otoha-style="aero"][data-theme="dark"] {
+  color-scheme:dark;
+  --bg:#06151c;--panel:rgba(10,39,52,.92);--panel-border:#2b5060;
+  --text:#e9f5f5;--text-muted:#9abcc5;--text-faint:#9abcc5;--grid:#143945;
+  --toolbar-bg:rgba(10,39,52,.94);--toolbar-border:#598795;--toolbar-text:#e9f5f5;
+  --toolbar-hover:#174754;--toolbar-menu-bg:#0b2837;--mask:#071e2b;
+  --arrow:#739fa9;--arrow-emphasis:#72e6e8;
+  --aero-top:rgba(32,79,93,.76);--aero-edge:#598795;--aero-inset:#071e2b;
+  --aero-button-top:#226275;--aero-button-bottom:#123a4b;
+  --aero-primary-top:#b0fcf3;--aero-primary-bottom:#45bfcf;--aero-primary-ink:#042e3a;
+  --aero-gloss:linear-gradient(180deg,#c4ffff12,transparent 45%);
+  --aero-shadow:0 10px 35px #00101855,inset 0 1px 0 #b6faff18;
+}
+[data-otoha-style="aero"][data-theme="light"] {
+  color-scheme:light;
+  --bg:#e4f1f2;--panel:rgba(239,251,251,.95);--panel-border:#9cbec6;
+  --text:#173e4b;--text-muted:#426b78;--text-faint:#426b78;--grid:#c4dce0;
+  --toolbar-bg:rgba(232,247,249,.96);--toolbar-border:#9cbec6;--toolbar-text:#173e4b;
+  --toolbar-hover:#e6f7f8;--toolbar-menu-bg:#edf9f9;--mask:#edf8f9;
+  --arrow:#648b96;--arrow-emphasis:#147885;
+  --aero-top:rgba(253,255,254,.98);--aero-edge:#bedbde;--aero-inset:#deeff2;
+  --aero-button-top:#f9ffff;--aero-button-bottom:#d2e9ee;
+  --aero-primary-top:#9aeddf;--aero-primary-bottom:#62c7c8;--aero-primary-ink:#164a54;
+  --aero-gloss:linear-gradient(180deg,#faffff77,transparent 45%);
+  --aero-shadow:0 10px 35px #375c651a,inset 0 1px 0 #faffffbb;
+}
+html[data-otoha-style="aero"] body {
+  background:radial-gradient(ellipse at 5% 100%,#126a5944,transparent 52%),radial-gradient(ellipse at 78% -20%,#267da04a,transparent 65%),var(--bg);
+  font-family:'Segoe UI','Trebuchet MS','PingFang SC','Microsoft YaHei',sans-serif;
+}
+html[data-otoha-style="aero"] :is(.map-pane,aside,body>header,dialog,.diagram-nav,.node-finder,.overview-map,.route-probe,.semantic-lens,.diagram-guide) {
+  background:var(--aero-gloss),linear-gradient(135deg,var(--aero-top),var(--panel) 46%);
+  border-color:var(--panel-border);border-top-color:var(--aero-edge);box-shadow:var(--aero-shadow);
+}
+html[data-otoha-style="aero"] :is(button,select) {
+  background:var(--aero-gloss),linear-gradient(var(--aero-button-top),var(--aero-button-bottom));
+  border-color:var(--panel-border);color:var(--text);box-shadow:inset 0 1px 0 #c4ffff16;
+}
+html[data-otoha-style="aero"] :is(button,select):hover {border-color:var(--arrow-emphasis)}
+/* Native select popups do not paint the trigger's gradient. Give every option
+   an opaque theme surface as well as the platform's matching color scheme. */
+html[data-otoha-style="aero"] :is(option,optgroup){background-color:var(--toolbar-menu-bg);color:var(--text)}
+html[data-otoha-style="aero"] :is(textarea,.status,.request) {background:var(--aero-inset)}
+html[data-otoha-style="aero"] #save {background:linear-gradient(var(--aero-primary-top),var(--aero-primary-bottom));color:var(--aero-primary-ink);border-color:var(--arrow-emphasis)}
+html[data-otoha-style="aero"] #breadcrumbs button {background:transparent;box-shadow:none;border-color:transparent}
+html[data-otoha-style="aero"] .evidence button {background:transparent;box-shadow:none;color:var(--arrow-emphasis)}
+html[data-otoha-style="aero"] .module-strip button.active {background:color-mix(in srgb,var(--arrow-emphasis) 16%,var(--panel));border-color:var(--arrow-emphasis)}
+html[data-otoha-style="aero"] .brand-mark {background:radial-gradient(circle at 35% 20%,#e9ffec,#82cbd0 15%,#1190b7 50%,#075063 73%,#08292e);box-shadow:inset 0 1px 3px #edffffcc,0 3px 8px #00101866,0 0 18px #51d6d219;color:#edfffe}

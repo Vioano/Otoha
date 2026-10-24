@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+._*
+.venv/
+.env
+.env.*
+.codex/hooks.json
+.codex/hooks.json.mailbox-backup-*
+dist/

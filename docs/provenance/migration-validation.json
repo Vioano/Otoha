@@ -1,0 +1,46 @@
+{
+  "date": "2026-10-24",
+  "platform": "darwin/arm64",
+  "runtime": {
+    "node": "22.22.3",
+    "python": "3.14.5",
+    "go": "1.27.3"
+  },
+  "local": {
+    "graph_tests": 100,
+    "collaboration_tests": 17,
+    "mailbox_tests": 25,
+    "native_go_packages": 2,
+    "native_service_integration_tests": 1,
+    "source_launcher_tests": 1,
+    "post_header_change_tests": 10,
+    "go_vet": "passed",
+    "npm_audit_vulnerabilities": 0,
+    "names": "passed",
+    "markdown_local_links": "passed",
+    "source_checkouts": "unchanged",
+    "private_runtime_migrated": false
+  },
+  "browser": {
+    "scope": "disposable local example",
+    "themes": [
+      "dark",
+      "light"
+    ],
+    "languages": [
+      "English",
+      "简体中文"
+    ],
+    "independent_task_save": "passed",
+    "shared_cli_query": "same cursor and task",
+    "restart": "task and reading preferences retained"
+  },
+  "not_verified": [
+    "production migration",
+    "real teammate readback",
+    "cross-machine acceptance",
+    "real idle-agent wake",
+    "final logo selection"
+  ],
+  "ci": "pending remote readback"
+}

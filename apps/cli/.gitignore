@@ -1,0 +1,6 @@
+/dist/
+/.private/
+*.log
+.DS_Store
+._*
+__MACOSX/

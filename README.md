@@ -2,33 +2,74 @@
 
 面向复杂项目的人与多 Agent 协作基础设施。
 
-Otoha 面向跨 Session、跨设备、跨成员和跨 Agent 框架的长期工程协作。它将基于 System Atlas、Atlas CLI 和 Team Mailbox 的已有工作，发展共享工程图谱、通信与协作能力，并让人通过具体体验持续参与需求的形成和修正。长期方向包含自己的原生 Agent，同时兼容现有 Agent；插件、MCP 和 Skill 提供接入与操作指引。
+Otoha 面向跨 Session、跨设备、跨成员和跨 Agent 框架的长期工程协作。人通过具体体验持续形成和修正需求，独立执行的 Agent 通过共同工程状态、通信与协作协议推进工作。长期方向包含原生 Agent，同时兼容现有 Agent；插件、MCP 和 Skill 提供接入与操作指引。
 
 ## 五项核心哲学
 
 1. **分级异步通信**：完整内容持久保存，通知只带极简摘要和引用；按紧急程度与任务边界读取。
-2. **全局工程图谱与策略化读取**：显式组织工程对象和关系，让各 Agent 通过可复用查询取得所需局部上下文。
-3. **持续人机对齐**：由专门的对齐 Agent 在整个开发过程中理解、确认和更新人的意图。
+2. **全局工程图谱与策略化读取**：显式组织工程对象和关系，通过可复用查询取得所需局部上下文。
+3. **持续人机对齐**：专门的对齐 Agent 在整个开发过程中理解、确认和更新人的意图。
 4. **需求实例化**：先用低成本、可交互的具体体验帮助人判断，再据此推进实现。
 5. **协议驱动的自适应协作与调度**：规划时明确协调策略，复用通用协议，随任务和阶段调整组织方式。
 
-[详细说明](docs/PRINCIPLES.zh-CN.md)保留原讨论中的机制、网站与冲浪游戏例子，以及第五项从轻量中心调度到自适应策略的演变。验证、合并和冲突预防属于工程基础，不另列为第六项特色。
+[详细说明](docs/PRINCIPLES.zh-CN.md)保留原讨论中的机制、网站与冲浪游戏例子，以及调度思想的演变。
 
-## 文档
+## 从源码运行
 
-- [核心原则](docs/PRINCIPLES.zh-CN.md)：五项哲学的详细依据、具体例子与后续修正。
-- [已有基础与复用入口](docs/FOUNDATIONS.zh-CN.md)：三个旧项目的源码位置、固定版本和能力边界。
-- [架构起点](docs/ARCHITECTURE.zh-CN.md)：持续对齐、需求实例、共同模型与多 Agent 执行之间的关系。
-- [开发起点](docs/DEVELOPMENT.zh-CN.md)：首个场景建议、验收方式和尚待决定的问题。
+需要 Node.js 18+、Python 3.10+；构建原生客户端需要 Go 1.26+。
 
-## 当前状态
+```sh
+git clone https://github.com/Vioano/Otoha.git
+cd Otoha
+npm run setup
+node bin/otoha.mjs help
+```
 
-仓库处于初始化阶段，已经建立文档和旧项目的版本索引。尚未导入三个项目的实现，也没有可运行的 Otoha 产品或已完成的集成验证。文档中的架构和首个开发场景是后续设计的起点。
+图谱与看板示例：
 
-## 项目来源
+```sh
+node bin/otoha.mjs graph preview packages/graph/examples/service.system.json --repo-root packages/graph
+```
 
-- [System Atlas](https://github.com/Vioano/system-atlas)：共享系统模型、人类视图与 Agent 查询。
-- [Atlas CLI](https://github.com/Vioano/atlas-cli)：项目接入、持续收信与 Agent 会话适配。
-- Team Mailbox：跨成员、跨 Agent 的协作协议与 GitHub 收信工具；本机已有源码，原远端地址的可访问性见[复用记录](docs/FOUNDATIONS.zh-CN.md)。
+打开命令打印的本地地址。另一个终端可以查询同一接受状态：
 
-本仓库公开保存通用设计与代码。个人凭据、邀请密钥、真实团队消息、运行日志及私有服务配置保存在各自的私有存储中。
+```sh
+node bin/otoha.mjs graph manifest packages/graph/examples/service.system.json
+node bin/otoha.mjs graph query packages/graph/examples/service.system.json --mode overview
+```
+
+示例是虚构设计数据。预览可用 Ctrl-C 停止，不自动启动 Agent。
+
+协作服务与原生 CLI：
+
+```sh
+node bin/otoha.mjs server --help
+node bin/otoha.mjs message --help
+npm run build:cli
+node bin/otoha.mjs client version
+```
+
+服务初始化、私有身份与 MCP 接入见 [Otoha Collaboration](services/collaboration/README.md)。当前没有正式二进制发行版；使用本仓库源码构建。
+
+## 代码与文档
+
+| 组件 | 入口 |
+| --- | --- |
+| 图谱、查询、看板与交互视图 | [Otoha Graph](packages/graph/README.md) |
+| 协作服务、身份、查询、回执与 MCP | [Otoha Collaboration](services/collaboration/README.md) |
+| 原生客户端、项目接入与后台接收 | [Otoha CLI](apps/cli/README.md) |
+| GitHub 收信与操作指引 | [Otoha Mailbox](integrations/mailbox/README.md) |
+| 图标方向打样，尚未定稿 | [图标探索](assets/brand/README.md) |
+
+设计依据见[五项核心哲学](docs/PRINCIPLES.zh-CN.md)、[架构起点](docs/ARCHITECTURE.zh-CN.md)与[开发起点](docs/DEVELOPMENT.zh-CN.md)。迁入代码、来源和检查结果见[组件说明](docs/FOUNDATIONS.zh-CN.md)、[验证记录](docs/MIGRATION.zh-CN.md)与[版权来源](NOTICE.md)。
+
+## 验证与当前边界
+
+```sh
+npm test
+npm run check:names
+```
+
+通用实现已经迁入并统一命名，根入口可以启动组件；组件组合不等于五项哲学已经完整落地。分级通知、持续对齐、需求实例关联与自适应调度还需要继续开发。真实跨机器、Windows 宿主和空闲 Agent 唤醒有各自验收范围。
+
+凭据、邀请、个人配置和真实运行数据保存在仓库外。构建与测试不迁移旧部署。

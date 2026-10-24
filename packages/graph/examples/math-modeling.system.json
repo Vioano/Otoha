@@ -1,0 +1,1344 @@
+{
+  "schema_version": 1,
+  "diagram_type": "system",
+  "meta": {
+    "id": "math-modeling-template",
+    "title": "数学建模 · 协作讨论模板（示例）",
+    "locale": "zh-CN",
+    "rootView": "overview",
+    "demo": true
+  },
+  "entities": [
+    {
+      "id": "problem",
+      "type": "external",
+      "label": "题意与评价目标",
+      "sublabel": "A / C · 共同澄清",
+      "purpose": "把虚构的应急调度问题拆成可讨论的目标、约束与输出要求。",
+      "inputs": [
+        "虚构题意：多个仓库向需求点配送物资"
+      ],
+      "outputs": [
+        "问题清单、假设与评价口径"
+      ],
+      "steps": [
+        "明确需求与资源限制",
+        "区分题目给定条件和团队假设"
+      ],
+      "openIssues": [
+        "需要先讨论：这是工作对象、阶段，还是任务？"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "data",
+      "type": "database",
+      "label": "数据准备",
+      "sublabel": "A · 数据与来源",
+      "purpose": "保存数据来源、口径和加工结果，供多个候选模型共用。",
+      "inputs": [
+        "需求、库存、运输成本示例字段"
+      ],
+      "outputs": [
+        "可追溯的数据表、数据字典"
+      ],
+      "steps": [
+        "检查原始数据",
+        "处理缺失和单位",
+        "形成统一建模输入"
+      ],
+      "openIssues": [
+        "示例分工 A；尚无正式负责人字段或权限。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "models",
+      "type": "backend",
+      "label": "候选模型",
+      "sublabel": "B · 两种方案并行",
+      "purpose": "并行比较基线方案和考虑需求波动的候选方案，不把探索压成单一路径。",
+      "inputs": [
+        "统一数据、约束与目标"
+      ],
+      "outputs": [
+        "模型假设、求解结果、方案对照"
+      ],
+      "steps": [
+        "先定义比较标准",
+        "建立基线与备选方案",
+        "依据验证结果修订"
+      ],
+      "openIssues": [
+        "真实比赛题目的任务拆分与验收标准仍待讨论。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "experiments",
+      "type": "backend",
+      "label": "实验验证",
+      "sublabel": "A / B · 检验与反馈",
+      "purpose": "检查可行性与稳定性，把发现的问题反馈给模型。",
+      "inputs": [
+        "候选结果、比较指标与情景"
+      ],
+      "outputs": [
+        "对比结果、失效情景与修订建议"
+      ],
+      "steps": [
+        "比较共同指标",
+        "调整参数与需求情景",
+        "复核约束和结论"
+      ],
+      "openIssues": [
+        "尚未执行实验；没有真实验证证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "paper",
+      "type": "frontend",
+      "label": "论文与图表",
+      "sublabel": "C · 持续组织论证",
+      "purpose": "持续整理假设、推导、结果和限制；写作发现的逻辑缺口会返回题意或模型。",
+      "inputs": [
+        "问题定义、方法、实验结果与来源"
+      ],
+      "outputs": [
+        "可审阅的论证、图表与引用"
+      ],
+      "steps": [
+        "先搭结构",
+        "随结果更新证据",
+        "复查论证与图表的一致性"
+      ],
+      "openIssues": [
+        "论文完成与模型完成是否应独立？"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "delivery",
+      "type": "cloud",
+      "label": "交付与复现",
+      "sublabel": "A / B / C · 共同核对",
+      "purpose": "汇总可复现材料并检查最终交付内容。",
+      "inputs": [
+        "论文、数据、代码与运行说明"
+      ],
+      "outputs": [
+        "可复现交付包"
+      ],
+      "steps": [
+        "核对产物与版本",
+        "按说明复跑",
+        "检查最终材料"
+      ],
+      "openIssues": [
+        "这里不表示比赛已经完成或提交。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "source-data",
+      "type": "database",
+      "label": "来源与口径",
+      "sublabel": "保留原始材料",
+      "purpose": "记录每项数据的出处、单位和适用范围。",
+      "inputs": [
+        "原始表格与说明"
+      ],
+      "outputs": [
+        "数据字典"
+      ],
+      "steps": [
+        "记录出处",
+        "检查单位"
+      ],
+      "openIssues": [
+        "缺失数据如何处理？"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "data"
+    },
+    {
+      "id": "clean-data",
+      "type": "backend",
+      "label": "清理与核对",
+      "sublabel": "示例待办：核对缺失值",
+      "purpose": "形成可以重复执行的数据清理规则。",
+      "inputs": [
+        "原始数据、口径"
+      ],
+      "outputs": [
+        "清理结果和变更说明"
+      ],
+      "steps": [
+        "检查缺失与异常",
+        "验证约束"
+      ],
+      "openIssues": [
+        "清理规则需要由具体任务落实。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "data"
+    },
+    {
+      "id": "model-input",
+      "type": "database",
+      "label": "统一模型输入",
+      "sublabel": "各模型共用一份事实",
+      "purpose": "让不同模型使用可比较的输入版本。",
+      "inputs": [
+        "清理结果"
+      ],
+      "outputs": [
+        "版本明确的输入表"
+      ],
+      "steps": [
+        "固定字段与单位",
+        "记录输入版本"
+      ],
+      "openIssues": [
+        "模型分支是否使用同一份输入？"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "data"
+    },
+    {
+      "id": "baseline",
+      "type": "backend",
+      "label": "基线方案",
+      "sublabel": "先形成可比较的参照",
+      "purpose": "建立用于比较的简洁调度模型。",
+      "inputs": [
+        "统一输入、确定性约束"
+      ],
+      "outputs": [
+        "基线结果与假设"
+      ],
+      "steps": [
+        "定义目标与变量",
+        "求解并保存结果"
+      ],
+      "openIssues": [
+        "示例任务：先跑通一个可检查的基线。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "models"
+    },
+    {
+      "id": "robust",
+      "type": "backend",
+      "label": "需求波动方案",
+      "sublabel": "与基线并行探索",
+      "purpose": "探索需求波动时更稳健的候选方法。",
+      "inputs": [
+        "输入与需求情景"
+      ],
+      "outputs": [
+        "备选方案和代价分析"
+      ],
+      "steps": [
+        "明确不确定性假设",
+        "比较不同情景"
+      ],
+      "openIssues": [
+        "是否值得增加复杂度，由实验比较决定。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "models"
+    },
+    {
+      "id": "comparison",
+      "type": "backend",
+      "label": "方案对照",
+      "sublabel": "保留选择理由",
+      "purpose": "在共同输入和指标下比较候选模型。",
+      "inputs": [
+        "基线结果、备选结果"
+      ],
+      "outputs": [
+        "差异解释与后续选择"
+      ],
+      "steps": [
+        "对齐输入和指标",
+        "记录取舍"
+      ],
+      "openIssues": [
+        "没有真实结果；模板不预设胜出的方案。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "models"
+    },
+    {
+      "id": "metrics",
+      "type": "backend",
+      "label": "指标对齐",
+      "sublabel": "统一比较口径",
+      "purpose": "固定用于解释结果的评价指标。",
+      "inputs": [
+        "问题目标与模型结果"
+      ],
+      "outputs": [
+        "指标定义和对比表"
+      ],
+      "steps": [
+        "核对单位与含义",
+        "避免不同口径的结果混比"
+      ],
+      "openIssues": [
+        "什么证据足以支持结论？"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "experiments"
+    },
+    {
+      "id": "sensitivity",
+      "type": "backend",
+      "label": "情景与敏感性",
+      "sublabel": "寻找结论的适用边界",
+      "purpose": "检查结论随假设、参数和需求变化的表现。",
+      "inputs": [
+        "候选模型、指标与情景"
+      ],
+      "outputs": [
+        "稳定性观察与问题清单"
+      ],
+      "steps": [
+        "变化关键参数",
+        "记录异常情景"
+      ],
+      "openIssues": [
+        "结构上的反馈环不等于已经完成验证。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "experiments"
+    },
+    {
+      "id": "review",
+      "type": "backend",
+      "label": "复核与反馈",
+      "sublabel": "结果回到下一轮探索",
+      "purpose": "把实验发现转成明确的问题和下一步动作。",
+      "inputs": [
+        "对比结果、异常情景"
+      ],
+      "outputs": [
+        "修订建议和复核记录"
+      ],
+      "steps": [
+        "定位差异来源",
+        "建议重新检查数据或模型"
+      ],
+      "openIssues": [
+        "反馈意见如何成为任务，需要一起讨论。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "experiments"
+    }
+  ],
+  "relations": [
+    {
+      "id": "problem-data",
+      "to": "data",
+      "kind": "dataflow",
+      "label": "数据口径",
+      "from": "problem"
+    },
+    {
+      "id": "data-models",
+      "to": "models",
+      "kind": "dataflow",
+      "label": "统一输入",
+      "from": "data"
+    },
+    {
+      "id": "models-experiments",
+      "to": "experiments",
+      "kind": "dataflow",
+      "label": "候选结果",
+      "from": "models"
+    },
+    {
+      "id": "experiments-paper",
+      "to": "paper",
+      "kind": "dataflow",
+      "label": "结果与限制",
+      "from": "experiments"
+    },
+    {
+      "id": "paper-delivery",
+      "to": "delivery",
+      "kind": "dataflow",
+      "label": "论文与材料",
+      "from": "paper"
+    },
+    {
+      "id": "experiments-models",
+      "to": "models",
+      "kind": "feedback",
+      "label": "修订模型",
+      "from": "experiments"
+    },
+    {
+      "id": "paper-problem",
+      "to": "problem",
+      "kind": "feedback",
+      "label": "回看题意",
+      "from": "paper"
+    },
+    {
+      "id": "source-clean",
+      "to": "clean-data",
+      "kind": "dataflow",
+      "label": "原始表",
+      "from": "source-data"
+    },
+    {
+      "id": "clean-input",
+      "to": "model-input",
+      "kind": "dataflow",
+      "label": "清理结果",
+      "from": "clean-data"
+    },
+    {
+      "id": "baseline-compare",
+      "to": "comparison",
+      "kind": "dataflow",
+      "label": "基线结果",
+      "from": "baseline"
+    },
+    {
+      "id": "robust-compare",
+      "to": "comparison",
+      "kind": "dataflow",
+      "label": "备选结果",
+      "from": "robust"
+    },
+    {
+      "id": "metrics-sensitivity",
+      "to": "sensitivity",
+      "kind": "dataflow",
+      "label": "共同指标",
+      "from": "metrics"
+    },
+    {
+      "id": "sensitivity-review",
+      "to": "review",
+      "kind": "dataflow",
+      "label": "异常与观察",
+      "from": "sensitivity"
+    }
+  ],
+  "views": [
+    {
+      "id": "overview",
+      "title": "数学建模 · 非线性协作总览",
+      "placements": [
+        {
+          "entity": "problem",
+          "pos": [
+            70,
+            135
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "data",
+          "pos": [
+            425,
+            135
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "models",
+          "pos": [
+            780,
+            135
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "delivery",
+          "pos": [
+            70,
+            445
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "paper",
+          "pos": [
+            425,
+            445
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "experiments",
+          "pos": [
+            780,
+            445
+          ],
+          "size": [
+            250,
+            138
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "problem-data"
+        },
+        {
+          "relation": "data-models"
+        },
+        {
+          "relation": "models-experiments",
+          "fromSide": "bottom",
+          "toSide": "top",
+          "labelAt": [
+            905,
+            365
+          ]
+        },
+        {
+          "relation": "experiments-paper"
+        },
+        {
+          "relation": "paper-delivery"
+        },
+        {
+          "relation": "experiments-models",
+          "fromSide": "right",
+          "toSide": "right",
+          "via": [
+            [
+              1150,
+              514
+            ],
+            [
+              1150,
+              204
+            ]
+          ],
+          "labelAt": [
+            1150,
+            355
+          ],
+          "variant": "dashed"
+        },
+        {
+          "relation": "paper-problem",
+          "fromSide": "top",
+          "toSide": "bottom",
+          "via": [
+            [
+              550,
+              350
+            ],
+            [
+              195,
+              350
+            ]
+          ],
+          "labelAt": [
+            372,
+            350
+          ],
+          "variant": "dashed"
+        }
+      ],
+      "viewBox": [
+        1270,
+        760
+      ],
+      "cards": [
+        {
+          "dot": "cyan",
+          "title": "当前是讨论模板",
+          "items": [
+            "虚构题目；所有模块处于计划阶段。",
+            "节点本体选中；信息按钮看详情；子图标展开或进入。"
+          ]
+        },
+        {
+          "dot": "amber",
+          "title": "先看清三个概念",
+          "items": [
+            "模块成熟度、修改请求回执、任务状态不是同一件事。",
+            "A/B/C 是示例分工，不是权限或正式指派。"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data-inside",
+      "title": "数据准备 · 来源到共同输入",
+      "scope": "data",
+      "placements": [
+        {
+          "entity": "source-data",
+          "pos": [
+            70,
+            190
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "clean-data",
+          "pos": [
+            440,
+            190
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "model-input",
+          "pos": [
+            810,
+            190
+          ],
+          "size": [
+            250,
+            138
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "source-clean"
+        },
+        {
+          "relation": "clean-input"
+        }
+      ],
+      "viewBox": [
+        1180,
+        580
+      ]
+    },
+    {
+      "id": "models-inside",
+      "title": "候选模型 · 并行探索与对照",
+      "scope": "models",
+      "placements": [
+        {
+          "entity": "baseline",
+          "pos": [
+            100,
+            120
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "robust",
+          "pos": [
+            100,
+            400
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "comparison",
+          "pos": [
+            760,
+            260
+          ],
+          "size": [
+            250,
+            138
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "baseline-compare",
+          "fromSide": "right",
+          "toSide": "left",
+          "via": [
+            [
+              550,
+              189
+            ],
+            [
+              550,
+              329
+            ]
+          ],
+          "labelAt": [
+            500,
+            189
+          ]
+        },
+        {
+          "relation": "robust-compare",
+          "fromSide": "right",
+          "toSide": "bottom",
+          "via": [
+            [
+              885,
+              469
+            ]
+          ],
+          "labelAt": [
+            500,
+            469
+          ]
+        }
+      ],
+      "viewBox": [
+        1180,
+        700
+      ]
+    },
+    {
+      "id": "experiments-inside",
+      "title": "实验验证 · 指标、情景与反馈",
+      "scope": "experiments",
+      "placements": [
+        {
+          "entity": "metrics",
+          "pos": [
+            70,
+            190
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "sensitivity",
+          "pos": [
+            440,
+            190
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "review",
+          "pos": [
+            810,
+            190
+          ],
+          "size": [
+            250,
+            138
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "metrics-sensitivity"
+        },
+        {
+          "relation": "sensitivity-review"
+        }
+      ],
+      "viewBox": [
+        1180,
+        580
+      ]
+    },
+    {
+      "id": "team-perspective",
+      "kind": "perspective",
+      "entryPoints": [
+        "problem",
+        "data",
+        "models",
+        "experiments",
+        "paper",
+        "delivery"
+      ],
+      "title": "三人分工 · 讨论草案",
+      "placements": [
+        {
+          "entity": "problem",
+          "pos": [
+            70,
+            140
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "data",
+          "pos": [
+            70,
+            450
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "models",
+          "pos": [
+            475,
+            140
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "experiments",
+          "pos": [
+            475,
+            450
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "paper",
+          "pos": [
+            880,
+            140
+          ],
+          "size": [
+            250,
+            138
+          ]
+        },
+        {
+          "entity": "delivery",
+          "pos": [
+            880,
+            450
+          ],
+          "size": [
+            250,
+            138
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "problem-data",
+          "fromSide": "bottom",
+          "toSide": "top",
+          "labelAt": [
+            195,
+            365
+          ]
+        },
+        {
+          "relation": "data-models",
+          "fromSide": "right",
+          "toSide": "left",
+          "via": [
+            [
+              390,
+              519
+            ],
+            [
+              390,
+              209
+            ]
+          ],
+          "labelAt": [
+            390,
+            355
+          ]
+        },
+        {
+          "relation": "models-experiments",
+          "fromSide": "bottom",
+          "toSide": "top",
+          "labelAt": [
+            600,
+            365
+          ]
+        },
+        {
+          "relation": "experiments-paper",
+          "fromSide": "right",
+          "toSide": "left",
+          "via": [
+            [
+              800,
+              519
+            ],
+            [
+              800,
+              209
+            ]
+          ],
+          "labelAt": [
+            800,
+            355
+          ]
+        },
+        {
+          "relation": "paper-delivery",
+          "fromSide": "bottom",
+          "toSide": "top",
+          "labelAt": [
+            1005,
+            365
+          ]
+        }
+      ],
+      "viewBox": [
+        1270,
+        770
+      ],
+      "cards": [
+        {
+          "dot": "emerald",
+          "title": "一个模型，多种视角",
+          "items": [
+            "这里复用总览的节点 ID，没有复制另一份状态。",
+            "负责人仅为示例标签；具体任务与权限尚待讨论。"
+          ]
+        }
+      ]
+    }
+  ],
+  "evidence": [],
+  "tasks": [
+    {
+      "id": "demo-scope",
+      "title": "明确题目边界与评价指标",
+      "status": "todo",
+      "assignees": [
+        "A",
+        "C"
+      ],
+      "entities": [
+        "problem"
+      ],
+      "description": "整理问题目标、数据条件与不能自行假定的约束。",
+      "acceptance": [
+        "列出主要目标和硬性约束",
+        "记录待确认问题"
+      ],
+      "deliverables": [],
+      "blocked": ""
+    },
+    {
+      "id": "demo-sensitivity",
+      "title": "设计敏感性与稳健性实验",
+      "status": "todo",
+      "assignees": [
+        "A",
+        "B"
+      ],
+      "entities": [
+        "sensitivity",
+        "metrics"
+      ],
+      "description": "确定扰动范围、对照设置及结果解释口径。",
+      "acceptance": [
+        "参数范围可追溯",
+        "区分稳定性和拟合优度"
+      ],
+      "deliverables": [],
+      "blocked": ""
+    },
+    {
+      "id": "demo-reproduce",
+      "title": "准备交付与复现检查",
+      "status": "todo",
+      "assignees": [
+        "A",
+        "B",
+        "C"
+      ],
+      "entities": [
+        "delivery"
+      ],
+      "description": "从干净目录复跑数据处理、模型与图表生成。",
+      "acceptance": [
+        "列出运行入口与环境",
+        "归档输入与产出引用"
+      ],
+      "deliverables": [],
+      "blocked": ""
+    },
+    {
+      "id": "demo-clean",
+      "title": "清洗数据并统一变量口径",
+      "status": "doing",
+      "assignees": [
+        "A"
+      ],
+      "entities": [
+        "clean-data",
+        "model-input"
+      ],
+      "description": "核对缺失、异常值、单位及模型输入表。",
+      "acceptance": [
+        "产出可复用清洗脚本",
+        "记录清洗前后的行数与异常处理"
+      ],
+      "deliverables": [],
+      "blocked": "等待原始数据字段说明（演示）"
+    },
+    {
+      "id": "demo-baseline",
+      "title": "实现基准模型",
+      "status": "doing",
+      "assignees": [
+        "B"
+      ],
+      "entities": [
+        "baseline"
+      ],
+      "description": "先跑通可解释的基准方案，再与候选方案比较。",
+      "acceptance": [
+        "固定输入与随机种子",
+        "保存基准结果和假设"
+      ],
+      "deliverables": [],
+      "blocked": ""
+    },
+    {
+      "id": "demo-paper",
+      "title": "组织论文结构与论证材料",
+      "status": "doing",
+      "assignees": [
+        "C"
+      ],
+      "entities": [
+        "paper"
+      ],
+      "description": "并行整理方法、结果和局限，避免最后拼接。",
+      "acceptance": [
+        "章节对应问题目标",
+        "结论引用实际结果"
+      ],
+      "deliverables": [],
+      "blocked": ""
+    },
+    {
+      "id": "demo-compare",
+      "title": "复核两种模型的比较口径",
+      "status": "review",
+      "assignees": [
+        "A",
+        "B"
+      ],
+      "entities": [
+        "comparison",
+        "metrics"
+      ],
+      "description": "演示：将相同输入、指标和约束下的结果送交复核。",
+      "acceptance": [
+        "确保评价口径一致",
+        "写明模型适用范围"
+      ],
+      "deliverables": [],
+      "blocked": ""
+    },
+    {
+      "id": "demo-figures",
+      "title": "检查图表标注与结果解释",
+      "status": "review",
+      "assignees": [
+        "C"
+      ],
+      "entities": [
+        "paper",
+        "review"
+      ],
+      "description": "演示：核对单位、图例与结论描述。",
+      "acceptance": [
+        "图表可追溯到数据",
+        "异常结果有解释"
+      ],
+      "deliverables": [],
+      "blocked": ""
+    },
+    {
+      "id": "demo-sources",
+      "title": "建立数据来源清单",
+      "status": "done",
+      "assignees": [
+        "A"
+      ],
+      "entities": [
+        "source-data"
+      ],
+      "description": "演示完成态：此卡用于展示看板，不代表已经收集真实比赛数据。",
+      "acceptance": [
+        "记录出处与获取时间",
+        "区分原始和派生数据"
+      ],
+      "deliverables": [],
+      "blocked": ""
+    },
+    {
+      "id": "demo-workspace",
+      "title": "约定项目目录与协作入口",
+      "status": "done",
+      "assignees": [
+        "A",
+        "B",
+        "C"
+      ],
+      "entities": [
+        "delivery"
+      ],
+      "description": "演示完成态：展示共同任务与交付模块的关联；不代表真实队员已经验收。",
+      "acceptance": [
+        "统一代码与论文入口",
+        "记录协作协议索引"
+      ],
+      "deliverables": [],
+      "blocked": ""
+    }
+  ]
+}

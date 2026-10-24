@@ -30,7 +30,7 @@ Otoha 面向长期、复杂、跨 Session、跨设备、跨成员和跨 Agent �
 
 图谱同时提供共同的决策定位。沿用地图例子，Agent 应能找到当前被认可的地图版本、它与自己任务的关系，以及后续修改对自己的影响。全局图谱由此既服务于定位，也服务于跨 Session 的共同理解。
 
-这一要求确定了显式图关系与策略查询的方向，但没有决定数据库产品、查询语言或存储引擎。System Atlas 的稳定 ID、共享接受模型和有界查询是可复用基础；Otoha 如何扩展为更完整的工程图谱，仍需实现与检验。具体设计应说明版本、读取范围与被省略的边界关系，让局部读取仍有可靠上下文。
+这一要求确定了显式图关系与策略查询的方向，但没有决定数据库产品、查询语言或存储引擎。Otoha Graph 的稳定 ID、共享接受模型和有界查询是可复用基础；Otoha 如何扩展为更完整的工程图谱，仍需实现与检验。具体设计应说明版本、读取范围与被省略的边界关系，让局部读取仍有可靠上下文。
 
 ## 3. 持续人机对齐：动态演化需求
 
@@ -80,7 +80,7 @@ Otoha 面向长期、复杂、跨 Session、跨设备、跨成员和跨 Agent �
 
 Otoha 的长期方向也包含开发自己的原生 Agent，同时兼容 Codex、Claude Code 等已有 Agent。插件、MCP 和 Skill 是接入和操作说明的形式；用户在最初讨论中明确说，Skill 不是系统本体。系统的核心能力需要由实际软件提供，不能只靠一组说明文档构成。
 
-System Atlas、Atlas CLI 和 Team Mailbox 是继续开发的代码与经验基础；新项目名称统一为 Otoha。已有实现、待开发能力与具体架构建议分别见[复用记录](FOUNDATIONS.zh-CN.md)、[架构起点](ARCHITECTURE.zh-CN.md)和[开发起点](DEVELOPMENT.zh-CN.md)。
+Otoha Graph、Otoha CLI 和 Otoha Mailbox 是继续开发的代码与经验基础；新项目名称统一为 Otoha。已有实现、待开发能力与具体架构建议分别见[复用记录](FOUNDATIONS.zh-CN.md)、[架构起点](ARCHITECTURE.zh-CN.md)和[开发起点](DEVELOPMENT.zh-CN.md)。
 
 ## 工程基础与五项特色的边界
 

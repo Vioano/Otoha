@@ -1,0 +1,363 @@
+{
+  "schema_version": 1,
+  "diagram_type": "system",
+  "meta": {
+    "id": "layered-service",
+    "title": "输入服务设计示例",
+    "locale": "zh-CN",
+    "rootView": "overview"
+  },
+  "entities": [
+    {
+      "id": "input",
+      "type": "backend",
+      "label": "输入",
+      "purpose": "待设计：输入的责任与边界。",
+      "inputs": [
+        "待明确输入契约"
+      ],
+      "outputs": [
+        "待明确输出契约"
+      ],
+      "steps": [
+        "明确前提与目标",
+        "定义处理与失败路径"
+      ],
+      "openIssues": [
+        "这是结构示例，未绑定实际实现或验证证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "parser",
+      "type": "backend",
+      "label": "解析服务",
+      "purpose": "待设计：解析服务的责任与边界。",
+      "inputs": [
+        "待明确输入契约"
+      ],
+      "outputs": [
+        "待明确输出契约"
+      ],
+      "steps": [
+        "明确前提与目标",
+        "定义处理与失败路径"
+      ],
+      "openIssues": [
+        "这是结构示例，未绑定实际实现或验证证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "session",
+      "type": "backend",
+      "label": "会话",
+      "purpose": "待设计：会话的责任与边界。",
+      "inputs": [
+        "待明确输入契约"
+      ],
+      "outputs": [
+        "待明确输出契约"
+      ],
+      "steps": [
+        "明确前提与目标",
+        "定义处理与失败路径"
+      ],
+      "openIssues": [
+        "这是结构示例，未绑定实际实现或验证证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "asr",
+      "parent": "parser",
+      "type": "backend",
+      "label": "语音分支",
+      "purpose": "待设计：语音分支的责任与边界。",
+      "inputs": [
+        "待明确输入契约"
+      ],
+      "outputs": [
+        "待明确输出契约"
+      ],
+      "steps": [
+        "明确前提与目标",
+        "定义处理与失败路径"
+      ],
+      "openIssues": [
+        "这是结构示例，未绑定实际实现或验证证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "music",
+      "parent": "parser",
+      "type": "backend",
+      "label": "音乐分支",
+      "purpose": "待设计：音乐分支的责任与边界。",
+      "inputs": [
+        "待明确输入契约"
+      ],
+      "outputs": [
+        "待明确输出契约"
+      ],
+      "steps": [
+        "明确前提与目标",
+        "定义处理与失败路径"
+      ],
+      "openIssues": [
+        "这是结构示例，未绑定实际实现或验证证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "decode",
+      "parent": "asr",
+      "type": "backend",
+      "label": "解码",
+      "purpose": "待设计：解码的责任与边界。",
+      "inputs": [
+        "待明确输入契约"
+      ],
+      "outputs": [
+        "待明确输出契约"
+      ],
+      "steps": [
+        "明确前提与目标",
+        "定义处理与失败路径"
+      ],
+      "openIssues": [
+        "这是结构示例，未绑定实际实现或验证证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "emit",
+      "parent": "asr",
+      "type": "backend",
+      "label": "输出候选",
+      "purpose": "待设计：输出候选的责任与边界。",
+      "inputs": [
+        "待明确输入契约"
+      ],
+      "outputs": [
+        "待明确输出契约"
+      ],
+      "steps": [
+        "明确前提与目标",
+        "定义处理与失败路径"
+      ],
+      "openIssues": [
+        "这是结构示例，未绑定实际实现或验证证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    }
+  ],
+  "relations": [
+    {
+      "id": "input-parser",
+      "from": "input",
+      "to": "parser",
+      "kind": "dataflow",
+      "label": "声音"
+    },
+    {
+      "id": "parser-session",
+      "from": "parser",
+      "to": "session",
+      "kind": "dataflow",
+      "label": "候选证据"
+    },
+    {
+      "id": "decode-emit",
+      "from": "decode",
+      "to": "emit",
+      "kind": "dataflow",
+      "label": "文本"
+    }
+  ],
+  "views": [
+    {
+      "id": "overview",
+      "title": "系统总览",
+      "placements": [
+        {
+          "entity": "input",
+          "pos": [
+            40,
+            180
+          ]
+        },
+        {
+          "entity": "parser",
+          "pos": [
+            370,
+            180
+          ]
+        },
+        {
+          "entity": "session",
+          "pos": [
+            700,
+            180
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "input-parser"
+        },
+        {
+          "relation": "parser-session"
+        }
+      ]
+    },
+    {
+      "id": "parser-inside",
+      "scope": "parser",
+      "title": "解析服务内部",
+      "placements": [
+        {
+          "entity": "asr",
+          "pos": [
+            40,
+            180
+          ]
+        },
+        {
+          "entity": "music",
+          "pos": [
+            370,
+            180
+          ]
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "asr-inside",
+      "scope": "asr",
+      "title": "语音分支内部",
+      "placements": [
+        {
+          "entity": "decode",
+          "pos": [
+            40,
+            180
+          ]
+        },
+        {
+          "entity": "emit",
+          "pos": [
+            370,
+            180
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "decode-emit"
+        }
+      ]
+    }
+  ],
+  "evidence": []
+}

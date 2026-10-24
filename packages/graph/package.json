@@ -1,0 +1,42 @@
+{
+  "name": "otoha-graph",
+  "version": "0.5.1",
+  "private": true,
+  "type": "module",
+  "description": "System design and layered architecture explorer, based on Archify 2.16.",
+  "license": "MIT",
+  "bin": {
+    "otoha-graph": "./bin/otoha-graph.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "generate:brand-marks": "node scripts/generate-brand-marks.mjs",
+    "check:brand-marks": "node scripts/generate-brand-marks.mjs --check",
+    "generate:validators": "node scripts/generate-validators.mjs",
+    "check:validators": "node scripts/generate-validators.mjs --check",
+    "test": "node --test test/system-design.test.mjs test/v1-compatibility.test.mjs test/preview.test.mjs test/output-path.test.mjs test/delivery-contract.test.mjs test/nested-layout.test.mjs test/agent-interface.test.mjs test/team.test.mjs test/reader-ui.test.mjs test/task-board.test.mjs test/atomic-write.test.mjs",
+    "render:examples": "node scripts/render-examples.mjs examples",
+    "test:system": "node --test test/system-design.test.mjs test/agent-interface.test.mjs test/team.test.mjs",
+    "test:team": "node --test test/team.test.mjs",
+    "test:browser": "node scripts/test-board-browser.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "parse5": "7.3.0",
+    "saxes": "6.0.0",
+    "simple-icons": "16.28.0"
+  },
+  "overrides": {
+    "fast-uri": "3.1.9"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Vioano/Otoha.git"
+  },
+  "homepage": "https://github.com/Vioano/Otoha/tree/main/packages/graph",
+  "bugs": {
+    "url": "https://github.com/Vioano/Otoha/issues"
+  }
+}

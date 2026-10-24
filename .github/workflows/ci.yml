@@ -1,0 +1,40 @@
+name: Otoha
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: apps/cli/go.mod
+          cache-dependency-path: apps/cli/go.sum
+      - run: npm run setup
+      - run: npm run check:names
+      - run: npm test
+      - run: go vet ./...
+        working-directory: apps/cli
+  windows-native:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: apps/cli/go.mod
+          cache-dependency-path: apps/cli/go.sum
+      - run: go test ./...
+        working-directory: apps/cli
+      - run: go vet ./...
+        working-directory: apps/cli
+      - run: go build ./cmd/otoha
+        working-directory: apps/cli

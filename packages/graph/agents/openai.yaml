@@ -1,0 +1,4 @@
+interface:
+  display_name: "Otoha Graph · 系统图谱"
+  short_description: "分层探索系统设计，查看模块接口、实现证据与变更要求，支持手势和 Aero 主题"
+  default_prompt: "用 $otoha-graph 为这个项目设计可逐层展开的系统图谱，显示接口、实现证据和未完成部分。"

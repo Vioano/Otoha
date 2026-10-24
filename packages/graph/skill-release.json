@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "skillId": "otoha-graph",
+  "version": "0.5.1",
+  "source": {
+    "repository": "https://github.com/Vioano/Otoha"
+  },
+  "updatePolicy": "manual-git",
+  "upstream": {
+    "name": "Archify",
+    "version": "2.16.0",
+    "repository": "https://github.com/tt-a1i/archify",
+    "license": "MIT"
+  }
+}
