@@ -1,0 +1,22 @@
+# macOS metadata
+.DS_Store
+._*
+__MACOSX/
+
+# Local configuration and runtime data
+.env
+.env.*
+!.env.example
+.otoha/
+.private/
+*.pem
+*.key
+
+# Dependencies and generated output
+node_modules/
+.venv/
+__pycache__/
+*.py[cod]
+dist/
+coverage/
+*.log
