@@ -250,6 +250,12 @@ func run(args []string) error {
 			output(r)
 		}
 		return nil
+	case "team":
+		result, err := a.TeamCommand(ctx, args)
+		if result != nil {
+			output(result)
+		}
+		return err
 	case "join":
 		// Accept key before flags so the invitation really is one copyable command.
 		key := ""
@@ -371,6 +377,176 @@ func run(args []string) error {
 			return fmt.Errorf("--allow ACTOR[,ACTOR] required")
 		}
 		return a.Bind(ctx, p, *agent, strings.Split(*allow, ","), s)
+	case "telegram":
+		if len(args) == 0 {
+			return fmt.Errorf("otoha telegram send|receive|status [options]")
+		}
+		action := args[0]
+		f := flags("telegram " + action)
+		configPath := f.String("config", "", "private Telegram config JSON")
+		tokenFile := f.String("token-file", "", "private Telegram token file")
+		stateDir := f.String("state-dir", "", "private Telegram state directory")
+		apiBase := f.String("api-base", "", "Telegram API base, for local tests")
+		chatID := f.String("chat-id", "", "Telegram chat ID or @username")
+		recipient := f.String("to", "", "configured local session/member recipient")
+		text := f.String("text", "", "message text")
+		messageID := f.String("id", "", "stable Otoha message ID")
+		routes := f.String("route", "", "chat_id=session, comma separated")
+		once := f.Bool("once", false, "receive one long-poll batch and exit")
+		parse(f, args[1:])
+		cfg, e := a.LoadTelegramConfig(*configPath)
+		if e != nil && *configPath != "" {
+			return e
+		}
+		if *tokenFile != "" {
+			cfg.TokenFile, cfg.Token = *tokenFile, ""
+		}
+		if *stateDir != "" {
+			cfg.StateDir = *stateDir
+		}
+		if *apiBase != "" {
+			cfg.APIBase = *apiBase
+		}
+		if cfg.Routes == nil {
+			cfg.Routes = map[string]string{}
+		}
+		if cfg.Recipients == nil {
+			cfg.Recipients = map[string]string{}
+		}
+		for _, item := range strings.Split(*routes, ",") {
+			if item == "" {
+				continue
+			}
+			parts := strings.SplitN(item, "=", 2)
+			if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+				return fmt.Errorf("invalid --route %q; expected CHAT_ID=SESSION", item)
+			}
+			cfg.Routes[parts[0]] = parts[1]
+		}
+		g, e := a.NewTelegramGateway(cfg)
+		if e != nil {
+			return e
+		}
+		defer g.Close()
+		switch action {
+		case "send":
+			if *chatID == "" && *recipient != "" {
+				*chatID = cfg.Recipients[*recipient]
+			}
+			if *chatID == "" || *text == "" {
+				return fmt.Errorf("telegram send requires --chat-id or configured --to, and --text")
+			}
+			result, e := g.Send(ctx, a.Outbound{ID: *messageID, ChatID: *chatID, Text: *text})
+			if e == nil {
+				output(result)
+			}
+			return e
+		case "receive":
+			sink := func(in a.Inbound) error { output(in); return nil }
+			if *once {
+				_, e = g.ReceiveOnce(ctx, sink)
+				return e
+			}
+			return g.Receive(ctx, sink)
+		case "status":
+			if e = g.Connect(ctx); e != nil {
+				return e
+			}
+			output(a.Object{"channel": g.Name(), "identity": g.Identity(), "capabilities": g.Capabilities(), "state_path": g.StatePath()})
+			return nil
+		case "bridge":
+			s := settings()
+			p, c := profile(s)
+			defer c.Transport.Close()
+			session := os.Getenv("CODEX_THREAD_ID")
+			if b, loadErr := a.Load(filepath.Join(a.Home(), "binding.json")); loadErr == nil && session == "" {
+				session = a.S(b, "session")
+			}
+			if session == "" {
+				session = "cli-session"
+			}
+			channel := a.S(p, "channel")
+			if channel == "" {
+				return fmt.Errorf("telegram bridge requires a configured project channel")
+			}
+			if _, e = c.Call(ctx, "POST", "/v1/sessions", a.Object{"id": session, "agent": "otoha-telegram-bridge"}); e != nil {
+				return e
+			}
+			binding := a.Object{"actor": a.S(p, "actor"), "session": session, "channel": channel}
+			bridge, e := a.NewChannelBridge(g, c, binding, func(message a.Object) string {
+				payload := a.O(message, "payload")
+				for _, target := range a.Array(payload["to_sessions"]) {
+					if chat := cfg.Recipients[fmt.Sprint(target)]; chat != "" {
+						return chat
+					}
+				}
+				return cfg.Recipients["public"]
+			})
+			if e != nil {
+				return e
+			}
+			return bridge.Run(ctx)
+		default:
+			return fmt.Errorf("unknown telegram action %q", action)
+		}
+	case "inbox":
+		if len(args) == 0 {
+			return fmt.Errorf("otoha inbox check|list|read [options]")
+		}
+		action := args[0]
+		f := flags("inbox " + action)
+		channel := f.String("channel", "", "project channel")
+		session := f.String("session", "", "local Otoha session")
+		messageID := f.String("id", "", "message uid or numeric message ID")
+		wait := f.Int("wait", 0, "long-poll seconds for check, 0 to return immediately")
+		remaining := parse(f, args[1:])
+		if *messageID == "" && len(remaining) == 1 {
+			*messageID = remaining[0]
+		}
+		s := settings()
+		p, c := profile(s)
+		defer c.Transport.Close()
+		if *session == "" {
+			*session = os.Getenv("CODEX_THREAD_ID")
+		}
+		if *session == "" {
+			*session = "cli-session"
+		}
+		if *channel == "" {
+			*channel = a.S(p, "channel")
+		}
+		if *channel == "" {
+			return fmt.Errorf("--channel CHANNEL required")
+		}
+		if _, e := c.Call(ctx, "POST", "/v1/sessions", a.Object{"id": *session, "agent": "otoha-cli"}); e != nil {
+			return e
+		}
+		binding := a.Object{"actor": a.S(p, "actor"), "session": *session, "channel": *channel}
+		switch action {
+		case "check":
+			r, e := a.InboxCheck(ctx, c, binding, *wait)
+			if e == nil {
+				output(r)
+			}
+			return e
+		case "list":
+			r, e := a.ListInbox(*channel)
+			if e == nil {
+				output(a.Object{"channel": *channel, "messages": r})
+			}
+			return e
+		case "read":
+			if *messageID == "" {
+				return fmt.Errorf("inbox read requires MESSAGE_UID or --id")
+			}
+			r, e := a.InboxRead(ctx, c, binding, *messageID)
+			if e == nil {
+				output(r)
+			}
+			return e
+		default:
+			return fmt.Errorf("unknown inbox action %q", action)
+		}
 	case "receive":
 		return a.Receive(ctx)
 	case "service":
@@ -439,6 +615,11 @@ func run(args []string) error {
 		defer c.Transport.Close()
 		r, e := c.Call(ctx, "POST", "/v1/messages", b)
 		if e == nil {
+			b["local_state"] = "accepted_by_server"
+			b["server_result"] = r
+			if saveErr := a.Save(filepath.Join(a.Home(), "outbox", args[0]+".json"), b); saveErr != nil {
+				return fmt.Errorf("server accepted retry but local outbox update failed: %w", saveErr)
+			}
 			output(r)
 		}
 		return e
@@ -562,12 +743,24 @@ func help() {
   otoha setup --otoha-profile FILE --gitea-profile FILE --gateway-profile FILE --gateway-admin SSH_ALIAS
   otoha project create NAME --invite MEMBER --purpose TEXT --agent current
   otoha project grant NAME --member MEMBER
+  otoha team init NAME [--mode local] [--data DIR] [--port PORT]
+  otoha team invite TEAM MEMBER [--role member|admin|reader] [--out FILE]
+  otoha team join --invite FILE
+  otoha team status [TEAM]
+  otoha team doctor [TEAM]
   otoha join KEY --agent current
   otoha import EXISTING_IDENTITY.json
   otoha pack EXISTING_BUNDLE.json
   otoha bind --agent current --channel CHANNEL --allow ACTOR
   otoha admit --thread UUID --request-id PERSISTED_UUID < PRIVATE_WAKE_TEXT
   otoha send --text TEXT --to ACTOR/SESSION
+  otoha telegram status --config PRIVATE/telegram.json
+  otoha telegram send --config PRIVATE/telegram.json --chat-id @bot --text TEXT --id UID
+  otoha telegram receive --config PRIVATE/telegram.json --route CHAT_ID=SESSION
+  otoha telegram bridge --config PRIVATE/telegram.json
+  otoha inbox check --channel CHANNEL [--session SESSION] [--wait SECONDS]
+  otoha inbox list --channel CHANNEL
+  otoha inbox read MESSAGE_UID --channel CHANNEL --session SESSION
   otoha read --channel CHANNEL
   otoha status | doctor | agents | benchmark
 

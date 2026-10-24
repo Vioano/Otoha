@@ -16,8 +16,9 @@ def valid_ref(ref):
 def normalize(body, valid_target, valid_reply):
     """Keep useful text; preserve rejected descriptions as untrusted metadata."""
     payload = {key: body.get(key, default) for key, default in (
-        ('text', ''), ('kind', 'message'), ('refs', []), ('reply_to', None),
-        ('to_sessions', []), ('delivery', 'tool'))}
+        ('text', ''), ('uid', ''), ('summary', ''), ('body', None),
+        ('class', 'queued'), ('kind', 'message'), ('refs', []),
+        ('reply_to', None), ('to_sessions', []), ('delivery', 'tool'))}
     warnings, declared = [], {}
 
     def correct(field, value):
@@ -27,6 +28,14 @@ def normalize(body, valid_target, valid_reply):
 
     if payload['kind'] not in ('message', 'task', 'result', 'question', 'status'):
         correct('kind', 'message')
+    if payload['class'] not in ('queued', 'interrupt'):
+        correct('class', 'queued')
+    if not isinstance(payload['uid'], str):
+        correct('uid', '')
+    if not isinstance(payload['summary'], str):
+        correct('summary', '')
+    if payload['body'] is not None and not isinstance(payload['body'], str):
+        correct('body', None)
     if payload['delivery'] not in ('tool', 'chat', 'both'):
         correct('delivery', 'tool')
     for field, maximum, validator in (

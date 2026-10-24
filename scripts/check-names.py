@@ -8,6 +8,10 @@ pattern = re.compile(r'atlas(?!sian)', re.I)
 failures = []
 for path in root.rglob('*'):
     relative = path.relative_to(root)
+    # Audit active product sources. User-supplied root-level reference exports
+    # are historical evidence, not product wording to rewrite or publish.
+    if len(relative.parts) == 1 and path.name not in {'README.md', 'AGENTS.md', 'package.json', '.gitignore'}:
+        continue
     if any(part in ignored for part in relative.parts) or path.is_symlink() or not path.is_file():
         continue
     if relative.parts[:2] == ('docs', 'provenance') or path.name in {'LICENSE', 'NOTICE.md', 'check-names.py'}:

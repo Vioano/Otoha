@@ -286,7 +286,11 @@ func Send(ctx context.Context, c *Client, channel, session, text, target, reply 
 		return nil, fmt.Errorf("bind the current agent or provide --session")
 	}
 	id := ID()
-	body := Object{"channel": channel, "session": session, "client_id": id, "text": text, "kind": "message", "delivery": "both"}
+	summary := strings.TrimSpace(strings.ReplaceAll(strings.SplitN(text, "\n", 2)[0], "\r", " "))
+	if len([]rune(summary)) > 280 {
+		summary = string([]rune(summary)[:280])
+	}
+	body := Object{"channel": channel, "session": session, "client_id": id, "uid": id, "summary": summary, "body": text, "text": text, "class": "queued", "kind": "message", "delivery": "both"}
 	if target != "" {
 		body["to_sessions"] = []string{target}
 	}
@@ -300,6 +304,11 @@ func Send(ctx context.Context, c *Client, channel, session, text, target, reply 
 	r, err := c.Call(ctx, "POST", "/v1/messages", body)
 	if err != nil {
 		return nil, fmt.Errorf("send outcome uncertain; retry with otoha retry %s: %w", id, err)
+	}
+	body["local_state"] = "accepted_by_server"
+	body["server_result"] = r
+	if saveErr := Save(outbox, body); saveErr != nil {
+		return nil, fmt.Errorf("server accepted message %s but local outbox update failed: %w", id, saveErr)
 	}
 	return r, nil
 }

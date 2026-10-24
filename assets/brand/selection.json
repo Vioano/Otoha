@@ -1,0 +1,16 @@
+{
+  "selected": "A",
+  "status": "provisional",
+  "date": "2026-10-24",
+  "source": "explorations/A-resonance.png",
+  "mark": "otoha-mark.svg",
+  "monochrome": "otoha-mark-mono.svg",
+  "app_icon": "otoha-icon.svg",
+  "palette": {
+    "cream": "#eee3d5",
+    "sage": "#95b19a",
+    "blue": "#96aded"
+  },
+  "editable_paths": 3,
+  "wordmark": "Preview typography only; not a finalized font asset"
+}

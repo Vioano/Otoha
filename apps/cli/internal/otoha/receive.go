@@ -136,6 +136,7 @@ func Bind(ctx context.Context, p Object, thread string, allow []string, settings
 	}
 	b["profile"] = p
 	b["allow_actors"] = actors
+	b["message_receipts"] = true
 	b["codex"] = codex
 	b["runtime"] = "codex-queue"
 	b["settings"] = settings
@@ -263,6 +264,16 @@ func receiveBinding(ctx context.Context, path string) {
 		for _, event := range Items(page, "events") {
 			if S(event, "kind") == "message.created" {
 				message := O(event, "payload")
+				persist := PersistInboxMessageLocal
+				if B(b, "message_receipts") {
+					persist = PersistInboxMessage
+				}
+				if _, e = persist(ctx, c, b, message); e != nil {
+					state["last_error"] = e.Error()
+					Save(statePath, state)
+					blocked = true
+					break
+				}
 				if eligible(b, message) {
 					if e = deliver(ctx, b, message); e != nil {
 						state["last_error"] = e.Error()

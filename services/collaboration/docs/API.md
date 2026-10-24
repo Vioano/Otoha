@@ -18,8 +18,8 @@ Credentials are never accepted in URLs. Cross-origin browser requests are denied
 | `/v1/query` | POST | Preset/custom read-only SQL over an authorized state snapshot |
 | `/v1/events?after=N&channel=ID&wait=45` | GET | Authorized durable events; JSON long polling |
 | `/v1/events` with `Accept: text/event-stream` | GET | SSE; Last-Event-ID supported; reconnect after 55 s |
-| `/v1/receipts?channel=ID` | GET | Explicit delivery/read assertions |
-| `/v1/receipts` | POST | Monotonic received/read cursor for own session |
+| `/v1/receipts?channel=ID` | GET | Channel and per-message delivery/read assertions |
+| `/v1/receipts` | POST | Monotonic cursor or one-message received/read assertion |
 | `/v1/invites` | POST | Owner creates scoped, expiring single-use invite |
 | `/v1/invites/revoke` | POST | Owner invalidates outstanding invitations |
 | `/v1/enroll` | POST | Claim invite with locally generated credential/id |
@@ -41,6 +41,10 @@ Messages:
   "channel": "general",
   "session": "my-session",
   "client_id": "stable-operation-id",
+  "uid": "stable-message-id",
+  "summary": "Review the updated scene.",
+  "body": "Review the updated scene.",
+  "class": "queued",
   "text": "Review the updated scene.",
   "kind": "task",
   "delivery": "both",
@@ -49,6 +53,27 @@ Messages:
   "refs": [{"repo":"team/game","commit":"0123456789012345678901234567890123456789","path":"assets/scene.blend"}]
 }
 ```
+
+`uid` identifies the message across channels and local inboxes. `summary` is
+the short text suitable for an Agent notification; `body` is the complete
+message. `text` remains accepted as the compatibility body field. The server
+fills missing `uid`, `summary`, and `body` from `client_id` and `text`.
+
+Clients may acknowledge a single message without advancing a channel-wide
+high-water mark:
+
+```json
+{
+  "channel": "general",
+  "session": "my-session",
+  "message_id": 42,
+  "received": true,
+  "read": false
+}
+```
+
+The same endpoint with `read: true` records the application-level read
+receipt. The original `received`/`read` high-water form remains supported.
 
 `to_sessions` is an explicit delivery intention. It does not grant recipients
 channel access or execution authority. Every authorized channel reader can

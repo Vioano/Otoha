@@ -1,6 +1,7 @@
 {
   "generator": "built-in image_gen",
-  "status": "exploration; no final logo selected",
+  "selected": "A",
+  "selection_status": "provisional",
   "rounds": [
     {
       "round": 1,
@@ -34,6 +35,34 @@
           "id": "E",
           "prompt": "Edit this Otoha logo exploration. Preserve the simple compact O-based identity and premium quiet presentation, but replace the heavy interwoven bands with an original very minimal counterpoint motif: two or three slender rounded musical-phrase-like curves, slightly staggered in time and carefully nested, that together imply an open O and coordinated independent motion. The musical and multi-agent orchestration associations must come solely from rhythm, intervals and harmony between separate strokes. Do NOT add a literal note, treble clef, staff, waveform, connected dots, conductor, star or any secondary symbol. Aim for the clarity of a two- or three-stroke calligraphic sign, balanced and memorable at app-icon scale. Retain restrained cream and sage on nearly black; show the identical mark in monochrome on warm white plus small app-icon application. Flat, precise, vector-friendly, no gradients or texture. Same Otoha wordmark and layout. Direction label 'E'. Keep it simpler than the reference, never busier.",
           "reference": "B"
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "concepts": [
+        {
+          "id": "E2",
+          "reference": "E",
+          "prompt": "Refine this selected Otoha logo direction E into an E2 production-direction study. The user chose E for counterpoint, rhythm and coordinated multi-agent motion. Preserve the same overall tilted open O, the SAME FOUR separate curved phrases and their arrangement, restrained cream and muted sage on near black, refined Otoha wordmark. Do not change to a different concept. Improve the geometric discipline: make the four curves clearly related, smooth consistent inner/outer curvature, more deliberate intervals and clear negative space. Slightly strengthen the very thin internal tips so the shape remains readable at 24 and 32 pixels; keep elegant tapered endings but avoid hairlines. Slightly reduce the overly sharp leaf-like points so these read as musical phrases in counterpoint, not leaves or a spinning fan. Crucial: the light-background monochrome mark and the app icon MUST use the exact same four-curve silhouette and placement as the large primary mark. A flat vector-friendly design with no gradients, texture, glow, 3D or new symbols. No literal notes, stave, waveform or network dots. Present one large primary mark with Otoha wordmark on near black occupying the left two thirds; at right, identical monochrome mark on warm white, plus 32px and 24px icon proofs with adequate clear space. Text only: 'E2', 'Otoha', '32', '24'. The composition stays quiet, simple and precise."
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "concepts": [
+        {
+          "id": "D2",
+          "prompt": "Develop the selected Otoha direction D further. Preserve its extremely simple open circular silhouette made of EXACTLY THREE separate curved strokes, its calm cream/sage/periwinkle palette, generous negative space and refined wordmark. Make the three strokes feel like three independent musical voices entering at different moments and responding around one shared quiet center. Develop rhythmic intervals and subtle variations in curvature, not literal music symbols. More purposeful and distinctive than three generic comma leaves: cleaner terminal shapes, a gentle shared pulse, less swoosh-like commercial motion. Do not add elements, connecting dots, notes, waveform, staff, glow, gradients or texture. Flat SVG-friendly shapes. Show the identical geometry large on near black, small in one color on warm white, and as a small app-icon application. Text only 'D2' and 'Otoha'. This is exploration, not final branding.",
+          "reference": "D"
+        },
+        {
+          "id": "F",
+          "prompt": "Use case: logo-brand. Invent an ENTIRELY NEW logo direction F for Otoha, software infrastructure for human intention and multi-agent orchestration. The user likes very simple marks and wants musical counterpoint and multiple independent voices without literal notation. BREAK OUT OF THE CIRCLE: do not draw an O, ring, orbit, circular swoosh, leaf or interwoven circular loop. Direction F: Three voices. Exactly three short, smooth, upright but gently leaning ribbon-like strokes of deliberately different heights and rhythmic offsets. They rise together like independent phrases, with a single subtle shared inflection in their curves that makes a distinctive compact silhouette. Think an elegant three-stroke calligraphic sign, not audio equalizer bars. Use negative space and measured rhythm to imply orchestration. Calm, minimal, precise, ownable, readable at 24px. No literal music notes, staff, waveform, network nodes, robots, stars, gradient, texture or 3D. Limit to cream and muted sage on near black. Present one large emblem and Otoha wordmark on dark background, plus EXACT SAME geometry in monochrome on warm white and small app-icon application. Text only 'F' and 'Otoha'."
+        },
+        {
+          "id": "G",
+          "prompt": "Use case: logo-brand. Invent a genuinely NEW minimal logo direction G for Otoha, infrastructure that orchestrates autonomous agents around human intention. Keep a musical, listening and guiding quality but do not illustrate music. BREAK OUT OF THE CIRCLE: no O-shaped ring, orbit, leaves or circular interweaving. Direction G: Conducting gesture. Use exactly TWO confident flowing strokes, with at most one restrained third answering stroke, to suggest a graceful conducting gesture and its response. An asymmetric compact open shape, perhaps an upward gesture answered by a short descending curve, grounded on one optical baseline. A distinctive designed silhouette with generous gaps, as simple and polished as a two-stroke sign. Not a generic checkmark or literal baton, not a heart, not a bird, not a monogram forced into a familiar shape. Rhythm comes from relation between strokes. Vector-friendly flat geometry with smooth controlled contours, no hairline details. Cream with a subtle muted periwinkle accent on nearly black; identical monochrome geometry on warm white. Show one large emblem, an Otoha wordmark, and small app-icon application. Only text 'G' and 'Otoha'. No notes, staff, waveform, graph nodes, sparkles, gradients, texture or 3D."
         }
       ]
     }

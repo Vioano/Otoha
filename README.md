@@ -1,5 +1,10 @@
 # Otoha
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/brand/otoha-mark.svg">
+  <img src="assets/brand/otoha-mark-mono.svg" width="96" height="96" alt="Otoha">
+</picture>
+
 面向复杂项目的人与多 Agent 协作基础设施。
 
 Otoha 面向跨 Session、跨设备、跨成员和跨 Agent 框架的长期工程协作。人通过具体体验持续形成和修正需求，独立执行的 Agent 通过共同工程状态、通信与协作协议推进工作。长期方向包含原生 Agent，同时兼容现有 Agent；插件、MCP 和 Skill 提供接入与操作指引。
@@ -49,6 +54,14 @@ npm run build:cli
 node bin/otoha.mjs client version
 ```
 
+通信闭环的本机收发：
+
+```sh
+node bin/otoha.mjs inbox check --channel PROJECT-general --session SESSION
+node bin/otoha.mjs inbox list --channel PROJECT-general
+node bin/otoha.mjs inbox read MESSAGE_UID --channel PROJECT-general --session SESSION
+```
+
 服务初始化、私有身份与 MCP 接入见 [Otoha Collaboration](services/collaboration/README.md)。当前没有正式二进制发行版；使用本仓库源码构建。
 
 ## 代码与文档
@@ -61,7 +74,7 @@ node bin/otoha.mjs client version
 | GitHub 收信与操作指引 | [Otoha Mailbox](integrations/mailbox/README.md) |
 | 图标方向打样，尚未定稿 | [图标探索](assets/brand/README.md) |
 
-设计依据见[五项核心哲学](docs/PRINCIPLES.zh-CN.md)、[架构起点](docs/ARCHITECTURE.zh-CN.md)与[开发起点](docs/DEVELOPMENT.zh-CN.md)。迁入代码、来源和检查结果见[组件说明](docs/FOUNDATIONS.zh-CN.md)、[验证记录](docs/MIGRATION.zh-CN.md)与[版权来源](NOTICE.md)。
+设计依据见[五项核心哲学](docs/PRINCIPLES.zh-CN.md)、[已定方向与边界](docs/DECISIONS.zh-CN.md)、[CLI 模块规格](docs/CLI-SPEC.zh-CN.md)、[架构起点](docs/ARCHITECTURE.zh-CN.md)与[开发起点](docs/DEVELOPMENT.zh-CN.md)。迁入代码、来源和检查结果见[组件说明](docs/FOUNDATIONS.zh-CN.md)、[验证记录](docs/MIGRATION.zh-CN.md)与[版权来源](NOTICE.md)。
 
 ## 验证与当前边界
 

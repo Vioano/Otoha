@@ -32,6 +32,8 @@ export function explorerHTML(snapshot, views) {
   const uiMessages=JSON.parse(fs.readFileSync(new URL('./ui.en.json',import.meta.url),'utf8'));
   const rendererCatalogs={en:viewerCatalog('en'),'zh-CN':viewerCatalog('zh-CN')};
   return template.replace('__ARCHIFY_SYSTEM_DATA__', () => safeJSON({ snapshot, views, themes, viewportCSS, chromeCSS, uiMessages, rendererCatalogs, viewerVersion }))
+    .replace('__OTOHA_BRAND_MARK__', () => fs.readFileSync(new URL('../assets/otoha-mark.svg', import.meta.url), 'utf8'))
+    .replace('__OTOHA_FAVICON__', () => 'data:image/svg+xml,' + encodeURIComponent(fs.readFileSync(new URL('../assets/otoha-icon.svg', import.meta.url), 'utf8')))
     .replace('__SYSTEM_OTOHA_THEME_TOKENS__', () => tokens + themes + chromeCSS + boardCSS)
     .replace('__SYSTEM_OTOHA_INTERACTIONS__', () => [mountOtohaCanvas, otohaUIText, installOtohaChrome, installOtohaFrameUI, installOtohaInteractions, otohaExpansionLayout, otohaExpandedRoute, installOtohaNodes, installOtohaTeam, otohaFilterPresets, matchesTaskFilter, filterGraphEntities, projectTasks, installOtohaBoard].map(fn=>fn.toString()).join('\n'));
 }

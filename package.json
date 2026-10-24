@@ -4,8 +4,12 @@
   "private": true,
   "type": "module",
   "description": "Human and multi-agent collaboration infrastructure",
-  "bin": { "otoha": "bin/otoha.mjs" },
-  "engines": { "node": ">=18" },
+  "bin": {
+    "otoha": "bin/otoha.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "setup": "npm --prefix packages/graph ci --ignore-scripts",
     "test": "node scripts/test.mjs",
@@ -13,7 +17,12 @@
     "test:service": "node scripts/test.mjs collaboration",
     "test:mailbox": "python3 -m unittest discover -s integrations/mailbox/skills/otoha-mailbox/tests -v && python3 -m unittest discover -s integrations/mailbox/tests -v",
     "build:cli": "node scripts/build-cli.mjs",
-    "check:names": "python3 scripts/check-names.py"
+    "check:names": "python3 scripts/check-names.py",
+    "sync:brand": "node scripts/sync-brand.mjs",
+    "check:brand": "node scripts/sync-brand.mjs --check"
   },
-  "repository": { "type": "git", "url": "https://github.com/Vioano/Otoha.git" }
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Vioano/Otoha.git"
+  }
 }

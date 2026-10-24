@@ -21,6 +21,7 @@ jobs:
           cache-dependency-path: apps/cli/go.sum
       - run: npm run setup
       - run: npm run check:names
+      - run: npm run check:brand
       - run: npm test
       - run: go vet ./...
         working-directory: apps/cli

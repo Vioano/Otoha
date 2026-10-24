@@ -106,6 +106,23 @@ class ServiceTest(unittest.TestCase):
         previous = self.call('GET', f"/v1/messages?channel=general&limit=20&before={page['before']}", token=self.owner)
         self.assertEqual(len(page['messages']) + len(previous['messages']), 16)
 
+    def test_message_envelope_and_precise_receipts(self):
+        alice, _, _ = self.member('alice')
+        sent = self.send(identifier='envelope-1', text='Full body\nwith details', summary='Short summary', body='Full body\nwith details', uid='uid-envelope-1', kind='task')
+        self.assertEqual(sent['uid'], 'uid-envelope-1')
+        history = self.call('GET', '/v1/messages?channel=general', token=alice)
+        payload = history['messages'][-1]['payload']
+        self.assertEqual(payload['uid'], 'uid-envelope-1')
+        self.assertEqual(payload['summary'], 'Short summary')
+        self.assertEqual(payload['body'], 'Full body\nwith details')
+        receipt = self.call('POST', '/v1/receipts', {'channel': 'general', 'session': 'alice-session', 'message_id': sent['message_id'], 'received': True}, alice)
+        self.assertIsNotNone(receipt['received'])
+        self.assertIsNone(receipt['read'])
+        receipt = self.call('POST', '/v1/receipts', {'channel': 'general', 'session': 'alice-session', 'message_id': sent['message_id'], 'read': True}, alice)
+        self.assertIsNotNone(receipt['read'])
+        listed = self.call('GET', '/v1/receipts?channel=general', token=self.owner)
+        self.assertEqual(len(listed['message_receipts']), 1)
+
     def test_realtime_receipts_and_stream_revocation(self):
         alice, _, _ = self.member('alice')
         cursor = self.call('GET', '/v1/events?after=0&wait=0', token=alice)['cursor']

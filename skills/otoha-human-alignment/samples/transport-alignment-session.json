@@ -1,0 +1,34 @@
+{
+  "kind": "alignment-session",
+  "id": "align-transport-001",
+  "revision": 1,
+  "agent_session": "alignment-otoha-graph-001",
+  "context": {
+    "current_understanding": "Otoha 先用中心服务和 CLI inbox/outbox 做可靠通信，Telegram 作为可替换 Transport；图谱要让人看懂五项哲学如何落到代码和证据。",
+    "accepted_decisions": ["decision-transport-mvp-001"],
+    "open_assumptions": ["真实 Bot 的回执、离线补收和跨机器行为仍需单独验证。"],
+    "stage_artifacts": ["inst-transport-inbox-001"]
+  },
+  "questions": [
+    {
+      "id": "q-transport-ui",
+      "prompt": "看通信图谱时，第一眼应先看到哪一层？",
+      "options": ["五项哲学与共同工程状态", "Transport 的技术细节"],
+      "answer": "五项哲学与共同工程状态",
+      "impact": "根视图先表达 Otoha 的研究方向，再从通信闭环进入具体 Transport。"
+    },
+    {
+      "id": "q-evidence",
+      "prompt": "源码、测试和真实集成未完成时，页面是否要同时显示？",
+      "options": ["分层显示并保留未验证项", "只显示已经完成的部分"],
+      "answer": "分层显示并保留未验证项",
+      "impact": "Module details 保留 maturity 和 evidence，不把本地测试写成生产验收。"
+    }
+  ],
+  "feedback_ids": ["feedback-transport-ui-001"],
+  "decision_ids": ["decision-transport-mvp-001"],
+  "affected_graph_entities": ["phi-async", "shared-state", "t-telegram", "collab"],
+  "affected_task_ids": [],
+  "next_check": "下次真实 Bot 联调和跨机器部署样本",
+  "status": "recorded"
+}

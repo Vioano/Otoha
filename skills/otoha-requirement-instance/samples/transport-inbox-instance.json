@@ -1,0 +1,48 @@
+{
+  "kind": "instance",
+  "id": "inst-transport-inbox-001",
+  "requirement_id": "req-transport-mvp-001",
+  "revision": 1,
+  "title": "通信摘要到正文的收件箱体验",
+  "purpose": "让人判断：收到通知、查看摘要、打开正文和看到已读状态是否连贯。",
+  "carrier": {
+    "type": "web",
+    "path": "docs/graph/transport.html",
+    "entry": "五项核心哲学 → 1 分级异步通信 → Module details"
+  },
+  "operations": [
+    {
+      "id": "op-summary",
+      "label": "查看 1 分级异步通信节点",
+      "observe": "能否理解完整消息被保存、通知只带摘要和引用。"
+    },
+    {
+      "id": "op-evidence",
+      "label": "打开 Module details 的证据卡片",
+      "observe": "能否区分源码、测试、运行集成和仍未验证的 Telegram。"
+    },
+    {
+      "id": "op-loop",
+      "label": "进入通信实现视图",
+      "observe": "能否沿中心服务 → Transport → 本机 inbox 理解消息路径。"
+    }
+  ],
+  "feedback_targets": ["visual", "interaction", "content"],
+  "scope": {
+    "expresses": [
+      "五项核心哲学与通信闭环的关系",
+      "源码、测试和未验证项的分层呈现"
+    ],
+    "does_not_prove": [
+      "真实 Telegram Bot 端到端收发",
+      "跨机器部署和 Agent 宿主唤醒",
+      "生产环境容量和长期稳定性"
+    ]
+  },
+  "links": {
+    "graph_entities": ["phi-async", "shared-state", "t-telegram", "collab", "store"],
+    "decision_ids": ["decision-transport-mvp-001"],
+    "task_ids": []
+  },
+  "status": "in_review"
+}

@@ -1,0 +1,22 @@
+{
+  "kind": "telegram-gateway-e2e",
+  "observed_at_utc": "2026-10-24T15:55:05Z",
+  "bots": ["Bocchi", "Nijika"],
+  "raw_bot_api": {
+    "bot_to_bot_private_send": "pass",
+    "bidirectional_get_updates": "pass"
+  },
+  "otoha_gateway": {
+    "send": "pass",
+    "long_poll_receive": "pass",
+    "chat_to_session_route": "pass",
+    "local_state_persistence": "pass",
+    "update_and_envelope_deduplication": "covered_by_fake_api_test"
+  },
+  "limitations": [
+    "The current state store is private JSON, not the planned SQLite local library.",
+    "Application-layer read receipts and Codex session delivery are not included.",
+    "Sender roster authorization, long-message splitting, and multi-transport failover remain unimplemented."
+  ],
+  "secrets_in_artifact": false
+}

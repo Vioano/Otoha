@@ -1,0 +1,27 @@
+{
+  "kind": "alignment-session",
+  "id": "align-<stable-id>",
+  "revision": 1,
+  "agent_session": "<alignment-agent-session>",
+  "context": {
+    "current_understanding": "<当前一句话理解>",
+    "accepted_decisions": [],
+    "open_assumptions": [],
+    "stage_artifacts": []
+  },
+  "questions": [
+    {
+      "id": "q-1",
+      "prompt": "<一个会改变方向的问题>",
+      "options": ["<选项 A>", "<选项 B>"],
+      "answer": null,
+      "impact": "<回答会改变什么>"
+    }
+  ],
+  "feedback_ids": [],
+  "decision_ids": [],
+  "affected_graph_entities": [],
+  "affected_task_ids": [],
+  "next_check": "<下一阶段成果或时间边界>",
+  "status": "open|recorded|superseded"
+}

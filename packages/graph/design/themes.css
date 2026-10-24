@@ -47,4 +47,4 @@ html[data-otoha-style="aero"] #save {background:linear-gradient(var(--aero-prima
 html[data-otoha-style="aero"] #breadcrumbs button {background:transparent;box-shadow:none;border-color:transparent}
 html[data-otoha-style="aero"] .evidence button {background:transparent;box-shadow:none;color:var(--arrow-emphasis)}
 html[data-otoha-style="aero"] .module-strip button.active {background:color-mix(in srgb,var(--arrow-emphasis) 16%,var(--panel));border-color:var(--arrow-emphasis)}
-html[data-otoha-style="aero"] .brand-mark {background:radial-gradient(circle at 35% 20%,#e9ffec,#82cbd0 15%,#1190b7 50%,#075063 73%,#08292e);box-shadow:inset 0 1px 3px #edffffcc,0 3px 8px #00101866,0 0 18px #51d6d219;color:#edfffe}
+html[data-otoha-style="aero"] .brand-mark {background:none;box-shadow:none;color:var(--ink)}

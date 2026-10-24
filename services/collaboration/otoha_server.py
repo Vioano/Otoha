@@ -34,8 +34,10 @@ CREATE TABLE IF NOT EXISTS session_context(actor TEXT NOT NULL, session TEXT NOT
 CREATE TABLE IF NOT EXISTS messages(id INTEGER PRIMARY KEY AUTOINCREMENT, channel TEXT NOT NULL REFERENCES channels(id), actor TEXT NOT NULL REFERENCES actors(id), session TEXT NOT NULL, client_id TEXT NOT NULL, payload TEXT NOT NULL, created REAL NOT NULL, UNIQUE(actor,client_id));
 CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, project TEXT, channel TEXT, payload TEXT NOT NULL, created REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS receipts(actor TEXT REFERENCES actors(id), session TEXT, channel TEXT REFERENCES channels(id), received INTEGER NOT NULL DEFAULT 0, read INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(actor,session,channel));
+CREATE TABLE IF NOT EXISTS message_receipts(actor TEXT REFERENCES actors(id), session TEXT, channel TEXT REFERENCES channels(id), message_id INTEGER REFERENCES messages(id), received REAL, read REAL, PRIMARY KEY(actor,session,message_id));
 CREATE INDEX IF NOT EXISTS message_channel ON messages(channel,id);
 CREATE INDEX IF NOT EXISTS event_channel ON events(channel,id);
+CREATE INDEX IF NOT EXISTS message_receipt_channel ON message_receipts(channel,message_id);
 '''
 
 class Error(Exception):
@@ -163,6 +165,16 @@ class Store:
     def message(self, row):
         result = dict(row)
         result['payload'] = json.loads(result['payload'])
+        payload = result['payload']
+        if not payload.get('uid'):
+            payload['uid'] = result['client_id']
+        if not payload.get('summary'):
+            lines = re.sub(r'[\x00-\x1f\x7f]+', ' ', str(payload.get('text', ''))).strip().splitlines()
+            summary = lines[0] if lines else ''
+            payload['summary'] = re.sub(r'\s+', ' ', summary)[:280]
+        if payload.get('body') is None:
+            payload['body'] = payload.get('text', '')
+        payload.setdefault('class', 'queued')
         result['origin'] = json.loads(result['origin']) if result.get('origin') else {
             'recorded': False, 'actor': result['actor'], 'session': result['session']}
         return result
@@ -249,7 +261,7 @@ class Store:
             actor = self.authenticate(token)
             aid = actor['id']
             if method == 'GET' and path == '/v1/manifest':
-                return {'protocol': 'otoha-collaboration/1', 'version': VERSION, 'actor': {k: actor[k] for k in ('id', 'name', 'owner', 'device')}, 'grants': self.rows('SELECT project,role FROM grants WHERE actor=?', (aid,)), 'capabilities': ['channels', 'messages', 'sessions', 'history', 'events', 'sse', 'receipts', 'invitations', 'git_refs', 'projections', 'message_origin'], 'read_presets': list(PRESETS), 'projection_tables': ['projects','channels','messages','sessions','receipts'], 'repository_required': False, 'max_message_bytes': 65536}
+                return {'protocol': 'otoha-collaboration/1', 'version': VERSION, 'actor': {k: actor[k] for k in ('id', 'name', 'owner', 'device')}, 'grants': self.rows('SELECT project,role FROM grants WHERE actor=?', (aid,)), 'capabilities': ['channels', 'messages', 'sessions', 'history', 'events', 'sse', 'receipts', 'message_receipts', 'invitations', 'git_refs', 'projections', 'message_origin'], 'read_presets': list(PRESETS), 'projection_tables': ['projects','channels','messages','sessions','receipts'], 'repository_required': False, 'max_message_bytes': 65536}
             if method == 'POST' and path == '/v1/query':
                 return self.projection(actor, body)
             if path == '/v1/projects':
@@ -389,12 +401,39 @@ class Store:
                     payload.setdefault('declared_metadata', {})['session'] = requested_sid
                 if not isinstance(payload['text'], str) or len(payload['text'].encode()) > 60000 or not payload['text'].strip():
                     raise Error(400, 'invalid_message_text')
+                if not payload.get('uid'):
+                    payload['uid'] = client_id
+                if not payload.get('summary'):
+                    lines = re.sub(r'[\x00-\x1f\x7f]+', ' ', payload['text']).strip().splitlines()
+                    summary = lines[0] if lines else ''
+                    payload['summary'] = re.sub(r'\s+', ' ', summary)[:280]
+                if payload.get('body') is None:
+                    payload['body'] = payload['text']
+                if not isinstance(payload['summary'], str) or len(payload['summary'].encode()) > 1000 or not payload['summary'].strip():
+                    raise Error(400, 'invalid_message_summary')
+                if not isinstance(payload['body'], str) or len(payload['body'].encode()) > 60000:
+                    raise Error(400, 'invalid_message_body')
                 data = encoded(payload)
                 old = self.row('SELECT * FROM messages WHERE actor=? AND client_id=?', (aid, client_id))
                 if old:
-                    if old['channel'] != channel or old['session'] != sid or old['payload'] != data:
+                    old_payload = json.loads(old['payload'])
+                    # Older stores predate uid/summary/body/class. Treat the
+                    # compatibility defaults as the same operation so a
+                    # restart or migration does not turn a retry into a
+                    # false idempotency conflict.
+                    if 'uid' not in old_payload:
+                        old_payload['uid'] = client_id
+                    if 'summary' not in old_payload:
+                        old_lines = re.sub(r'[\x00-\x1f\x7f]+', ' ', str(old_payload.get('text', ''))).strip().splitlines()
+                        old_summary = old_lines[0] if old_lines else ''
+                        old_payload['summary'] = re.sub(r'\s+', ' ', old_summary)[:280]
+                    if 'body' not in old_payload:
+                        old_payload['body'] = old_payload.get('text', '')
+                    if 'class' not in old_payload:
+                        old_payload['class'] = 'queued'
+                    if old['channel'] != channel or old['session'] != sid or encoded(old_payload) != data:
                         raise Error(409, 'idempotency_conflict')
-                    return {'message_id': old['id'], 'client_id': client_id, 'duplicate': True, 'warnings': payload.get('warnings', [])}
+                    return {'message_id': old['id'], 'uid': old_payload.get('uid', client_id), 'client_id': client_id, 'duplicate': True, 'warnings': payload.get('warnings', [])}
                 registered = self.row('SELECT s.*,coalesce(c.task,\'\') task FROM sessions s LEFT JOIN session_context c ON c.actor=s.actor AND c.session=s.id WHERE s.actor=? AND s.id=?', (aid, sid))
                 if registered is None:
                     self.db.execute('INSERT INTO sessions VALUES(?,?,?,?,?)', (sid, aid, payload.get('agent', 'unspecified'), actor['device'], time.time()))
@@ -406,15 +445,40 @@ class Store:
                 cur = self.db.execute('INSERT INTO messages(channel,actor,session,client_id,payload,created,origin) VALUES(?,?,?,?,?,?,?)', (channel, aid, sid, client_id, data, time.time(), encoded(origin)))
                 message = self.message(self.row('SELECT * FROM messages WHERE id=?', (cur.lastrowid,)))
                 event_id = self.emit('message.created', message, c['project'], channel)
-                return {'message_id': cur.lastrowid, 'client_id': client_id, 'event_id': event_id, 'duplicate': False, 'warnings': payload.get('warnings', [])}
+                return {'message_id': cur.lastrowid, 'uid': payload['uid'], 'client_id': client_id, 'event_id': event_id, 'duplicate': False, 'warnings': payload.get('warnings', [])}
             if path == '/v1/receipts':
                 channel = name(query.get('channel', [None])[0] if method == 'GET' else body.get('channel'))
                 c = self.channel(actor, channel)
                 if method == 'GET':
-                    return {'receipts': self.rows('SELECT * FROM receipts WHERE channel=?', (channel,))}
+                    return {
+                        'receipts': self.rows('SELECT * FROM receipts WHERE channel=?', (channel,)),
+                        'message_receipts': self.rows('SELECT * FROM message_receipts WHERE channel=? ORDER BY message_id', (channel,)),
+                    }
                 sid = name(body.get('session'))
                 if not self.row('SELECT 1 FROM sessions WHERE actor=? AND id=?', (aid, sid)):
                     raise Error(400, 'session_not_registered')
+                if 'message_id' in body:
+                    message_id = int(body.get('message_id'))
+                    if not self.row('SELECT id FROM messages WHERE id=? AND channel=?', (message_id, channel)):
+                        raise Error(400, 'invalid_receipt')
+                    received_flag = body.get('received', True)
+                    read_flag = body.get('read', False)
+                    if not isinstance(received_flag, bool) or not isinstance(read_flag, bool):
+                        raise Error(400, 'invalid_receipt')
+                    if read_flag:
+                        received_flag = True
+                    old = self.row('SELECT * FROM message_receipts WHERE actor=? AND session=? AND message_id=?', (aid, sid, message_id))
+                    received_at = old['received'] if old else None
+                    read_at = old['read'] if old else None
+                    now = time.time()
+                    if received_flag and received_at is None:
+                        received_at = now
+                    if read_flag and read_at is None:
+                        read_at = now
+                    self.db.execute('INSERT INTO message_receipts(actor,session,channel,message_id,received,read) VALUES(?,?,?,?,?,?) ON CONFLICT(actor,session,message_id) DO UPDATE SET received=excluded.received,read=excluded.read', (aid, sid, channel, message_id, received_at, read_at))
+                    receipt = dict(self.row('SELECT * FROM message_receipts WHERE actor=? AND session=? AND message_id=?', (aid, sid, message_id)))
+                    self.emit('receipt.changed', receipt, c['project'], channel)
+                    return receipt
                 received, read = int(body.get('received', 0)), int(body.get('read', 0))
                 high = self.row('SELECT COALESCE(MAX(id),0) n FROM messages WHERE channel=?', (channel,))['n']
                 if received < 0 or read < 0 or read > received or received > high:

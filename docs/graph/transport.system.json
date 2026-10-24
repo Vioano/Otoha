@@ -1,0 +1,2955 @@
+{
+  "schema_version": 1,
+  "diagram_type": "system",
+  "meta": {
+    "id": "otoha-transport",
+    "title": "Otoha 五项核心哲学与实现路径",
+    "locale": "zh-CN",
+    "rootView": "overview"
+  },
+  "entities": [
+    {
+      "id": "agents",
+      "type": "external",
+      "label": "Agent / 人",
+      "sublabel": "多个 Session",
+      "purpose": "发送与阅读消息的使用者。通过统一接口收发,不感知底层 Transport。",
+      "inputs": [
+        "要发送的正文与摘要"
+      ],
+      "outputs": [
+        "按引用取得的完整正文"
+      ],
+      "steps": [
+        "发送",
+        "收到通知",
+        "按需取正文并记 read"
+      ],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "envelope",
+      "type": "backend",
+      "label": "信封与通知",
+      "sublabel": "摘要/正文分离",
+      "purpose": "把一次发送变成与 Transport 无关的信封；通知只带摘要和引用，正文在需要时读取。",
+      "inputs": [
+        "正文、范围、接收者、紧急度"
+      ],
+      "outputs": [
+        "带稳定 id 的信封",
+        "不含正文的通知"
+      ],
+      "steps": [
+        "生成 id",
+        "确定 scope",
+        "生成摘要",
+        "生成通知"
+      ],
+      "openIssues": [
+        "摘要/正文已进入当前消息协议；Telegram 真实 Bot 端到端仍待验证。"
+      ],
+      "evidence": [
+        "ev-principles-design",
+        "ev-server-source",
+        "ev-service-test"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-principles-design"
+          ]
+        },
+        "implementation": {
+          "value": "partial",
+          "evidence": [
+            "ev-server-source"
+          ]
+        },
+        "verification": {
+          "value": "partial",
+          "evidence": [
+            "ev-service-test"
+          ]
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "store",
+      "type": "database",
+      "label": "本地存储",
+      "sublabel": "outbox / inbox / cursor",
+      "purpose": "每台 CLI 在 OTOHA_HOME 中保存发件箱、收件箱和游标；先落盘、按 uid 去重，再确认服务器回执。",
+      "inputs": [
+        "待发信封",
+        "各 Transport 收到的信封"
+      ],
+      "outputs": [
+        "待发队列",
+        "去重后的 inbox",
+        "摘要+引用"
+      ],
+      "steps": [
+        "写 outbox",
+        "去重",
+        "写 inbox",
+        "确认游标",
+        "记 received/read"
+      ],
+      "openIssues": [
+        "当前本机库是原子 JSON 文件，不是 SQLite；容量策略和长期清理尚未定稿。"
+      ],
+      "evidence": [
+        "ev-inbox-source",
+        "ev-inbox-test",
+        "ev-principles-design",
+        "ev-receive-source"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-principles-design"
+          ]
+        },
+        "implementation": {
+          "value": "partial",
+          "evidence": [
+            "ev-inbox-source",
+            "ev-receive-source"
+          ]
+        },
+        "verification": {
+          "value": "partial",
+          "evidence": [
+            "ev-inbox-test"
+          ]
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "router",
+      "type": "backend",
+      "label": "传输路由",
+      "sublabel": "默认 + 备用",
+      "purpose": "按配置选择发送用的 Transport;两个 Transport 都参与接收。默认失败时切到备用,恢复后回切。",
+      "inputs": [
+        "待发信封",
+        "各 Transport 健康状态"
+      ],
+      "outputs": [
+        "选定的 Transport 与发送结果"
+      ],
+      "steps": [
+        "读取配置",
+        "发送到 default",
+        "失败达阈值后改走 standby",
+        "恢复后回切并补拉"
+      ],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。",
+        "双写作为可选策略,不是默认。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "t-server",
+      "type": "backend",
+      "label": "服务器 Transport",
+      "sublabel": "适配器",
+      "purpose": "把统一接口映射到 Otoha Collaboration 的 HTTP API。",
+      "inputs": [
+        "信封"
+      ],
+      "outputs": [
+        "服务器消息 ID 作为引用",
+        "事件流中的信封"
+      ],
+      "steps": [
+        "幂等发送",
+        "事件长轮询或 SSE",
+        "上报健康"
+      ],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "t-telegram",
+      "type": "backend",
+      "label": "Telegram Transport",
+      "sublabel": "适配器",
+      "purpose": "把统一信封映射到 Telegram Bot API；维护长轮询 offset、状态文件、限流和更新去重。",
+      "inputs": [
+        "信封"
+      ],
+      "outputs": [
+        "chat_id/message_id 引用",
+        "收到的信封"
+      ],
+      "steps": [
+        "编码消息头",
+        "拆分与限流",
+        "getUpdates 收取",
+        "重组并解码"
+      ],
+      "openIssues": [
+        "Fake API 测试已通过；两个真实 Bot 的互发、离线补收和 4096 上限仍待验证。"
+      ],
+      "evidence": [
+        "ev-bridge-source",
+        "ev-bridge-test",
+        "ev-principles-design",
+        "ev-telegram-source",
+        "ev-telegram-test"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-principles-design"
+          ]
+        },
+        "implementation": {
+          "value": "partial",
+          "evidence": [
+            "ev-bridge-source",
+            "ev-telegram-source"
+          ]
+        },
+        "verification": {
+          "value": "passed",
+          "evidence": [
+            "ev-bridge-test",
+            "ev-telegram-test"
+          ]
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "collab",
+      "type": "cloud",
+      "label": "协作服务",
+      "sublabel": "Otoha Collaboration",
+      "purpose": "权威中心服务：身份、频道、持久消息、事件、summary/body 信封兼容、幂等和逐条收到/已读回执。",
+      "inputs": [
+        "HTTP 请求"
+      ],
+      "outputs": [
+        "消息、事件、回执"
+      ],
+      "steps": [
+        "鉴权",
+        "保存消息",
+        "按授权发布事件"
+      ],
+      "openIssues": [
+        "本地测试和源码证据已绑定；真实服务器部署、TLS 和跨机器验收尚未进行。"
+      ],
+      "evidence": [
+        "ev-principles-design",
+        "ev-server-source",
+        "ev-service-test"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-principles-design"
+          ]
+        },
+        "implementation": {
+          "value": "implemented",
+          "evidence": [
+            "ev-server-source"
+          ]
+        },
+        "verification": {
+          "value": "passed",
+          "evidence": [
+            "ev-service-test"
+          ]
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "tg-api",
+      "type": "external",
+      "label": "Telegram Bot API",
+      "sublabel": "外部服务",
+      "purpose": "Telegram 提供的 HTTP 接口。限流返回 429 与 retry_after;未确认 update 仅保留 24 小时。",
+      "inputs": [
+        "sendMessage、getUpdates"
+      ],
+      "outputs": [
+        "消息与 update"
+      ],
+      "steps": [],
+      "openIssues": [
+        "限制来自调研文档,尚未核实。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "reader",
+      "type": "backend",
+      "label": "读取调度",
+      "sublabel": "按紧急程度",
+      "purpose": "决定摘要何时进入 Agent 上下文；正文读取和 read 回执由显式 inbox read 完成。",
+      "inputs": [
+        "摘要+引用",
+        "宿主的忙闲能力"
+      ],
+      "outputs": [
+        "通知投递",
+        "read 回执"
+      ],
+      "steps": [
+        "按 urgency 排队",
+        "投递通知",
+        "实际阅读后记 read"
+      ],
+      "openIssues": [
+        "不同 Agent 宿主的忙闲投递和真实唤醒仍需分别验证。"
+      ],
+      "evidence": [
+        "ev-inbox-source",
+        "ev-inbox-test",
+        "ev-principles-design",
+        "ev-receive-source"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-principles-design"
+          ]
+        },
+        "implementation": {
+          "value": "partial",
+          "evidence": [
+            "ev-inbox-source",
+            "ev-receive-source"
+          ]
+        },
+        "verification": {
+          "value": "partial",
+          "evidence": [
+            "ev-inbox-test"
+          ]
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "e-scope",
+      "type": "backend",
+      "label": "范围",
+      "sublabel": "channel / direct",
+      "purpose": "区分群发与私发。私发不会降级为群发。",
+      "inputs": [
+        "接收者列表"
+      ],
+      "outputs": [
+        "scope 与 to"
+      ],
+      "steps": [
+        "校验接收者",
+        "接收者不可达则失败"
+      ],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "envelope"
+    },
+    {
+      "id": "e-summary",
+      "type": "backend",
+      "label": "摘要",
+      "sublabel": "一句话以内",
+      "purpose": "发送方给出,缺省取正文首句并标记 auto。",
+      "inputs": [
+        "正文"
+      ],
+      "outputs": [
+        "summary"
+      ],
+      "steps": [
+        "截断",
+        "标记来源"
+      ],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "envelope"
+    },
+    {
+      "id": "e-urgency",
+      "type": "backend",
+      "label": "紧急度",
+      "sublabel": "interrupt/boundary/idle",
+      "purpose": "只决定读取时机,不改权限,不改保存方式。",
+      "inputs": [
+        "发送方声明"
+      ],
+      "outputs": [
+        "urgency"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "envelope"
+    },
+    {
+      "id": "e-notice",
+      "type": "backend",
+      "label": "通知对象",
+      "sublabel": "摘要 + 引用",
+      "purpose": "通知只含 id、来源、范围、摘要、紧急度与引用,不含正文。",
+      "inputs": [
+        "summary、scope、urgency、ref"
+      ],
+      "outputs": [
+        "通知"
+      ],
+      "steps": [
+        "组装"
+      ],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "envelope"
+    },
+    {
+      "id": "s-outbox",
+      "type": "database",
+      "label": "outbox",
+      "sublabel": "先落盘",
+      "purpose": "发送前先写入,结果未知时用同一 id 重试。",
+      "inputs": [
+        "信封"
+      ],
+      "outputs": [
+        "待发队列"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "store"
+    },
+    {
+      "id": "s-dedup",
+      "type": "backend",
+      "label": "按 id 去重",
+      "sublabel": "跨 Transport",
+      "purpose": "同一 id 经任意 Transport 到达只算一条。",
+      "inputs": [
+        "收到的信封"
+      ],
+      "outputs": [
+        "新信封"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "store"
+    },
+    {
+      "id": "s-inbox",
+      "type": "database",
+      "label": "inbox",
+      "sublabel": "先于确认游标",
+      "purpose": "去重后的信封与正文。",
+      "inputs": [
+        "新信封"
+      ],
+      "outputs": [
+        "摘要+引用"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "store"
+    },
+    {
+      "id": "s-cursor",
+      "type": "database",
+      "label": "游标与回执",
+      "sublabel": "received / read",
+      "purpose": "各 Transport 的游标;收到与阅读分别记录。",
+      "inputs": [
+        "inbox 写入结果"
+      ],
+      "outputs": [
+        "游标",
+        "回执"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "store"
+    },
+    {
+      "id": "r-policy",
+      "type": "backend",
+      "label": "主备配置",
+      "sublabel": "default / standby",
+      "purpose": "从配置读取默认与备用 Transport、失败阈值、探测间隔。",
+      "inputs": [
+        "配置文件"
+      ],
+      "outputs": [
+        "策略"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "router"
+    },
+    {
+      "id": "r-health",
+      "type": "backend",
+      "label": "健康探测",
+      "sublabel": "up/degraded/down",
+      "purpose": "汇总连续失败与周期探测结果。",
+      "inputs": [
+        "各 Transport 的 Health"
+      ],
+      "outputs": [
+        "状态"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "router"
+    },
+    {
+      "id": "r-switch",
+      "type": "backend",
+      "label": "切换与回切",
+      "sublabel": "自动",
+      "purpose": "达到阈值后改走备用并记录原因;恢复后回切。",
+      "inputs": [
+        "策略",
+        "状态"
+      ],
+      "outputs": [
+        "当前发送 Transport"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "router"
+    },
+    {
+      "id": "r-backfill",
+      "type": "backend",
+      "label": "补拉合并",
+      "sublabel": "回切前",
+      "purpose": "按各自游标补拉两边,再按 id 合并。",
+      "inputs": [
+        "两边游标"
+      ],
+      "outputs": [
+        "合并后的信封"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。",
+        "切换期间的数据缺口规则待用真实场景验证。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "router"
+    },
+    {
+      "id": "tg-header",
+      "type": "backend",
+      "label": "消息头编解码",
+      "sublabel": "机器可读",
+      "purpose": "首行放 id、scope、kind、urgency、part,随后摘要行与正文。",
+      "inputs": [
+        "信封"
+      ],
+      "outputs": [
+        "Telegram 文本"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。",
+        "格式待定稿。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "t-telegram"
+    },
+    {
+      "id": "tg-split",
+      "type": "backend",
+      "label": "拆分与重组",
+      "sublabel": "4096 上限",
+      "purpose": "超限拆成多条并带 seq/total,收齐后才算收到。",
+      "inputs": [
+        "Telegram 文本"
+      ],
+      "outputs": [
+        "分片"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "t-telegram"
+    },
+    {
+      "id": "tg-limit",
+      "type": "backend",
+      "label": "限流与队列",
+      "sublabel": "遵守 retry_after",
+      "purpose": "同一聊天默认不低于 1 秒间隔,有容量上限的持久队列。",
+      "inputs": [
+        "分片"
+      ],
+      "outputs": [
+        "已发送分片"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "t-telegram"
+    },
+    {
+      "id": "tg-poll",
+      "type": "backend",
+      "label": "getUpdates 收取",
+      "sublabel": "长轮询",
+      "purpose": "先交给本地存储,再确认 update 游标。",
+      "inputs": [
+        "update"
+      ],
+      "outputs": [
+        "原始消息"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "t-telegram"
+    },
+    {
+      "id": "tg-start",
+      "type": "backend",
+      "label": "私聊引导",
+      "sublabel": "/start",
+      "purpose": "私发要求接收者先对 Bot 发 /start;未完成时返回 recipient_unreachable。",
+      "inputs": [
+        "接收者身份"
+      ],
+      "outputs": [
+        "可达性"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "t-telegram"
+    },
+    {
+      "id": "ts-send",
+      "type": "backend",
+      "label": "幂等发送",
+      "sublabel": "client_id",
+      "purpose": "复用服务器现有 client_id 幂等。",
+      "inputs": [
+        "信封"
+      ],
+      "outputs": [
+        "消息 ID"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "t-server"
+    },
+    {
+      "id": "ts-events",
+      "type": "backend",
+      "label": "事件订阅",
+      "sublabel": "长轮询 / SSE",
+      "purpose": "按游标取事件,重连可能重复,由 id 去重。",
+      "inputs": [
+        "事件游标"
+      ],
+      "outputs": [
+        "信封"
+      ],
+      "steps": [],
+      "openIssues": [
+        "设计草案,见 docs/TRANSPORT.zh-CN.md;尚无实现与测试证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "t-server"
+    },
+    {
+      "id": "c-summary",
+      "type": "backend",
+      "label": "summary 字段",
+      "sublabel": "待新增",
+      "purpose": "消息表增加独立摘要。",
+      "inputs": [
+        "摘要"
+      ],
+      "outputs": [
+        "可查询的摘要"
+      ],
+      "steps": [],
+      "openIssues": [
+        "待新增,含迁移与测试。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "collab"
+    },
+    {
+      "id": "c-direct",
+      "type": "backend",
+      "label": "direct 范围",
+      "sublabel": "待新增",
+      "purpose": "按接收者限制可见,发送方、接收方与服务所有者可读。",
+      "inputs": [
+        "to"
+      ],
+      "outputs": [
+        "可见性"
+      ],
+      "steps": [],
+      "openIssues": [
+        "待新增。to_sessions 语义不变。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      },
+      "parent": "collab"
+    },
+    {
+      "id": "c-receipts",
+      "type": "backend",
+      "label": "回执与事件",
+      "sublabel": "已有",
+      "purpose": "received/read 游标与持久事件。",
+      "inputs": [
+        "回执"
+      ],
+      "outputs": [
+        "事件"
+      ],
+      "steps": [],
+      "openIssues": [
+        "已有代码,本图未绑定证据。"
+      ],
+      "evidence": [],
+      "maturity": {
+        "design": {
+          "value": "proposed"
+        },
+        "implementation": {
+          "value": "unknown"
+        },
+        "verification": {
+          "value": "unknown"
+        },
+        "integration": {
+          "value": "unknown"
+        }
+      },
+      "parent": "collab"
+    },
+    {
+      "id": "phi-async",
+      "type": "messagebus",
+      "label": "1 分级异步通信",
+      "sublabel": "摘要先到，正文按需读",
+      "purpose": "保护 Agent 的注意力：完整内容持久保存，通知只携带摘要、引用和读取时机。",
+      "inputs": [
+        "人或 Agent 的正文",
+        "紧急度与接收范围"
+      ],
+      "outputs": [
+        "本机 outbox/inbox",
+        "received/read 回执"
+      ],
+      "steps": [
+        "生成稳定 uid",
+        "写入中心服务和本机状态",
+        "按边界交付摘要",
+        "显式读取正文"
+      ],
+      "openIssues": [
+        "Telegram 真实 Bot 联调仍未完成。"
+      ],
+      "evidence": [
+        "ev-bridge-source",
+        "ev-bridge-test",
+        "ev-inbox-source",
+        "ev-inbox-test",
+        "ev-principles-design",
+        "ev-receive-source",
+        "ev-server-source",
+        "ev-service-test"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-principles-design"
+          ]
+        },
+        "implementation": {
+          "value": "partial",
+          "evidence": [
+            "ev-bridge-source",
+            "ev-inbox-source",
+            "ev-receive-source",
+            "ev-server-source"
+          ]
+        },
+        "verification": {
+          "value": "partial",
+          "evidence": [
+            "ev-bridge-test",
+            "ev-inbox-test",
+            "ev-service-test"
+          ]
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "phi-graph",
+      "type": "backend",
+      "label": "2 全局工程图谱",
+      "sublabel": "关系化状态，策略化读取",
+      "purpose": "把需求、模块、任务、决策和证据组织成可查询关系，让 Agent 只读取当前职责所需的上下文。",
+      "inputs": [
+        "工程对象与关系",
+        "读取策略"
+      ],
+      "outputs": [
+        "局部上下文",
+        "影响范围"
+      ],
+      "steps": [
+        "记录稳定 ID",
+        "表达依赖和作用域",
+        "按策略查询"
+      ],
+      "openIssues": [
+        "当前图谱基础已存在；完整 Otoha 工程图和策略库仍在建设。"
+      ],
+      "evidence": [
+        "ev-principles-design"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-principles-design"
+          ]
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "phi-align",
+      "type": "external",
+      "label": "3 持续人机对齐",
+      "sublabel": "在开发中持续修正意图",
+      "purpose": "让专门的对齐职责主动提问、展示阶段成果，并把人的反馈写回共同需求。",
+      "inputs": [
+        "人的反馈",
+        "阶段成果"
+      ],
+      "outputs": [
+        "更新后的意图",
+        "待确认决策"
+      ],
+      "steps": [
+        "发现歧义",
+        "用可操作实例确认",
+        "记录变化"
+      ],
+      "openIssues": [
+        "对齐 Agent 和真实反馈回路尚未实现。"
+      ],
+      "evidence": [
+        "ev-principles-design"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-principles-design"
+          ]
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "phi-instance",
+      "type": "frontend",
+      "label": "4 需求实例化",
+      "sublabel": "先体验，再支付实现成本",
+      "purpose": "用低成本、可操作的页面、场景或小型实现，让人判断功能、视觉和交互。",
+      "inputs": [
+        "抽象想法",
+        "当前未知问题"
+      ],
+      "outputs": [
+        "可体验实例",
+        "具体反馈"
+      ],
+      "steps": [
+        "选最便宜的载体",
+        "让人直接操作",
+        "把反馈写回需求和图谱"
+      ],
+      "openIssues": [
+        "实例与需求对象的正式关联尚未实现。"
+      ],
+      "evidence": [
+        "ev-principles-design"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-principles-design"
+          ]
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "phi-schedule",
+      "type": "backend",
+      "label": "5 自适应协作与调度",
+      "sublabel": "策略随任务阶段变化",
+      "purpose": "用可复用协议组织角色、依赖、并行工作和交接，并根据任务阶段切换调度策略。",
+      "inputs": [
+        "任务结构",
+        "可用 Agent 与渠道",
+        "协议库"
+      ],
+      "outputs": [
+        "角色分工",
+        "交接与调度策略"
+      ],
+      "steps": [
+        "选择协调策略",
+        "并行可并行的工作",
+        "在变化时重排"
+      ],
+      "openIssues": [
+        "当前已有 receiver 和服务协议，但自适应策略切换尚未实现。"
+      ],
+      "evidence": [
+        "ev-principles-design"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-principles-design"
+          ]
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "shared-state",
+      "type": "database",
+      "label": "共同工程状态",
+      "sublabel": "消息、图谱、决策与证据",
+      "purpose": "五项哲学共同依赖的可追溯状态：通信让信息流动，图谱和证据让依据可定位。",
+      "inputs": [
+        "消息与回执",
+        "图谱对象",
+        "人的反馈",
+        "测试与运行证据"
+      ],
+      "outputs": [
+        "可查询的共同依据"
+      ],
+      "steps": [
+        "持久化",
+        "建立关系",
+        "按职责读取",
+        "保留来源和边界"
+      ],
+      "openIssues": [
+        "五项之间的完整联动仍需更多阶段验收。"
+      ],
+      "evidence": [
+        "ev-principles-design"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-principles-design"
+          ]
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "req-transport-mvp-001",
+      "type": "backend",
+      "label": "需求 · 可靠通信闭环",
+      "sublabel": "accepted",
+      "purpose": "把中心服务、CLI 本机 outbox/inbox、uid 去重、回执和 Telegram Transport 组织成可判断的通信 MVP。",
+      "inputs": [
+        "人的目标",
+        "当前通信实现与边界"
+      ],
+      "outputs": [
+        "可实例化的判断问题",
+        "执行依据"
+      ],
+      "steps": [
+        "提炼目标",
+        "选择实例",
+        "吸收反馈",
+        "记录决策"
+      ],
+      "openIssues": [
+        "跨机器、真实 Bot 回执和宿主唤醒仍需验收。"
+      ],
+      "evidence": [
+        "ev-intent-objects"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-intent-objects"
+          ]
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "inst-transport-inbox-001",
+      "type": "frontend",
+      "label": "实例 · 收件箱体验",
+      "sublabel": "in review",
+      "purpose": "用当前 Otoha Graph 页面让人判断摘要、正文、证据和未验证项是否连贯。",
+      "inputs": [
+        "req-transport-mvp-001",
+        "docs/graph/transport.html"
+      ],
+      "outputs": [
+        "具体反馈"
+      ],
+      "steps": [
+        "选择分级异步通信",
+        "查看 Module details",
+        "进入通信实现视图"
+      ],
+      "openIssues": [
+        "它不证明真实 Telegram 或跨机器运行。"
+      ],
+      "evidence": [
+        "ev-instance-sample",
+        "ev-intent-objects"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-intent-objects"
+          ]
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "feedback-transport-ui-001",
+      "type": "external",
+      "label": "反馈 · 根视图先讲哲学",
+      "sublabel": "accepted",
+      "purpose": "记录人对实例操作的观察：先看五项哲学和共同状态，再进入通信 Transport；证据要分层显示。",
+      "inputs": [
+        "实例操作",
+        "人的判断"
+      ],
+      "outputs": [
+        "可执行的修改建议"
+      ],
+      "steps": [
+        "保留反馈原话",
+        "标记类别",
+        "关联操作和实例"
+      ],
+      "openIssues": [
+        "还没有通用反馈收集命令。"
+      ],
+      "evidence": [
+        "ev-intent-objects"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-intent-objects"
+          ]
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    },
+    {
+      "id": "decision-transport-mvp-001",
+      "type": "backend",
+      "label": "决策 · 通信 MVP + 证据分层",
+      "sublabel": "accepted",
+      "purpose": "把反馈整理成可执行决策：通信闭环作为第一条已落地路径，图谱根视图先表达五项哲学，源码/测试/集成分开呈现。",
+      "inputs": [
+        "feedback-transport-ui-001",
+        "req-transport-mvp-001"
+      ],
+      "outputs": [
+        "更新后的共同工程状态"
+      ],
+      "steps": [
+        "说明取舍",
+        "列影响对象",
+        "标记未验证边界"
+      ],
+      "openIssues": [
+        "后续需要把决策写入正式需求和任务协议。"
+      ],
+      "evidence": [
+        "ev-intent-objects"
+      ],
+      "maturity": {
+        "design": {
+          "value": "accepted",
+          "evidence": [
+            "ev-intent-objects"
+          ]
+        },
+        "implementation": {
+          "value": "not_started"
+        },
+        "verification": {
+          "value": "untested"
+        },
+        "integration": {
+          "value": "not_connected"
+        }
+      }
+    }
+  ],
+  "relations": [
+    {
+      "id": "send",
+      "from": "agents",
+      "to": "envelope",
+      "kind": "dataflow",
+      "label": "发送"
+    },
+    {
+      "id": "persist",
+      "from": "envelope",
+      "to": "store",
+      "kind": "dataflow",
+      "label": "先落盘"
+    },
+    {
+      "id": "pending",
+      "from": "store",
+      "to": "router",
+      "kind": "dataflow",
+      "label": "待发信封"
+    },
+    {
+      "id": "to-server",
+      "from": "router",
+      "to": "t-server",
+      "kind": "call",
+      "label": "default"
+    },
+    {
+      "id": "to-tg",
+      "from": "router",
+      "to": "t-telegram",
+      "kind": "call",
+      "label": "standby/切换后"
+    },
+    {
+      "id": "srv-api",
+      "from": "t-server",
+      "to": "collab",
+      "kind": "dataflow",
+      "label": "HTTP/事件流"
+    },
+    {
+      "id": "tg-api",
+      "from": "t-telegram",
+      "to": "tg-api",
+      "kind": "dataflow",
+      "label": "Bot API"
+    },
+    {
+      "id": "in-server",
+      "from": "t-server",
+      "to": "store",
+      "kind": "dataflow",
+      "label": "收:去重入库"
+    },
+    {
+      "id": "in-tg",
+      "from": "t-telegram",
+      "to": "store",
+      "kind": "dataflow",
+      "label": "收:去重入库"
+    },
+    {
+      "id": "health-s",
+      "from": "t-server",
+      "to": "router",
+      "kind": "feedback",
+      "label": "健康"
+    },
+    {
+      "id": "health-t",
+      "from": "t-telegram",
+      "to": "router",
+      "kind": "feedback",
+      "label": "健康"
+    },
+    {
+      "id": "notice",
+      "from": "store",
+      "to": "reader",
+      "kind": "dataflow",
+      "label": "摘要+引用"
+    },
+    {
+      "id": "deliver",
+      "from": "reader",
+      "to": "agents",
+      "kind": "dataflow",
+      "label": "按紧急度通知"
+    },
+    {
+      "id": "fetch",
+      "from": "agents",
+      "to": "store",
+      "kind": "call",
+      "label": "取正文,读后记 read"
+    },
+    {
+      "id": "n1",
+      "from": "e-summary",
+      "to": "e-notice",
+      "kind": "dataflow",
+      "label": "摘要"
+    },
+    {
+      "id": "n2",
+      "from": "e-scope",
+      "to": "e-notice",
+      "kind": "dataflow",
+      "label": "范围"
+    },
+    {
+      "id": "n3",
+      "from": "e-urgency",
+      "to": "e-notice",
+      "kind": "dataflow",
+      "label": "紧急度"
+    },
+    {
+      "id": "n4",
+      "from": "s-outbox",
+      "to": "s-inbox",
+      "kind": "dependency",
+      "label": "同一库"
+    },
+    {
+      "id": "n5",
+      "from": "s-dedup",
+      "to": "s-inbox",
+      "kind": "dataflow",
+      "label": "新信封"
+    },
+    {
+      "id": "n6",
+      "from": "s-inbox",
+      "to": "s-cursor",
+      "kind": "dataflow",
+      "label": "写入后确认"
+    },
+    {
+      "id": "n7",
+      "from": "r-policy",
+      "to": "r-switch",
+      "kind": "dependency",
+      "label": "配置"
+    },
+    {
+      "id": "n8",
+      "from": "r-health",
+      "to": "r-switch",
+      "kind": "dataflow",
+      "label": "状态"
+    },
+    {
+      "id": "n9",
+      "from": "r-switch",
+      "to": "r-backfill",
+      "kind": "call",
+      "label": "回切前"
+    },
+    {
+      "id": "n10",
+      "from": "tg-header",
+      "to": "tg-split",
+      "kind": "dataflow",
+      "label": "文本"
+    },
+    {
+      "id": "n11",
+      "from": "tg-split",
+      "to": "tg-limit",
+      "kind": "dataflow",
+      "label": "分片"
+    },
+    {
+      "id": "n12",
+      "from": "tg-poll",
+      "to": "tg-header",
+      "kind": "dataflow",
+      "label": "解码"
+    },
+    {
+      "id": "n13",
+      "from": "tg-start",
+      "to": "tg-limit",
+      "kind": "dependency",
+      "label": "私发前提"
+    },
+    {
+      "id": "n14",
+      "from": "ts-events",
+      "to": "ts-send",
+      "kind": "dependency",
+      "label": "同一会话"
+    },
+    {
+      "id": "n15",
+      "from": "c-summary",
+      "to": "c-direct",
+      "kind": "dependency",
+      "label": "同一消息表"
+    },
+    {
+      "id": "phi-async-state",
+      "from": "phi-async",
+      "to": "shared-state",
+      "kind": "dataflow",
+      "label": "持久化消息与回执"
+    },
+    {
+      "id": "phi-graph-state",
+      "from": "phi-graph",
+      "to": "shared-state",
+      "kind": "dataflow",
+      "label": "查询共同依据"
+    },
+    {
+      "id": "phi-align-state",
+      "from": "phi-align",
+      "to": "shared-state",
+      "kind": "feedback",
+      "label": "反馈写回意图"
+    },
+    {
+      "id": "phi-instance-state",
+      "from": "phi-instance",
+      "to": "shared-state",
+      "kind": "dataflow",
+      "label": "实例与需求关联"
+    },
+    {
+      "id": "phi-schedule-state",
+      "from": "phi-schedule",
+      "to": "shared-state",
+      "kind": "call",
+      "label": "读取任务与依赖"
+    },
+    {
+      "id": "intent-req-instance",
+      "from": "req-transport-mvp-001",
+      "to": "inst-transport-inbox-001",
+      "kind": "dataflow",
+      "label": "用实例呈现"
+    },
+    {
+      "id": "intent-instance-feedback",
+      "from": "inst-transport-inbox-001",
+      "to": "feedback-transport-ui-001",
+      "kind": "feedback",
+      "label": "收集具体反馈"
+    },
+    {
+      "id": "intent-feedback-decision",
+      "from": "feedback-transport-ui-001",
+      "to": "decision-transport-mvp-001",
+      "kind": "feedback",
+      "label": "整理成决策"
+    },
+    {
+      "id": "intent-decision-req",
+      "from": "decision-transport-mvp-001",
+      "to": "req-transport-mvp-001",
+      "kind": "feedback",
+      "label": "修订共同需求"
+    },
+    {
+      "id": "intent-decision-state",
+      "from": "decision-transport-mvp-001",
+      "to": "shared-state",
+      "kind": "dataflow",
+      "label": "写入共同状态"
+    }
+  ],
+  "views": [
+    {
+      "id": "overview",
+      "title": "五项核心哲学",
+      "kind": "structure",
+      "viewBox": [
+        1240,
+        980
+      ],
+      "placements": [
+        {
+          "entity": "phi-async",
+          "pos": [
+            70,
+            70
+          ],
+          "size": [
+            260,
+            150
+          ]
+        },
+        {
+          "entity": "phi-graph",
+          "pos": [
+            490,
+            45
+          ],
+          "size": [
+            260,
+            150
+          ]
+        },
+        {
+          "entity": "phi-align",
+          "pos": [
+            910,
+            70
+          ],
+          "size": [
+            260,
+            150
+          ]
+        },
+        {
+          "entity": "phi-instance",
+          "pos": [
+            180,
+            560
+          ],
+          "size": [
+            260,
+            150
+          ]
+        },
+        {
+          "entity": "shared-state",
+          "pos": [
+            495,
+            290
+          ],
+          "size": [
+            300,
+            175
+          ]
+        },
+        {
+          "entity": "phi-schedule",
+          "pos": [
+            900,
+            560
+          ],
+          "size": [
+            260,
+            150
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "phi-async-state",
+          "fromSide": "bottom",
+          "toSide": "left",
+          "labelDx": -18,
+          "labelDy": 16
+        },
+        {
+          "relation": "phi-graph-state",
+          "fromSide": "bottom",
+          "toSide": "top",
+          "labelDx": 18,
+          "labelDy": -8
+        },
+        {
+          "relation": "phi-align-state",
+          "fromSide": "bottom",
+          "toSide": "right",
+          "labelDx": 18,
+          "labelDy": 16
+        },
+        {
+          "relation": "phi-instance-state",
+          "fromSide": "top",
+          "toSide": "bottom",
+          "via": [
+            [
+              310,
+              510
+            ],
+            [
+              420,
+              510
+            ],
+            [
+              420,
+              530
+            ],
+            [
+              645,
+              530
+            ]
+          ],
+          "labelDx": -12,
+          "labelDy": 16
+        },
+        {
+          "relation": "phi-schedule-state",
+          "fromSide": "top",
+          "toSide": "bottom",
+          "via": [
+            [
+              1030,
+              520
+            ],
+            [
+              870,
+              520
+            ],
+            [
+              870,
+              560
+            ],
+            [
+              645,
+              560
+            ]
+          ],
+          "labelDx": 12,
+          "labelDy": 16
+        }
+      ],
+      "cards": [
+        {
+          "dot": "cyan",
+          "title": "现在先做的闭环",
+          "items": [
+            "中心服务保存完整消息和逐条回执",
+            "CLI 本机 outbox/inbox、uid 去重、游标恢复",
+            "Telegram 只是 Transport，FakeChannel 先验证联调"
+          ]
+        },
+        {
+          "dot": "violet",
+          "title": "五项之间的关系",
+          "items": [
+            "通信让信息适时流动",
+            "图谱保存共同依据",
+            "对齐与实例让人的意图持续变化",
+            "调度决定谁在何时读取和交接"
+          ]
+        },
+        {
+          "dot": "amber",
+          "title": "证据边界",
+          "items": [
+            "绿色状态表示已有源码或测试证据",
+            "灰色状态表示仍是设计方向",
+            "真实 Bot、跨机器和宿主唤醒要单独验收"
+          ]
+        }
+      ],
+      "guidedViews": [
+        {
+          "id": "chapter-all",
+          "label": "整体循环",
+          "focus": [
+            "phi-async",
+            "phi-graph",
+            "phi-align",
+            "phi-instance",
+            "phi-schedule",
+            "shared-state"
+          ],
+          "note": "先看五项如何围绕共同工程状态闭环。"
+        },
+        {
+          "id": "chapter-async",
+          "label": "通信闭环",
+          "focus": [
+            "phi-async",
+            "shared-state"
+          ],
+          "note": "摘要、正文、outbox、inbox、回执和 Telegram。"
+        },
+        {
+          "id": "chapter-graph",
+          "label": "图谱读取",
+          "focus": [
+            "phi-graph",
+            "shared-state"
+          ],
+          "note": "把全局工程状态变成可查询的局部上下文。"
+        },
+        {
+          "id": "chapter-human",
+          "label": "人机往返",
+          "focus": [
+            "phi-align",
+            "phi-instance",
+            "shared-state"
+          ],
+          "note": "实例体验产生反馈，反馈再改变共同意图。"
+        },
+        {
+          "id": "chapter-schedule",
+          "label": "协作调度",
+          "focus": [
+            "phi-schedule",
+            "phi-async",
+            "phi-graph"
+          ],
+          "note": "协议提供语义，策略决定当前组织方式。"
+        }
+      ]
+    },
+    {
+      "id": "v-transport",
+      "title": "通信实现：统一信封与双 Transport",
+      "placements": [
+        {
+          "entity": "agents",
+          "pos": [
+            40,
+            260
+          ]
+        },
+        {
+          "entity": "reader",
+          "pos": [
+            40,
+            460
+          ]
+        },
+        {
+          "entity": "envelope",
+          "pos": [
+            270,
+            60
+          ]
+        },
+        {
+          "entity": "store",
+          "pos": [
+            270,
+            260
+          ]
+        },
+        {
+          "entity": "router",
+          "pos": [
+            500,
+            160
+          ]
+        },
+        {
+          "entity": "t-server",
+          "pos": [
+            730,
+            60
+          ]
+        },
+        {
+          "entity": "t-telegram",
+          "pos": [
+            730,
+            360
+          ]
+        },
+        {
+          "entity": "collab",
+          "pos": [
+            960,
+            60
+          ]
+        },
+        {
+          "entity": "tg-api",
+          "pos": [
+            960,
+            360
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "send",
+          "labelDy": -20
+        },
+        {
+          "relation": "persist",
+          "labelAt": [
+            320,
+            150
+          ]
+        },
+        {
+          "relation": "pending"
+        },
+        {
+          "relation": "to-server"
+        },
+        {
+          "relation": "to-tg",
+          "variant": "dashed"
+        },
+        {
+          "relation": "srv-api"
+        },
+        {
+          "relation": "tg-api"
+        },
+        {
+          "relation": "notice"
+        },
+        {
+          "relation": "deliver"
+        }
+      ],
+      "cards": [
+        {
+          "dot": "cyan",
+          "title": "主路径",
+          "items": [
+            "发送:Agent → 信封 → 本地 outbox → 路由 → 默认 Transport",
+            "接收:两个 Transport 都监听 → 按 id 去重 → inbox → 读取调度 → Agent"
+          ]
+        },
+        {
+          "dot": "amber",
+          "title": "主备",
+          "items": [
+            "虚线为备用与健康反馈",
+            "默认失败达阈值后发送改走备用,恢复后回切并补拉"
+          ]
+        }
+      ],
+      "kind": "perspective"
+    },
+    {
+      "id": "v-failover",
+      "title": "主备与读取",
+      "kind": "scenario",
+      "entryPoints": [
+        "router"
+      ],
+      "placements": [
+        {
+          "entity": "router",
+          "pos": [
+            40,
+            200
+          ]
+        },
+        {
+          "entity": "t-server",
+          "pos": [
+            420,
+            60
+          ]
+        },
+        {
+          "entity": "t-telegram",
+          "pos": [
+            420,
+            340
+          ]
+        },
+        {
+          "entity": "store",
+          "pos": [
+            800,
+            200
+          ]
+        },
+        {
+          "entity": "agents",
+          "pos": [
+            1180,
+            200
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "health-s"
+        },
+        {
+          "relation": "health-t",
+          "variant": "dashed"
+        },
+        {
+          "relation": "fetch",
+          "variant": "dashed",
+          "labelDy": -24
+        }
+      ],
+      "cards": [
+        {
+          "dot": "amber",
+          "title": "故障切换",
+          "items": [
+            "健康反馈汇入路由",
+            "default 连续失败达阈值后发送改走 standby",
+            "恢复后回切,并按各自游标补拉合并"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "v-receive",
+      "title": "接收路径",
+      "kind": "scenario",
+      "entryPoints": [
+        "store"
+      ],
+      "placements": [
+        {
+          "entity": "t-server",
+          "pos": [
+            40,
+            60
+          ]
+        },
+        {
+          "entity": "t-telegram",
+          "pos": [
+            40,
+            340
+          ]
+        },
+        {
+          "entity": "store",
+          "pos": [
+            420,
+            200
+          ]
+        },
+        {
+          "entity": "reader",
+          "pos": [
+            800,
+            200
+          ]
+        },
+        {
+          "entity": "agents",
+          "pos": [
+            1180,
+            200
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "in-server"
+        },
+        {
+          "relation": "in-tg"
+        },
+        {
+          "relation": "notice"
+        },
+        {
+          "relation": "deliver"
+        }
+      ],
+      "cards": [
+        {
+          "dot": "cyan",
+          "title": "接收",
+          "items": [
+            "两个 Transport 都监听,不论是否为 default",
+            "按信封 id 去重后写入 inbox,再确认游标",
+            "读取调度只交付摘要+引用"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "v-envelope",
+      "title": "信封与通知内部",
+      "placements": [
+        {
+          "entity": "e-scope",
+          "pos": [
+            40,
+            60
+          ]
+        },
+        {
+          "entity": "e-summary",
+          "pos": [
+            420,
+            60
+          ]
+        },
+        {
+          "entity": "e-urgency",
+          "pos": [
+            800,
+            60
+          ]
+        },
+        {
+          "entity": "e-notice",
+          "pos": [
+            420,
+            300
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "n1",
+          "labelAt": [
+            545,
+            218
+          ]
+        },
+        {
+          "relation": "n2"
+        },
+        {
+          "relation": "n3"
+        }
+      ],
+      "scope": "envelope"
+    },
+    {
+      "id": "v-store",
+      "title": "本地存储内部",
+      "placements": [
+        {
+          "entity": "s-outbox",
+          "pos": [
+            40,
+            100
+          ]
+        },
+        {
+          "entity": "s-dedup",
+          "pos": [
+            40,
+            300
+          ]
+        },
+        {
+          "entity": "s-inbox",
+          "pos": [
+            420,
+            200
+          ]
+        },
+        {
+          "entity": "s-cursor",
+          "pos": [
+            800,
+            200
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "n4"
+        },
+        {
+          "relation": "n5"
+        },
+        {
+          "relation": "n6",
+          "labelAt": [
+            695,
+            212
+          ]
+        }
+      ],
+      "scope": "store"
+    },
+    {
+      "id": "v-router",
+      "title": "传输路由内部",
+      "placements": [
+        {
+          "entity": "r-policy",
+          "pos": [
+            40,
+            100
+          ]
+        },
+        {
+          "entity": "r-health",
+          "pos": [
+            40,
+            300
+          ]
+        },
+        {
+          "entity": "r-switch",
+          "pos": [
+            420,
+            200
+          ]
+        },
+        {
+          "entity": "r-backfill",
+          "pos": [
+            800,
+            200
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "n7"
+        },
+        {
+          "relation": "n8"
+        },
+        {
+          "relation": "n9",
+          "labelAt": [
+            695,
+            212
+          ]
+        }
+      ],
+      "scope": "router"
+    },
+    {
+      "id": "v-tg",
+      "title": "Telegram Transport 内部",
+      "placements": [
+        {
+          "entity": "tg-header",
+          "pos": [
+            420,
+            60
+          ]
+        },
+        {
+          "entity": "tg-split",
+          "pos": [
+            800,
+            60
+          ]
+        },
+        {
+          "entity": "tg-limit",
+          "pos": [
+            800,
+            300
+          ]
+        },
+        {
+          "entity": "tg-poll",
+          "pos": [
+            40,
+            60
+          ]
+        },
+        {
+          "entity": "tg-start",
+          "pos": [
+            420,
+            300
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "n10",
+          "labelAt": [
+            695,
+            72
+          ]
+        },
+        {
+          "relation": "n11",
+          "labelAt": [
+            925,
+            218
+          ]
+        },
+        {
+          "relation": "n12",
+          "labelAt": [
+            315,
+            72
+          ]
+        },
+        {
+          "relation": "n13",
+          "labelAt": [
+            695,
+            312
+          ]
+        }
+      ],
+      "scope": "t-telegram"
+    },
+    {
+      "id": "v-server",
+      "title": "服务器 Transport 内部",
+      "placements": [
+        {
+          "entity": "ts-send",
+          "pos": [
+            40,
+            200
+          ]
+        },
+        {
+          "entity": "ts-events",
+          "pos": [
+            420,
+            200
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "n14",
+          "labelAt": [
+            315,
+            212
+          ]
+        }
+      ],
+      "scope": "t-server"
+    },
+    {
+      "id": "v-collab",
+      "title": "协作服务内部",
+      "placements": [
+        {
+          "entity": "c-summary",
+          "pos": [
+            40,
+            200
+          ]
+        },
+        {
+          "entity": "c-direct",
+          "pos": [
+            420,
+            200
+          ]
+        },
+        {
+          "entity": "c-receipts",
+          "pos": [
+            800,
+            200
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "n15",
+          "labelAt": [
+            315,
+            212
+          ]
+        }
+      ],
+      "scope": "collab"
+    },
+    {
+      "id": "v-intent-loop",
+      "title": "需求往返：实例、反馈与决策",
+      "kind": "scenario",
+      "entryPoints": [
+        "phi-align",
+        "phi-instance",
+        "shared-state"
+      ],
+      "viewBox": [
+        1120,
+        760
+      ],
+      "placements": [
+        {
+          "entity": "req-transport-mvp-001",
+          "pos": [
+            70,
+            100
+          ],
+          "size": [
+            240,
+            140
+          ]
+        },
+        {
+          "entity": "inst-transport-inbox-001",
+          "pos": [
+            810,
+            100
+          ],
+          "size": [
+            240,
+            140
+          ]
+        },
+        {
+          "entity": "feedback-transport-ui-001",
+          "pos": [
+            810,
+            480
+          ],
+          "size": [
+            240,
+            140
+          ]
+        },
+        {
+          "entity": "decision-transport-mvp-001",
+          "pos": [
+            70,
+            480
+          ],
+          "size": [
+            260,
+            140
+          ]
+        },
+        {
+          "entity": "shared-state",
+          "pos": [
+            420,
+            275
+          ],
+          "size": [
+            280,
+            160
+          ]
+        }
+      ],
+      "relations": [
+        {
+          "relation": "intent-req-instance",
+          "fromSide": "right",
+          "toSide": "left"
+        },
+        {
+          "relation": "intent-instance-feedback",
+          "fromSide": "bottom",
+          "toSide": "top",
+          "labelDy": 24
+        },
+        {
+          "relation": "intent-feedback-decision",
+          "fromSide": "left",
+          "toSide": "right"
+        },
+        {
+          "relation": "intent-decision-req",
+          "fromSide": "top",
+          "toSide": "bottom"
+        },
+        {
+          "relation": "intent-decision-state",
+          "fromSide": "right",
+          "toSide": "left",
+          "labelDy": 16
+        }
+      ],
+      "cards": [
+        {
+          "dot": "cyan",
+          "title": "如何使用",
+          "items": [
+            "需求只写当前要判断的问题",
+            "实例承载具体操作和观察点",
+            "反馈关联实例中的操作与对象"
+          ]
+        },
+        {
+          "dot": "violet",
+          "title": "如何回到开发",
+          "items": [
+            "决策写明接受、修改、搁置或拒绝",
+            "影响对象写回 Otoha Graph",
+            "执行 Agent 读取同一份接受状态"
+          ]
+        },
+        {
+          "dot": "amber",
+          "title": "边界",
+          "items": [
+            "样本不产生授权",
+            "实例不等于正式实现",
+            "真实宿主和生产集成单独验收"
+          ]
+        }
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev-principles-design",
+      "kind": "design",
+      "path": "docs/PRINCIPLES.zh-CN.md",
+      "sha256": "6c216895187cabaaf809c56104b1923d1256a411995620ebc73241e81a9824bf",
+      "label": "五项核心哲学设计依据"
+    },
+    {
+      "id": "ev-server-source",
+      "kind": "source",
+      "path": "services/collaboration/otoha_server.py",
+      "sha256": "5cdaf4719fe01928ff1538a5b7033f7a58658d410eb90ce6f3bb6653f0f59476",
+      "label": "中心消息库、事件与逐条回执",
+      "line": 395,
+      "end_line": 490
+    },
+    {
+      "id": "ev-inbox-source",
+      "kind": "source",
+      "path": "apps/cli/internal/otoha/inbox.go",
+      "sha256": "a00be81ec7e7b14ecf55c2a0e5488c294935441108dedb44df621ffba34acabf",
+      "label": "本机 inbox、游标和去重",
+      "line": 20,
+      "end_line": 224
+    },
+    {
+      "id": "ev-receive-source",
+      "kind": "source",
+      "path": "apps/cli/internal/otoha/receive.go",
+      "sha256": "ae5297d70d1164ffaccb4d20001f171f21109e18b6e3ada4d45dbd48cf81097a",
+      "label": "后台 receiver 的持久化边界",
+      "line": 250,
+      "end_line": 290
+    },
+    {
+      "id": "ev-telegram-source",
+      "kind": "source",
+      "path": "apps/cli/internal/otoha/telegram.go",
+      "sha256": "6b2b754c0b7f9a643e0a84c8520a06dd3064aaff7be8ad57eada8489fb71643f",
+      "label": "Telegram Bot API Gateway",
+      "line": 169,
+      "end_line": 501
+    },
+    {
+      "id": "ev-service-test",
+      "kind": "test",
+      "path": "services/collaboration/tests/test_service.py",
+      "sha256": "0f98e792b9acfe24709079d49333bae3f8a2a922eb3878e3ee99712a7817d5d5",
+      "label": "协作服务 18 项测试",
+      "scope": "消息信封、幂等、旧库迁移、事件和逐条回执",
+      "command": "python3 -m unittest discover -s tests -v",
+      "result": "passed",
+      "capturedAt": "2026-10-25",
+      "inputs": [
+        {
+          "path": "services/collaboration/otoha_server.py",
+          "sha256": "5cdaf4719fe01928ff1538a5b7033f7a58658d410eb90ce6f3bb6653f0f59476"
+        }
+      ]
+    },
+    {
+      "id": "ev-inbox-test",
+      "kind": "test",
+      "path": "apps/cli/internal/otoha/inbox_test.go",
+      "sha256": "ee56bfae1a1b9cf2fbb3d6d3a84abedd95d303f27b85df704b7b6eae5037490d",
+      "label": "本机 inbox FakeChannel 风格联调测试",
+      "scope": "事件持久化、重复游标、收到/已读回执",
+      "command": "go test ./...",
+      "result": "passed",
+      "capturedAt": "2026-10-25",
+      "inputs": [
+        {
+          "path": "apps/cli/internal/otoha/inbox.go",
+          "sha256": "a00be81ec7e7b14ecf55c2a0e5488c294935441108dedb44df621ffba34acabf"
+        },
+        {
+          "path": "apps/cli/internal/otoha/inbox_test.go",
+          "sha256": "ee56bfae1a1b9cf2fbb3d6d3a84abedd95d303f27b85df704b7b6eae5037490d"
+        }
+      ]
+    },
+    {
+      "id": "ev-telegram-test",
+      "kind": "test",
+      "path": "apps/cli/internal/otoha/telegram_test.go",
+      "sha256": "489eb0b6cb5d46c42b1bd12a55d60661b2e7e073f9e269d9c865ce1582b5e31b",
+      "label": "Telegram Gateway 模拟 API 测试",
+      "scope": "发送、长轮询、路由、状态持久化、更新去重",
+      "command": "go test ./...",
+      "result": "passed",
+      "capturedAt": "2026-10-25",
+      "inputs": [
+        {
+          "path": "apps/cli/internal/otoha/telegram.go",
+          "sha256": "6b2b754c0b7f9a643e0a84c8520a06dd3064aaff7be8ad57eada8489fb71643f"
+        },
+        {
+          "path": "apps/cli/internal/otoha/telegram_test.go",
+          "sha256": "489eb0b6cb5d46c42b1bd12a55d60661b2e7e073f9e269d9c865ce1582b5e31b"
+        }
+      ]
+    },
+    {
+      "id": "ev-bridge-source",
+      "kind": "source",
+      "path": "apps/cli/internal/otoha/transport_bridge.go",
+      "sha256": "40310a3774b7fa8d9c9240184d71830127672c57b415de9d212b61a3a936421b",
+      "label": "中心服务与 Channel 双向 bridge",
+      "line": 15,
+      "end_line": 241
+    },
+    {
+      "id": "ev-bridge-test",
+      "kind": "test",
+      "path": "apps/cli/internal/otoha/transport_bridge_test.go",
+      "sha256": "ea00d0da28d60dbcee7582fe056df708eca1e827dbe66ce252bf89d808dd6724",
+      "label": "FakeChannel 双向联调测试",
+      "scope": "中心服务事件→Channel 与 Channel→中心服务→本机 inbox",
+      "command": "go test ./...",
+      "result": "passed",
+      "capturedAt": "2026-10-25",
+      "inputs": [
+        {
+          "path": "apps/cli/internal/otoha/transport_bridge.go",
+          "sha256": "40310a3774b7fa8d9c9240184d71830127672c57b415de9d212b61a3a936421b"
+        },
+        {
+          "path": "apps/cli/internal/otoha/transport_bridge_test.go",
+          "sha256": "ea00d0da28d60dbcee7582fe056df708eca1e827dbe66ce252bf89d808dd6724"
+        }
+      ]
+    },
+    {
+      "id": "ev-intent-objects",
+      "kind": "design",
+      "path": "docs/intent/transport-mvp-objects.json",
+      "sha256": "b40c49db21ab05e70c37f2a7b7233652dfa926af4eaa7c8f8fda373ab2bce038",
+      "label": "需求、实例、反馈、决策最小对象样本"
+    },
+    {
+      "id": "ev-instance-sample",
+      "kind": "design",
+      "path": "skills/otoha-requirement-instance/samples/transport-inbox-instance.json",
+      "sha256": "0e23c7f13d257f32ca22b75bf1307425437ab3db9deb36987c52843aacd5d01e",
+      "label": "需求实例化真实样本"
+    },
+    {
+      "id": "ev-alignment-sample",
+      "kind": "design",
+      "path": "skills/otoha-human-alignment/samples/transport-alignment-session.json",
+      "sha256": "00465315e851def58662c8d64f7f63b8727f8369d8c772134cc77096640262ef",
+      "label": "持续人机对齐真实样本"
+    }
+  ]
+}

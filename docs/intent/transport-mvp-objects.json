@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "project": "otoha",
+  "objects": {
+    "requirements": [
+      {
+        "id": "req-transport-mvp-001",
+        "title": "先让 Otoha 通信闭环可用",
+        "statement": "中心服务保存完整消息，CLI 本机保存 outbox/inbox 并去重、记录回执；Telegram 作为可替换 Transport。",
+        "judgement": "人和 Agent 能理解消息何时到达、何时读到，以及哪些部分仍未验证。",
+        "status": "accepted",
+        "graph_entities": ["phi-async", "shared-state", "collab", "store", "t-telegram"]
+      }
+    ],
+    "instances": [
+      {
+        "id": "inst-transport-inbox-001",
+        "requirement_id": "req-transport-mvp-001",
+        "title": "通信摘要到正文的收件箱体验",
+        "carrier": "docs/graph/transport.html",
+        "operations": ["选择分级异步通信", "打开 Module details", "进入通信实现视图"],
+        "scope": {
+          "expresses": ["五项哲学与通信闭环的关系", "证据分层"],
+          "does_not_prove": ["真实 Telegram Bot 端到端", "跨机器部署", "宿主唤醒"]
+        },
+        "status": "in_review"
+      }
+    ],
+    "feedback": [
+      {
+        "id": "feedback-transport-ui-001",
+        "instance_id": "inst-transport-inbox-001",
+        "category": "content",
+        "observation": "根视图应该先解释五项核心哲学，技术 Transport 放在下一层；源码、测试和未验证项要同时可见。",
+        "operation": "查看五项核心哲学根视图和分级异步通信详情",
+        "status": "accepted"
+      }
+    ],
+    "decisions": [
+      {
+        "id": "decision-transport-mvp-001",
+        "requirement_id": "req-transport-mvp-001",
+        "feedback_ids": ["feedback-transport-ui-001"],
+        "statement": "Otoha Graph 根视图先呈现五项核心哲学；通信闭环作为第一条已落地的局部路径；证据面板分开显示设计、源码、测试和真实集成。",
+        "impact": ["phi-async", "shared-state", "collab", "store", "t-telegram"],
+        "status": "accepted",
+        "recorded_at": "2026-10-25"
+      }
+    ]
+  },
+  "relations": [
+    {"from": "req-transport-mvp-001", "kind": "instantiated_by", "to": "inst-transport-inbox-001"},
+    {"from": "inst-transport-inbox-001", "kind": "elicits", "to": "feedback-transport-ui-001"},
+    {"from": "feedback-transport-ui-001", "kind": "changes", "to": "decision-transport-mvp-001"},
+    {"from": "decision-transport-mvp-001", "kind": "updates", "to": "req-transport-mvp-001"},
+    {"from": "decision-transport-mvp-001", "kind": "impacts", "to": "phi-async"},
+    {"from": "decision-transport-mvp-001", "kind": "impacts", "to": "shared-state"}
+  ]
+}

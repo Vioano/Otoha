@@ -1,0 +1,37 @@
+{
+  "kind": "instance",
+  "id": "inst-<stable-id>",
+  "requirement_id": "req-<stable-id>",
+  "revision": 1,
+  "title": "<人能判断的实例名称>",
+  "purpose": "<这个实例帮助人判断什么>",
+  "carrier": {
+    "type": "web|scene|simulation|small-real-build",
+    "path": "<local artifact or URL>",
+    "entry": "<入口或起始状态>"
+  },
+  "operations": [
+    {
+      "id": "op-1",
+      "label": "<用户执行的动作>",
+      "observe": "<动作后要判断的结果>"
+    }
+  ],
+  "feedback_targets": [
+    "layout",
+    "visual",
+    "interaction",
+    "behavior",
+    "content"
+  ],
+  "scope": {
+    "expresses": ["<实例能表达的内容>"],
+    "does_not_prove": ["<实例不能证明的性能、真实集成或宿主行为>"]
+  },
+  "links": {
+    "graph_entities": [],
+    "decision_ids": [],
+    "task_ids": []
+  },
+  "status": "draft|in_review|accepted|superseded"
+}
