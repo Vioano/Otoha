@@ -4,6 +4,8 @@
 
 2026-11-06 调整当前执行顺序：先按[需求演化记录](REQUIREMENTS-STATE.zh-CN.md)核对有效需求，再用[通信需求实例](communication-requirement-instance.html)模拟[通信契约](COMMUNICATION-CONTRACT.zh-CN.md)。该实例只使用虚构数据。新反馈先回到共同需求，再决定真实代码；现有实现不能反向规定用户需求。尚未取得的长聊天前文和旧决定原话明确保留为取证缺口。
 
+当前发布顺序由用户明确为：先在私人服务器测试并更新私人 Git 仓库，达到首个可用版本门槛后再更新 GitHub。首发流程、渠道边界和临时性能目标见[发布门槛](RELEASE-GATES.zh-CN.md)；Agent 从[接入与工作入口](AGENT-ENTRY.md)发现用法。具体实机结果存于 `docs/evidence/release-validation-20261106/`，测试候选与公开发布分别记录。
+
 ## 已确定的方向
 
 ### 交付聚焦 CLI，Skill 可选下载

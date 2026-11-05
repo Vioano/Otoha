@@ -13,7 +13,7 @@ const option = (name, fallback) => {
   if (!args[i + 1] || args[i + 1].startsWith('--')) throw new Error(`${name} requires a value`);
   return args[i + 1];
 };
-const version = option('--version', '0.1.0-alpha.1');
+const version = option('--version', '0.1.0-alpha.2');
 if (!/^[A-Za-z0-9][A-Za-z0-9.+-]{0,70}$/.test(version)) throw new Error('Invalid release version');
 const output = path.resolve(option('--out', path.join(root, 'dist', 'releases')));
 fs.mkdirSync(output, { recursive: true });

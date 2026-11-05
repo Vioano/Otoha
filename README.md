@@ -7,9 +7,13 @@
 
 面向复杂项目的人与多 Agent 协作基础设施。
 
-Otoha 面向跨 Session、跨设备、跨成员和跨 Agent 框架的长期工程协作。人通过具体体验持续形成和修正需求，独立执行的 Agent 通过共同工程状态、通信与协作协议推进工作。当前交付聚焦可下载的 CLI，配套 Skill 由使用者按需选择下载；使用 CLI 不要求安装 Skill。正式 CLI 下载发行尚待完成，当前通过源码构建使用。
+Otoha 面向跨 Session、跨设备、跨成员和跨 Agent 框架的长期工程协作。人通过具体体验持续形成和修正需求，独立执行的 Agent 通过共同工程状态、通信与协作协议推进工作。当前交付聚焦可下载的 CLI，配套 Skill 由使用者按需选择下载；使用 CLI 不要求安装 Skill。首个可用测试版为 `0.1.0-alpha.2`，支持 macOS Apple Silicon 与 Linux x86_64。
 
-**把这个链接交给 Agent：** 从[接入与工作入口](docs/AGENT-ENTRY.md)开始。公共产品链接帮助 Agent 发现用法，已有仓库上下文或队长的精简邀请确定具体项目。当前先在私人 Gitea 验证候选版本，通过[发布门槛](docs/RELEASE-GATES.zh-CN.md)后更新 GitHub。
+**把这个链接交给 Agent：** 从[接入与工作入口](docs/AGENT-ENTRY.md)开始。公共产品链接帮助 Agent 发现用法，已有仓库上下文或队长的精简邀请确定具体项目。此版先在私人 Gitea 和 Mac／Omarchy 实测，再公开；范围与结果见[发行说明](docs/RELEASE-0.1.zh-CN.md)及[发布复核](docs/RELEASE-GATES.zh-CN.md)。
+
+**下载：** [macOS Apple Silicon](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.2/otoha-0.1.0-alpha.2-darwin-arm64.tar.gz) · [Linux x86_64](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.2/otoha-0.1.0-alpha.2-linux-amd64.tar.gz) · [SHA256SUMS](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.2/SHA256SUMS)
+
+解压后使用 `bin/otoha`。普通成员无需 Go、Node.js 或 Python；绑定仓库时需要 Git。托管中心另外需要 Python 3.10+。
 
 ## 五项核心哲学
 
@@ -77,7 +81,7 @@ node bin/otoha.mjs inbox list --channel PROJECT-general
 node bin/otoha.mjs inbox read MESSAGE_UID --channel PROJECT-general --session SESSION
 ```
 
-服务初始化、私有身份与 MCP 接入见 [Otoha Collaboration](services/collaboration/README.md)。当前没有正式二进制发行版；使用本仓库源码构建。
+服务初始化、私有身份与 MCP 接入见 [Otoha Collaboration](services/collaboration/README.md)。原生下载版的当前用法以[Agent 接入入口](docs/AGENT-ENTRY.md)为准。
 
 ## 代码与文档
 
@@ -104,6 +108,6 @@ npm test
 npm run check:names
 ```
 
-通用实现已经迁入并统一命名，根入口可以启动组件；组件组合不等于五项哲学已经完整落地。分级通知、持续对齐、需求实例关联与自适应调度还需要继续开发。真实跨机器、Windows 宿主和空闲 Agent 唤醒有各自验收范围。
+通用实现已经迁入并统一命名，根入口可以启动组件；组件组合不等于五项哲学已经完整落地。首版已实测中心共享频道、摘要/原件分离、指定 Codex 宿主的 queue/steer、工作页反馈与离线续投。完整成员副本、逐消息私发权限、通用 Graph Core 实现和自适应调度仍待开发；Windows 实机及其他宿主另行验证。
 
 凭据、邀请、个人配置和真实运行数据保存在仓库外。构建与测试不迁移旧部署。

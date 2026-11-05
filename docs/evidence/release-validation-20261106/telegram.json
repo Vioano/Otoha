@@ -1,0 +1,441 @@
+{
+  "schema": "otoha-release-telegram-evidence/1",
+  "recorded_date": "2026-11-06",
+  "identity_aliases": {
+    "A": "macOS test participant and test Bot",
+    "B": "Omarchy Linux test participant and test Bot"
+  },
+  "privacy": {
+    "synthetic_messages_only": true,
+    "provider_tokens_included": false,
+    "provider_usernames_or_ids_included": false,
+    "private_paths_or_owner_configuration_included": false,
+    "message_plaintext_included": false,
+    "exact_authorized_token_scan": {
+      "tokens_checked": 2,
+      "matches": 0
+    },
+    "publishable_source_exact_token_scan": {
+      "scope": "git ls-files -co --exclude-standard; private Git directory excluded",
+      "tokens_checked": 2,
+      "files_scanned": 470,
+      "matching_files": 0,
+      "symlink_targets_followed": 0
+    }
+  },
+  "hash_method": "SHA-256 of exact UTF-8 text, without normalization. Summary expectations use the first line without its newline.",
+  "version_boundary": {
+    "runs_native_and_bridge": "Earlier builds; these are not full alpha.2 package acceptance tests. A binary hash is unavailable and is not backfilled with an alpha.2 hash.",
+    "earlier_linux_component_source_matches_alpha2": true,
+    "source_comparison_basis": "Recorded validation build chronology and byte equality of retained source snapshot with frozen adapter source; release binaries are different.",
+    "adapter_source_sha256": {
+      "telegram.go": "dabd0af982aaddce9a1c258cfd459897706acb7def9f2b7074642b4fe0558f02",
+      "transport_bridge.go": "844209357293a5e908a52f6b1d5728ec1622e76d664ab4be55ce12f65178fe15"
+    },
+    "alpha2_bound_runs": [
+      "real_bot_sink_failure_restart",
+      "alpha2_central_bridge_round_trip_with_real_session"
+    ]
+  },
+  "runs": [
+    {
+      "name": "native_two_host_bidirectional",
+      "started_utc": "2026-11-05T22:21:15.729416+00:00",
+      "finished_utc": "2026-11-05T22:21:46.532720+00:00",
+      "result": "passed",
+      "builds": {
+        "A": {
+          "platform": "macOS",
+          "architecture": "arm64",
+          "binary_sha256": null,
+          "build": "earlier native Gateway; full package version not captured",
+          "hash_limit": "The executed binary was replaced after these runs; no pre-replacement hash was retained."
+        },
+        "B": {
+          "platform": "Omarchy Linux",
+          "architecture": "amd64",
+          "binary_sha256": "862643668a22a01710043e42414f3488a86be94e15b846763b5fa44036c69043",
+          "build": "telegram-validation-20261106-v1; prior to alpha.2 package freeze"
+        }
+      },
+      "provider": "real Telegram Bot API",
+      "synthetic_counts": {
+        "source_frames": 2,
+        "directions": 2,
+        "stable_id_replay_calls": 2,
+        "extra_provider_frames_from_replays": 0,
+        "durable_originals_per_receiver": 1
+      },
+      "text_hash_comparisons": [
+        {
+          "direction": "A -> B",
+          "body": {
+            "expected_sha256": "83b4fecca6375dc616e5bf4534a1c1b8bebab1b75f5c2796f9965479e09d760c",
+            "native_received_sha256": "83b4fecca6375dc616e5bf4534a1c1b8bebab1b75f5c2796f9965479e09d760c",
+            "equal": true
+          },
+          "summary": {
+            "comparison": "not_applicable",
+            "reason": "Standalone Telegram transport preserves an envelope body; it does not create a central message summary."
+          }
+        },
+        {
+          "direction": "B -> A",
+          "body": {
+            "expected_sha256": "1a0b46f990186c5c04afb7091862df8934a25092238079eb3e02e48de2c675a1",
+            "native_received_sha256": "1a0b46f990186c5c04afb7091862df8934a25092238079eb3e02e48de2c675a1",
+            "equal": true
+          },
+          "summary": {
+            "comparison": "not_applicable",
+            "reason": "Standalone Telegram transport preserves an envelope body; it does not create a central message summary."
+          }
+        }
+      ],
+      "delivery_semantics": {
+        "native_received_and_persisted": true,
+        "central_received_receipt": "not exercised",
+        "application_read": "not exercised",
+        "agent_execution_or_human_acceptance": "not established"
+      },
+      "cleanup": {
+        "new_token_copies_removed": 2,
+        "original_filters_unchanged": true,
+        "webhooks_unchanged_and_empty": true,
+        "pending_after": {
+          "A": 0,
+          "B": 0
+        },
+        "only_exact_test_updates_acknowledged": true,
+        "negative_offset_used": false
+      }
+    },
+    {
+      "name": "central_bridge_round_trip",
+      "started_utc": "2026-11-05T22:32:18.778257+00:00",
+      "finished_utc": "2026-11-05T22:32:38.900456+00:00",
+      "result": "passed",
+      "builds": {
+        "A": {
+          "platform": "macOS",
+          "architecture": "arm64",
+          "binary_sha256": null,
+          "build": "earlier native Gateway; full package version not captured",
+          "hash_limit": "The executed binary was replaced after these runs; no pre-replacement hash was retained."
+        },
+        "B": {
+          "platform": "Omarchy Linux",
+          "architecture": "amd64",
+          "binary_sha256": "862643668a22a01710043e42414f3488a86be94e15b846763b5fa44036c69043",
+          "build": "telegram-validation-20261106-v1; prior to alpha.2 package freeze"
+        }
+      },
+      "provider": "real Telegram Bot API through a test-only loopback safety guard; not a mocked provider",
+      "center": "independent synthetic center on B; A used a temporary SSH tunnel",
+      "synthetic_counts": {
+        "source_messages": 2,
+        "center_message_rows": 2,
+        "bridge_sent_records": 1,
+        "bridge_original_records": 1,
+        "bridge_pending_after": 0
+      },
+      "text_hash_comparisons": [
+        {
+          "direction": "A -> center -> B bridge -> real provider -> A receiver",
+          "body": {
+            "expected_sha256": "b5ad5e26e1b41f4afafd04a8ef6f4e44f412f06cff99158f979348d085b0e1b0",
+            "center_body_sha256": "b5ad5e26e1b41f4afafd04a8ef6f4e44f412f06cff99158f979348d085b0e1b0",
+            "center_text_sha256": "b5ad5e26e1b41f4afafd04a8ef6f4e44f412f06cff99158f979348d085b0e1b0",
+            "native_received_sha256": "b5ad5e26e1b41f4afafd04a8ef6f4e44f412f06cff99158f979348d085b0e1b0",
+            "equal": true
+          },
+          "summary": {
+            "expected_sha256": "05ad80a68894b7866ad02d7af29084053e6b316d4acf3a9fd759684e2d5cbfd7",
+            "center_summary_sha256": "05ad80a68894b7866ad02d7af29084053e6b316d4acf3a9fd759684e2d5cbfd7",
+            "equal": true
+          }
+        },
+        {
+          "direction": "A sender -> real provider -> B bridge -> center",
+          "body": {
+            "expected_sha256": "29c330e0d410a27381dcd3bc1b2602972f3f1d3ff623439adc6ca4c8c888b62e",
+            "center_body_sha256": "29c330e0d410a27381dcd3bc1b2602972f3f1d3ff623439adc6ca4c8c888b62e",
+            "center_text_sha256": "29c330e0d410a27381dcd3bc1b2602972f3f1d3ff623439adc6ca4c8c888b62e",
+            "equal": true
+          },
+          "summary": {
+            "expected_sha256": "93bdb4d8b5231159e1f6b0546aa02b8851da82ecd4c6392ae3cb73eae7d37a15",
+            "center_summary_sha256": "93bdb4d8b5231159e1f6b0546aa02b8851da82ecd4c6392ae3cb73eae7d37a15",
+            "equal": true
+          }
+        }
+      ],
+      "delivery_semantics": {
+        "received_receipt_present": true,
+        "read_receipt": null,
+        "meaning": "The bridge stored the original and recorded receipt; this does not establish Agent reading, task execution or human acceptance."
+      },
+      "single_bridge_send_poll_state_preserved": true,
+      "cleanup": {
+        "new_token_copies_removed": 3,
+        "test_center_bridge_guard_and_tunnel_stopped": true,
+        "original_filters_unchanged": true,
+        "webhooks_unchanged_and_empty": true,
+        "pending_after": {
+          "A": 0,
+          "B": 0
+        },
+        "only_exact_test_updates_acknowledged": true
+      }
+    },
+    {
+      "name": "real_bot_sink_failure_restart",
+      "started_utc": "2026-11-05T22:37:23.458754+00:00",
+      "first_attempt_finished_utc": "2026-11-05T22:37:52.069906+00:00",
+      "initial_result": "failed_or_stopped",
+      "core_recovery_result": "passed",
+      "builds": {
+        "A": {
+          "platform": "macOS",
+          "architecture": "arm64",
+          "version": "0.1.0-alpha.2",
+          "binary_sha256": "2beea973a4c4287e841131c39c8f8fe35e4fe5c49055ff07e97950b85397a1a6",
+          "matches_frozen_candidate": true
+        },
+        "B": {
+          "platform": "Omarchy Linux",
+          "architecture": "amd64",
+          "version": "0.1.0-alpha.2",
+          "binary_sha256": "c523dc83a08cc5875ec9f75267a719f60b02634fe01bd937a33d19fc07f36537",
+          "matches_extracted_release_package": true,
+          "linux_release_archive_sha256": "eb5a9947ede155dbcc85a9bdbf64dfd929b32a5a8c726f13c727dbe0187cca14",
+          "archive_matches_frozen_candidate": true
+        }
+      },
+      "provider": "one real Telegram source frame; no source regeneration",
+      "fault_injection": "A test-only loopback center proxy returned 503 only for the selected synthetic message write. Other center endpoints remained available.",
+      "synthetic_counts": {
+        "provider_source_frames": 1,
+        "injected_write_503": 1,
+        "successful_recovery_forward": 1,
+        "center_effects_before_restart": 0,
+        "center_effects_after_restart": 1,
+        "gateway_originals_before_and_after_restart": 1,
+        "pending_before_restart": 1,
+        "pending_after_restart": 0
+      },
+      "same_uid_used_on_recovery": true,
+      "text_hash_comparisons": {
+        "body": {
+          "expected_sha256": "da519f6336cab1a62425477adb8b8dff47431e986ad2c5bc3b32c06b0df76c31",
+          "pending_before_restart_sha256": "da519f6336cab1a62425477adb8b8dff47431e986ad2c5bc3b32c06b0df76c31",
+          "gateway_original_after_restart_sha256": "da519f6336cab1a62425477adb8b8dff47431e986ad2c5bc3b32c06b0df76c31",
+          "center_body_sha256": "da519f6336cab1a62425477adb8b8dff47431e986ad2c5bc3b32c06b0df76c31",
+          "center_text_sha256": "da519f6336cab1a62425477adb8b8dff47431e986ad2c5bc3b32c06b0df76c31",
+          "equal": true
+        },
+        "summary": {
+          "expected_sha256": "2b48edcff0323e8f584a174d7eef874727601807be145b5a8bd44feddfd1b851",
+          "center_summary_sha256": "2b48edcff0323e8f584a174d7eef874727601807be145b5a8bd44feddfd1b851",
+          "equal": true
+        }
+      },
+      "delivery_semantics": {
+        "received_receipt_present": true,
+        "read_receipt": null,
+        "agent_execution_or_human_acceptance": "not established"
+      },
+      "initial_postflight_failure": {
+        "operation": "provider status query after core recovery assertions passed",
+        "observed_error": "URLError caused by SSLEOFError: UNEXPECTED_EOF_WHILE_READING",
+        "initial_failed_result_preserved": true,
+        "core_recovery_not_reclassified_as_provider_connectivity_success": true
+      },
+      "follow_up": [
+        {
+          "operation": "read-only center database, Gateway state and provider metadata",
+          "observed_utc": "2026-11-05T22:39:06.660024+00:00",
+          "core_recovery_pass": true,
+          "provider_metadata_reachable_from_B": true,
+          "pending_observed_before_cleanup": {
+            "A": 0,
+            "B": 1
+          },
+          "all_owned_processes_stopped": true,
+          "all_new_token_files_absent": true
+        },
+        {
+          "operation": "bounded cleanup of the exact original synthetic frame",
+          "observed_utc": "2026-11-05T22:40:07.033860+00:00",
+          "result": "completed_test_only_cleanup",
+          "peek_count": 1,
+          "peer_uid_and_body_checked_before_ack": true,
+          "test_frame_acknowledged": true,
+          "new_updates_after_ack": 0,
+          "pending_after": {
+            "A": 0,
+            "B": 0
+          },
+          "source_frame_regenerated": false,
+          "new_token_file_created": false
+        }
+      ],
+      "cleanup": {
+        "new_token_copies_removed": 3,
+        "all_test_processes_and_tunnel_stopped": true,
+        "original_filters_unchanged": true,
+        "webhooks_unchanged_and_empty": true,
+        "pending_after": {
+          "A": 0,
+          "B": 0
+        },
+        "only_exact_test_updates_acknowledged": true
+      }
+    },
+    {
+      "name": "alpha2_central_bridge_round_trip_with_real_session",
+      "started_utc": "2026-11-05T23:22:00.319172+00:00",
+      "finished_utc": "2026-11-05T23:25:57.419679+00:00",
+      "result": "passed",
+      "builds": {
+        "A": {
+          "platform": "macOS",
+          "architecture": "arm64",
+          "version": "0.1.0-alpha.2",
+          "binary_sha256": "2beea973a4c4287e841131c39c8f8fe35e4fe5c49055ff07e97950b85397a1a6",
+          "receiver_binary_sha256": "2beea973a4c4287e841131c39c8f8fe35e4fe5c49055ff07e97950b85397a1a6",
+          "matches_frozen_candidate": true
+        },
+        "B": {
+          "platform": "Omarchy Linux",
+          "architecture": "amd64",
+          "version": "0.1.0-alpha.2",
+          "binary_sha256": "c523dc83a08cc5875ec9f75267a719f60b02634fe01bd937a33d19fc07f36537",
+          "release_archive_sha256": "eb5a9947ede155dbcc85a9bdbf64dfd929b32a5a8c726f13c727dbe0187cca14",
+          "matches_frozen_candidate": true
+        },
+        "isolated_center_sources_match_release_package": true
+      },
+      "provider": "real Telegram Bot API through a test-only loopback safety guard; not a mocked provider",
+      "isolation": "Independent synthetic center and receiver; the concurrent resource-validation daemons were not used or changed.",
+      "synthetic_counts": {
+        "source_messages": 2,
+        "center_message_rows": 2,
+        "accepted_message_events": 2,
+        "accepted_events_per_original_id": {
+          "M1": 1,
+          "M2": 1
+        },
+        "bridge_sent_records": 1,
+        "bridge_original_records": 1,
+        "bridge_pending_after": 0,
+        "authorized_real_session_notifications": 1,
+        "additional_provider_messages_for_session_probe": 0
+      },
+      "text_hash_comparisons": [
+        {
+          "message": "M1",
+          "body": {
+            "expected_sha256": "b5ad5e26e1b41f4afafd04a8ef6f4e44f412f06cff99158f979348d085b0e1b0",
+            "center_body_sha256": "b5ad5e26e1b41f4afafd04a8ef6f4e44f412f06cff99158f979348d085b0e1b0",
+            "center_text_sha256": "b5ad5e26e1b41f4afafd04a8ef6f4e44f412f06cff99158f979348d085b0e1b0",
+            "native_received_sha256": "b5ad5e26e1b41f4afafd04a8ef6f4e44f412f06cff99158f979348d085b0e1b0",
+            "equal": true
+          },
+          "summary": {
+            "expected_sha256": "05ad80a68894b7866ad02d7af29084053e6b316d4acf3a9fd759684e2d5cbfd7",
+            "center_summary_sha256": "05ad80a68894b7866ad02d7af29084053e6b316d4acf3a9fd759684e2d5cbfd7",
+            "equal": true
+          }
+        },
+        {
+          "message": "M2",
+          "body": {
+            "expected_sha256": "29c330e0d410a27381dcd3bc1b2602972f3f1d3ff623439adc6ca4c8c888b62e",
+            "center_body_sha256": "29c330e0d410a27381dcd3bc1b2602972f3f1d3ff623439adc6ca4c8c888b62e",
+            "center_text_sha256": "29c330e0d410a27381dcd3bc1b2602972f3f1d3ff623439adc6ca4c8c888b62e",
+            "equal": true
+          },
+          "summary": {
+            "expected_sha256": "93bdb4d8b5231159e1f6b0546aa02b8851da82ecd4c6392ae3cb73eae7d37a15",
+            "center_summary_sha256": "93bdb4d8b5231159e1f6b0546aa02b8851da82ecd4c6392ae3cb73eae7d37a15",
+            "equal": true
+          }
+        }
+      ],
+      "reference_continuity": [
+        {
+          "message": "M1",
+          "original_id_sha256": "b0b2d01879b444d72f7d516e9c5835ac2db2954130f91f12c363406e6b48ee04",
+          "center_by_id_resolved_same_original": true,
+          "center_by_client_id_resolved_same_original": true,
+          "accepted_events_for_original_id": 1
+        },
+        {
+          "message": "M2",
+          "original_id_sha256": "9f6a9e74528b4ba521a3f47baa42ba11d8346c91f2a5ab3094860e39b9e3285d",
+          "center_by_id_resolved_same_original": true,
+          "center_by_client_id_resolved_same_original": true,
+          "accepted_events_for_original_id": 1
+        }
+      ],
+      "delivery_semantics": {
+        "central_received_receipt_present": true,
+        "central_read_receipt": null,
+        "runtime_queue_acceptance_is_distinct_from_model_observation": true,
+        "human_acceptance": "not established"
+      },
+      "authorized_real_session": {
+        "alias": "S",
+        "source_message": "M2",
+        "source_uid_and_center_message_reference_matched": true,
+        "queued_count": 1,
+        "runtime_ack_observed": true,
+        "runtime_transport": "codex-queue",
+        "interrupt_delivered": false,
+        "summary_and_reference_only": true,
+        "full_body_included": false,
+        "actual_new_session_input_observed": true,
+        "correlated_model_response_observed": true,
+        "observation_method": "Authorized direct session readback; no native UI control or screenshots.",
+        "observation_sha256": "480eed5da84abc82f1bc0afe0d9464810460b4a2aa437fa397982efe9cb270c1",
+        "notification_journal_sha256": "464cfac85bb5a5efdd4913b7543a080ce40fc83386339f9790cf6b6b7155803a",
+        "notification_appeared_in_new_turn_after_busy_turn_completed": true,
+        "full_body_get_observed": false,
+        "read_receipt_recorded": false
+      },
+      "cleanup": {
+        "new_bot_token_copies_removed": 3,
+        "independent_receiver_stopped": true,
+        "center_bridge_guard_and_tunnel_stopped": true,
+        "process_and_file_absence_read_back": true,
+        "original_filters_unchanged": true,
+        "webhooks_unchanged_and_empty": true,
+        "pending_after": {
+          "A": 0,
+          "B": 0
+        },
+        "only_exact_test_updates_acknowledged": true,
+        "source_messages_not_regenerated": true
+      }
+    }
+  ],
+  "configuration_and_scope": {
+    "telegram_opt_in": true,
+    "bridge_requires": [
+      "private Bot configuration",
+      "enrolled center profile",
+      "project channel and local session binding",
+      "explicit recipient and chat routes"
+    ],
+    "team_invitation_alone_enables_telegram": false,
+    "bridge_binding_scope": "Only the isolated center and explicit bindings used in these tests are verified.",
+    "multiple_processes_sharing_one_telegram_state_directory": "not supported",
+    "full_alpha2_multichannel_or_agent_acceptance": "This evidence verifies the described Telegram adapter paths and one authorized real-session notification. It does not establish complete multi-channel behavior, task execution or human acceptance."
+  },
+  "official_references": [
+    "https://core.telegram.org/bots/api#getupdates",
+    "https://core.telegram.org/bots/api#getwebhookinfo",
+    "https://core.telegram.org/bots/features#bot-to-bot-communication"
+  ]
+}

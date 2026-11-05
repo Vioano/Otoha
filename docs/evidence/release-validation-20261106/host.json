@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "date": "2026-11-06",
+  "timezone": "Asia/Taipei",
+  "candidate_version": "0.1.0-alpha.2",
+  "candidate_platform": "darwin-arm64",
+  "candidate_sha256": "2beea973a4c4287e841131c39c8f8fe35e4fe5c49055ff07e97950b85397a1a6",
+  "server_components_sha256": {
+    "otoha_server.py": "5390f24e24357986272d3d4b900f40f055497d6784ee51bab369890d59fee967",
+    "otoha_message.py": "7f35928a3579f19b8457d0fec472f05011800a711fcdc43e41fa7be2587b58b4",
+    "otoha_projection.py": "08c495b30e196dc561f337fd8b3639802ee4b4ba579e8524f3a2f0b4a8571695",
+    "otoha_repository.py": "09e919a2ac682f1ed01445f6b0fd50b01610c70159caf1cee9e465d363a9d936"
+  },
+  "counts": {
+    "test_identities": 4,
+    "authorized_target_sessions": 1,
+    "attempted_message_writes": 5,
+    "accepted_messages": 4,
+    "rejected_message_writes": 1,
+    "host_accepted_notifications": 4,
+    "notification_scenarios_with_model_response": 4,
+    "software_received_receipts": 4,
+    "software_read_receipts": 0,
+    "successful_original_fetches_observed": 1,
+    "original_fetches_by_harness": 0,
+    "system_services_registered": 0,
+    "native_window_screenshots": 0
+  },
+  "scenarios": [
+    {
+      "scenario": "queued-busy",
+      "attempts": 1,
+      "authority_http_status": 200,
+      "accepted_messages": 1,
+      "host_transport": "codex-queue",
+      "host_accepted": true,
+      "delivery_journal_status": "queued",
+      "journal_sha256": "ed001ad7dcbff7d35d7020706d36fe5bc5ec6adccdacb97b9e7c6c8f98cdd84f",
+      "model_response_observed": true,
+      "model_response_source": "root_authorized_read_thread",
+      "observed_phase": "following_turn",
+      "summary_and_reference_only_observed": true,
+      "full_body_in_notification_observed": false,
+      "notification_observation_source": "root_authorized_read_thread"
+    },
+    {
+      "scenario": "queued-idle",
+      "attempts": 1,
+      "authority_http_status": 200,
+      "accepted_messages": 1,
+      "host_transport": "codex-queue",
+      "host_accepted": true,
+      "delivery_journal_status": "queued",
+      "journal_sha256": "9ee4082dfddf91f8a32f1366d6c1070e72d54943906d700c79d176008bf743b0",
+      "model_response_observed": true,
+      "model_response_source": "root_authorized_read_thread",
+      "observed_phase": "new_turn_from_idle",
+      "summary_and_reference_only_observed": true,
+      "full_body_in_notification_observed": false,
+      "notification_observation_source": "root_authorized_read_thread"
+    },
+    {
+      "scenario": "interrupt-owner-busy",
+      "attempts": 1,
+      "authority_http_status": 200,
+      "accepted_messages": 1,
+      "host_transport": "desktop-steer",
+      "host_accepted": true,
+      "delivery_journal_status": "steered",
+      "journal_sha256": "61514e6baaaaabdb807eb0d21acda5580ad67a298a6abdddafd853daba87a372",
+      "model_response_observed": true,
+      "model_response_source": "root_authorized_read_thread",
+      "observed_phase": "same_busy_turn",
+      "summary_and_reference_only_observed": true,
+      "full_body_in_notification_observed": false,
+      "notification_observation_source": "root_authorized_read_thread"
+    },
+    {
+      "scenario": "interrupt-admin-busy",
+      "attempts": 1,
+      "authority_http_status": 200,
+      "accepted_messages": 1,
+      "host_transport": "desktop-steer",
+      "host_accepted": true,
+      "delivery_journal_status": "steered",
+      "journal_sha256": "9019bb63322f1b1d3a78d9619849e4c34920c55667c25ae0cab0ee2a87f5709f",
+      "model_response_observed": true,
+      "model_response_source": "root_authorized_read_thread",
+      "observed_phase": "same_busy_turn",
+      "summary_and_reference_only_observed": true,
+      "full_body_in_notification_observed": false,
+      "notification_observation_source": "root_authorized_read_thread"
+    },
+    {
+      "scenario": "member-interrupt-rejected",
+      "attempts": 1,
+      "authority_http_status": 403,
+      "lookup_http_status": 404,
+      "accepted_messages": 0,
+      "host_inputs": 0,
+      "effect_observed": false
+    }
+  ],
+  "on_demand_original": {
+    "scenario": "explicit-get-after-notification-observation",
+    "source": "authority",
+    "request_identity_matches": true,
+    "summary_differs_from_body": true,
+    "independent_body_marker_observed_after_explicit_get": true,
+    "original_marker_observed_in_prior_notifications": false,
+    "read_receipt_recorded": false,
+    "sent_body_sha256": "10058a47c360f87fe35cd2105b37ef101c995b0ee715f40f78c2c2c44de04036",
+    "model_consumption_source": "root_authorized_read_thread_and_target_response",
+    "get_readback_artifact_sha256": "c9d66e8b7e7b6fcb934477df8019205fd89bf5dd0e9a59b84cd55e21ae8b1904"
+  },
+  "readback_artifacts_sha256": {
+    "authorized_readback_1_sha256": "05a6de07c091a81297e1bb00738bf677d29f17aa4ce582d86258869481ce6962",
+    "authorized_readback_2_sha256": "92c7514869210eb90a46fd21d0e2ab3c3dcc0407b6bfc3fa70bb1374a413abef"
+  },
+  "evidence_boundary": {
+    "delivery_journal_proves": "host_admission_only",
+    "model_consumption_proof": "authorized_thread_readback_and_actual_target_responses",
+    "native_ui_control": "prohibited_by_tool_policy",
+    "native_window_screenshot_observed": false,
+    "ui_restriction_bypassed": false
+  },
+  "cleanup": {
+    "isolated_receiver_exit_confirmed": true,
+    "isolated_center_exit_confirmed": true,
+    "test_database_integrity": "ok",
+    "existing_receiver_configuration_writes_performed": 0,
+    "login_configuration_writes_performed": 0
+  },
+  "privacy": {
+    "real_session_ids_included": false,
+    "private_paths_included": false,
+    "login_names_included": false,
+    "credentials_included": false,
+    "body_markers_included": false
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "date_local": "2026-11-06",
+  "candidate": "0.1.0-alpha.2",
+  "model": "gpt-6-luna",
+  "fresh_sessions": 5,
+  "joined": 4,
+  "failed_or_blocked": 1,
+  "scope": "Private candidate URL and discoverable synthetic invitation. Not a public website or first-machine-install benchmark.",
+  "common_preconditions": {
+    "native_cli_preinstalled": true,
+    "same_os_authorized_executable": true,
+    "machine_ssh_route_preconfigured": true,
+    "temporary_runtime_prestarted": true,
+    "fresh_project_identity_each_trial": true,
+    "skill_required": false,
+    "extra_product_command_coaching": false
+  },
+  "trials": [
+    {
+      "trial": 1,
+      "input": "URL only plus common isolated test boundary",
+      "joined": true,
+      "repository_read_verified": true,
+      "team_doctor_passed": true,
+      "test_message_sent_and_accepted": false,
+      "command_retry_to_repair_join": false,
+      "outcome": "joined",
+      "timing": "Model-entered timestamps are nonuniform; no end-to-end time statistic claimed.",
+      "raw_result_sha256": "b2dc1c34692ac60a63247a9cb85282efe964bb5225b3397f483d13e2b32a30f9"
+    },
+    {
+      "trial": 2,
+      "input": "One sentence of intended use plus URL and common isolated test boundary",
+      "joined": true,
+      "repository_read_verified": true,
+      "team_doctor_passed": true,
+      "test_message_sent_and_accepted": false,
+      "command_retry_to_repair_join": false,
+      "outcome": "joined",
+      "timing": "Model-entered timestamps are nonuniform; no end-to-end time statistic claimed.",
+      "raw_result_sha256": "86eec057726d2a7f889478901de6d07cf042531cfb01c85aab1d5d9996adeb8d"
+    },
+    {
+      "trial": 3,
+      "input": "One sentence of intended use plus URL and common isolated test boundary",
+      "joined": true,
+      "repository_read_verified": true,
+      "team_doctor_passed": true,
+      "test_message_sent_and_accepted": true,
+      "command_retry_to_repair_join": false,
+      "outcome": "joined",
+      "timing": "Model-entered timestamps are nonuniform; no end-to-end time statistic claimed.",
+      "raw_result_sha256": "7acdfa03ff5e9bfa2f5798fda8767d28eb201d0fc1e9f28234653a69273acf8f"
+    },
+    {
+      "trial": 4,
+      "input": "One sentence of intended use plus URL and common isolated test boundary",
+      "joined": false,
+      "repository_read_verified": false,
+      "team_doctor_passed": false,
+      "test_message_sent_and_accepted": false,
+      "command_retry_to_repair_join": null,
+      "outcome": "stopped before onboarding: browser/web tool could not resolve loopback URL; no shell fallback attempted",
+      "timing": "Model-entered timestamps are nonuniform; no end-to-end time statistic claimed.",
+      "raw_result_sha256": "60650d637f40d0b18448a202ca0231f46cfbba064244d2eb968249e1c499bcc7"
+    },
+    {
+      "trial": 5,
+      "input": "One sentence of intended use plus URL and common isolated test boundary",
+      "joined": true,
+      "repository_read_verified": true,
+      "team_doctor_passed": true,
+      "test_message_sent_and_accepted": false,
+      "command_retry_to_repair_join": false,
+      "outcome": "joined",
+      "timing": "Model-entered timestamps are nonuniform; no end-to-end time statistic claimed.",
+      "raw_result_sha256": "5cefe7e1d2655ab595e9b1ec21d42623bd4478ab3f42620d87a094a9c80c0d37"
+    }
+  ],
+  "timing_limit": "Self-entered model start/end times and command grouping differ; native-cold-join.json separately records independent monotonic CLI durations. These are different measurements.",
+  "first_test_message": "Only one model chose to send a clearly labelled connectivity test. Others did not invent task progress; no claim all five sent a message.",
+  "general_success_rate_or_sla_claim": false,
+  "five_test_runtimes_cleanup_verified": true
+}

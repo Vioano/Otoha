@@ -1,5 +1,7 @@
 # 传输层设计:统一信封、双 Transport 与主备切换
 
+2026-11-06 阅读提示：本文保留较早的传输设计和旧记录，后文的接口草案、SQLite/主备设想及“待验证”状态不等于本版能力或最新决定。当前需求以[通信契约](COMMUNICATION-CONTRACT.zh-CN.md)为准；候选实测见[首版说明](RELEASE-0.1.zh-CN.md)与[Telegram 证据](evidence/release-validation-20261106/telegram.json)。真实双机 Bot、Bridge 中心往返和失败后补投已在本轮测试；完整成员库和多渠道自动切换仍未完成。
+
 状态:统一 Transport 仍是演进中的设计；Telegram Gateway、中心服务 bridge 和本机 inbox 已有 FakeChannel 风格联调。下文区分三类内容:**现状**(已读代码确认)、**设计**(本文提出)、**待验证**(依赖真实 Telegram 或服务器行为)。
 
 当前实现位于 `apps/cli/internal/otoha/telegram.go` 与 `transport_bridge.go`：提供 `Channel` 接口、Telegram `sendMessage`/`getUpdates`、本机 JSON 状态持久化、chat 到 Session 路由、更新与 envelope ID 去重，以及中心服务事件 ↔ Channel ↔ 本机 inbox 的双向 bridge。CLI 入口包括 `otoha telegram send|receive|status|bridge`。SQLite 本机库、名册发送者校验、Codex 会话投递、长消息分片、真实应用层回执和多 Transport 主备仍未实现。
@@ -14,7 +16,7 @@
 
 ## 现状
 
-- 服务端消息表只有 `payload` JSON,没有独立摘要字段。
+- 服务端 `payload` 已含独立的 `summary`、`body` 和 `class`；原件不要求与摘要物理分表。原生 CLI 默认列表与宿主通知已按摘要/引用读取，选定原件单独取得。
 - `to_sessions` 只是投递意图,不是私聊权限。需要限制可见性时要另建带成员名单的频道(`channels.members`)。
 - 发送已有 `client_id` 幂等,CLI 在传输前先持久化 ID。
 - `apps/cli/internal/otoha/gateway.go` 仍是 HTTPS 反向代理；Transport 抽象和 Telegram Gateway 位于独立的 `telegram.go`，bridge 不改变中心服务的权威消息模型。

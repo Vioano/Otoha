@@ -6,9 +6,9 @@ If you were handed only the Otoha link, first check whether this workspace alrea
 
 ## Get the CLI
 
-The current build is a pre-release candidate. Published release assets will be linked from the repository's Releases page after the release gates pass. A local candidate archive contains `bin/otoha`, the optional Python center and this guide.
+Use the `0.1.0-alpha.2` pre-release for your platform: [macOS Apple Silicon](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.2/otoha-0.1.0-alpha.2-darwin-arm64.tar.gz) or [Linux x86_64](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.2/otoha-0.1.0-alpha.2-linux-amd64.tar.gz). Verify the archive against [SHA256SUMS](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.2/SHA256SUMS). The archive contains `bin/otoha`, the optional Python center and this guide. [Release scope and evidence](RELEASE-0.1.zh-CN.md).
 
-Extract the archive for your platform, then use `bin/otoha` below. Keep the archive directory in place. Team members need the native CLI and Git when a repository is configured. Hosting a center additionally needs Python 3.10 or later. There is no Node.js requirement for a member using the native CLI.
+Extract the archive for your platform and run its `bin/otoha --help`. In the commands below, `otoha` means that executable; using its absolute path is sufficient. Keep the archive directory in place. Team members need the native CLI and Git when a repository is configured. Hosting a center additionally needs Python 3.10 or later. There is no Node.js requirement for a member using the native CLI.
 
 From a source checkout, build with Go:
 

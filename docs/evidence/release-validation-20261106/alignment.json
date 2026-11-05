@@ -1,0 +1,34 @@
+{
+  "date_local": "2026-11-06",
+  "candidate": "0.1.0-alpha.2",
+  "scope": "Synthetic requirement correction entered through the actual Mac work-page interface, consumed by an ephemeral Linux Codex Agent. Not user acceptance or real project progress.",
+  "source_page_message_id": 159,
+  "feedback_message_id": 160,
+  "feedback_bound_to_original_version": true,
+  "revised_page_message_id": 161,
+  "revised_publish_state": "accepted",
+  "adopted_revision": "rev2",
+  "button_change": {
+    "before": "加入",
+    "after": "开始"
+  },
+  "original_file_and_reference_retained": true,
+  "real_linux_agent_executed": true,
+  "mac_browser_observed_revised_label_and_basis": true,
+  "screenshot": "alignment-revision-2.jpg",
+  "first_attempt": {
+    "outcome": "blocked",
+    "reason": "Test runner selected read-only sandbox; no feedback retrieval or output publication",
+    "not_counted_as_product_success": true
+  },
+  "second_attempt": {
+    "outcome": "passed",
+    "scope": "One-off workspace-write for isolated test workspace and test Otoha Home; local API network access enabled. No persistent login or sandbox configuration edited."
+  },
+  "claims_not_made": [
+    "Complete Graph Core integration",
+    "Human acceptance",
+    "Reduced meeting time or general scheduling efficiency demonstrated"
+  ],
+  "raw_agent_result_sha256": "d70610aac6265d1bb32ebcbb4629d6b9938b8017feeee35ab35fd4ce139f2b0c"
+}

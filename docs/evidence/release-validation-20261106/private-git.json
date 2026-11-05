@@ -24,8 +24,52 @@
     "real_admin_identity_copied": false
   },
   "candidate_validation": {
-    "state": "waiting_for_frozen_snapshot",
-    "backend_tests": "not_run",
-    "native_package_smoke": "not_run"
+    "state": "passed",
+    "frozen_commit": "3694e6294f7a9ffe73423e6719647734cf15a8a9",
+    "fetch_fast_forward_only": true,
+    "native_package": {
+      "platform": "linux/amd64",
+      "version": "0.1.0-alpha.2",
+      "archive_sha256": "eb5a9947ede155dbcc85a9bdbf64dfd929b32a5a8c726f13c727dbe0187cca14",
+      "source_inputs_sha256": "3fa6199dfaac2ac26da7ede03ad093998ffd4f80904e858520de963fdacb7ce6",
+      "source_input_hash_matches_private_checkout": true,
+      "go_not_installed_on_test_host": true,
+      "smoke_pass": true,
+      "checks": {
+        "package_runtime_found_from_unrelated_working_directory": true,
+        "empty_home_status_does_not_claim_joined": true,
+        "team_init_and_doctor": true,
+        "default_summary_and_authority_original_roundtrip": true,
+        "free_html_publication_and_version_bound_feedback": true,
+        "local_center_restart_keeps_original_and_credentials": true,
+        "sigterm_exit_zero_and_owned_center_stopped": true
+      },
+      "cleanup": {
+        "receiver_stopped": true,
+        "known_center_pids_remaining": []
+      }
+    },
+    "backend_tests": {
+      "exit_code": 0,
+      "count": 30,
+      "seconds": 20.099,
+      "python": "3.14.7"
+    },
+    "limits": [
+      "Isolated synthetic local project, not a real project migration",
+      "Process restart and SIGTERM tested; physical reboot and power loss not tested",
+      "Native API artifact round-trip is not browser or user acceptance"
+    ]
+  },
+  "member_git_write_validation": {
+    "synthetic_limited_identity": true,
+    "branch": "codex/validation-omarchy-alpha2",
+    "commit": "3694e6294f7a9ffe73423e6719647734cf15a8a9",
+    "native_push_pass": true,
+    "native_fetch_and_ls_remote_readback_pass": true,
+    "private_api_branch_readback_pass": true,
+    "branch_retained": true,
+    "main_modified_by_validation": false,
+    "source_worktree_clean": true
   }
 }

@@ -1,0 +1,54 @@
+{
+  "timestamp_utc": "2026-11-05T22:23:34.536703+00:00",
+  "scope": "Read-only GitHub Mailbox on public Otoha repository using existing gh login, isolated local metadata, no hooks, no remote writes.",
+  "steps": [
+    {
+      "command": [
+        "init",
+        "--manual"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 1.891,
+      "output_fields": [
+        "automatic_replies",
+        "login",
+        "receiving_enabled"
+      ]
+    },
+    {
+      "command": [
+        "check",
+        "--full"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 3.024,
+      "output_fields": [
+        "assigned_open_count",
+        "comment_count",
+        "fetch_complete",
+        "index_file",
+        "issue_count",
+        "note"
+      ],
+      "assigned_open_count": 0
+    },
+    {
+      "command": [
+        "doctor"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 0.093,
+      "output_fields": [
+        "enabled",
+        "hooks",
+        "last_error",
+        "last_success",
+        "login",
+        "repo"
+      ]
+    }
+  ],
+  "real_new_message_delivery_proven": false,
+  "github_repository_writes_performed": false,
+  "local_setup_only": true
+}

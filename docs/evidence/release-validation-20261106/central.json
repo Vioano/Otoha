@@ -1,162 +1,571 @@
 {
-  "schema": 1,
+  "schema": 2,
   "date_local": "2026-11-06",
   "timezone": "Asia/Taipei",
-  "recorded_utc": "2026-11-05T22:23:50.502003+00:00",
-  "status": "intermediate_correctness_verified_with_latency_failure; unified candidate validation pending",
-  "scope": "Isolated existing temporary center and synthetic project identities. Current installed page-only runtimes were left unchanged; message tests used separate pre-candidate Mac/Linux runtimes. No real receiver, project data, login credential or host network configuration was changed.",
+  "recorded_utc": "2026-11-05T23:22:33.197130+00:00",
+  "status": "passed_with_explicit_scope_limits",
+  "scope": "Isolated disposable test center, synthetic project identities and private test repository. Only detached release-validation runtimes and the disposable center were upgraded. Existing real receiver processes, login credentials, real project data and host network settings were not changed.",
+  "candidate": {
+    "version": "0.1.0-alpha.2",
+    "mac_sha256": "2beea973a4c4287e841131c39c8f8fe35e4fe5c49055ff07e97950b85397a1a6",
+    "linux_sha256": "c523dc83a08cc5875ec9f75267a719f60b02634fe01bd937a33d19fc07f36537",
+    "backend_sha256": {
+      "otoha_server.py": "5390f24e24357986272d3d4b900f40f055497d6784ee51bab369890d59fee967",
+      "otoha_message.py": "7f35928a3579f19b8457d0fec472f05011800a711fcdc43e41fa7be2587b58b4",
+      "otoha_projection.py": "08c495b30e196dc561f337fd8b3639802ee4b4ba579e8524f3a2f0b4a8571695",
+      "otoha_repository.py": "09e919a2ac682f1ed01445f6b0fd50b01610c70159caf1cee9e465d363a9d936"
+    },
+    "coherent_packaged_backend_and_clients": true
+  },
   "test_conditions": {
-    "transport": "LAN over existing pinned authenticated SSH route for Mac; Linux-to-center loopback HTTP",
-    "separate_test_runtimes": true,
-    "mac_executable_identity": "same previously OS-authorized executable; file not updated",
-    "load": "sequential synthetic messages; bounded cache test",
-    "host_agent_browser_memory_excluded": true,
-    "not_voice_or_host_agent_acceptance": true
-  },
-  "intermediate_builds": {
-    "mac": {
-      "version": "otoha loop-20261106-v7",
-      "sha256": "a8a626f15f431efa4762b8f28ece4c8b364785806e47277c4d76ef53ad15c2ec"
+    "transport": "Mac uses existing pinned authenticated SSH route over LAN to authority loopback; Linux client uses loopback HTTP to same authority",
+    "separate_test_homes": true,
+    "fixed_executable_identity_and_hashes_unchanged_during_50_messages": true,
+    "macos_network_permission": "existing authorized executable pathname reused; not a first-install permission measurement",
+    "sender_roles": {
+      "mac": "synthetic ordinary member",
+      "linux": "synthetic authority owner"
     },
-    "linux": {
-      "version": "otoha loop-20261106-v6",
-      "sha256": "b6bb074909f61cb74d23ad1c9dc8c651d8cad78d31b8e107812559cd648ab6c0"
-    }
+    "browser_and_model_memory_excluded": true,
+    "unmeasured": "public internet, concurrent throughput, browser paint, voice host integration, receiver application reading and human acceptance"
   },
-  "correctness": {
-    "bidirectional_cli": true,
-    "same_request_cli_retry_same_message": true,
-    "central_same_request_duplicate_http_status": 200,
-    "central_same_request_duplicate": true,
-    "different_content_same_id_http_status": 409,
-    "different_content_same_id_error": "idempotency_conflict",
-    "long_utf8_body": {
-      "status": 200,
-      "message_id": 11,
-      "bytes": 13558,
-      "sha256": "2ac9d80b4ba581dd137fbe1804091c02b8afe3a3a21388093bed910961a11e6a",
-      "matches_cli_input": true
+  "candidate_message_results": {
+    "status": "passed",
+    "permission_and_receipt_snapshot_utc": "2026-11-05T22:48:04.980162+00:00",
+    "state_layers": {
+      "cli_unique_submissions": 50,
+      "authority_unique_message_rows": 50,
+      "both_cache_visible": 50,
+      "authority_full_body_hash_matches": 50,
+      "application_received_receipts": 0,
+      "application_read_receipts": 0,
+      "taken_delivered_accepted_by_user_not_inferred": true
     },
-    "cache_boundary": {
-      "central_messages_total": 107,
-      "central_normal_messages": 101,
-      "mac_cached_messages": 100,
-      "linux_cached_messages": 100,
-      "mac_truncated_flag": true,
-      "linux_truncated_flag": true,
-      "removed_old_message_still_in_authority": true,
-      "history_probe_used": "authorized central history API, not the latest-100 CLI cache"
-    }
-  },
-  "state_layers": {
-    "new_unique_synthetic_submissions": 99,
-    "authority_accepted_unique_messages": 99,
-    "observed_in_both_derived_caches": 99,
-    "application_received_receipt_records": 0,
-    "application_read_receipt_records": 0,
-    "taken_delivered_or_user_accepted_not_inferred": true,
-    "caches_are_not_complete_member_replicas": true
-  },
-  "permissions_live": {
-    "ordinary_member_identity_verified": true,
-    "ordinary_member_other_project_read": {
-      "http_status": 403,
-      "result": {
-        "error": "channel_forbidden"
+    "same_id_cli_retry": {
+      "exit_code": 0,
+      "message_id": 108,
+      "state": "accepted",
+      "same_original_message": true
+    },
+    "central_idempotency": {
+      "same": {
+        "http_status": 200,
+        "message_id": 109,
+        "duplicate": true,
+        "error": null
+      },
+      "different": {
+        "http_status": 409,
+        "message_id": null,
+        "duplicate": null,
+        "error": "idempotency_conflict"
       }
     },
-    "malformed_id_lookup": {
-      "http_status": 400,
-      "result": {
-        "error": "invalid_identifier"
+    "message_get": [
+      {
+        "message_id": 7,
+        "exit_code": 0,
+        "source": "authority",
+        "body_bytes": 60,
+        "hash_matches": true,
+        "read_receipt_recorded": false
+      },
+      {
+        "message_id": 11,
+        "exit_code": 0,
+        "source": "authority",
+        "body_bytes": 13558,
+        "hash_matches": true,
+        "read_receipt_recorded": false
+      }
+    ],
+    "summary_list": {
+      "content": "summaries",
+      "count": 100,
+      "truncated": true,
+      "body_not_returned": true
+    },
+    "local_cache_scope": "latest 100 derived messages with truncated flag; no complete member replica",
+    "permission_probes": {
+      "identity": {
+        "http_status": 200,
+        "actor_is_owner": false,
+        "project_roles": [
+          "member"
+        ]
+      },
+      "forbidden_project": {
+        "http_status": 403,
+        "result": {
+          "error": "channel_forbidden"
+        }
+      },
+      "malformed_client_id": {
+        "http_status": 400,
+        "result": {
+          "error": "invalid_identifier"
+        }
+      },
+      "interrupt": {
+        "http_status": 403,
+        "result": {
+          "error": "interrupt_requires_admin"
+        }
       }
     },
-    "other_sender_was_synthetic_authority_owner": true,
-    "private_recipient_acl_and_admin_urgent_not_validated_by_this_shared_channel_test": true
+    "no_real_session_steering": true,
+    "offline_message_get": {
+      "status": "passed",
+      "exit_code": 1,
+      "stdout_empty": true,
+      "authority_unavailable": true,
+      "not_represented_as_local_original": true
+    }
   },
-  "latency_failure_retained": {
-    "within_15_second_observation_window": false,
-    "failed_sample_was_not_resent_with_new_id": true,
-    "eventually_accepted_effect_count": 1,
-    "original_local_queue_seconds": 41.081699,
-    "original_precise_error": "not captured; successful receipt removed last_error, so root cause remains unknown",
-    "additional_cold_connection_diagnostic": {
-      "samples": 3,
-      "first_two_seconds": [
-        0.337,
-        0.24
-      ],
-      "third_seconds": 3.585,
-      "observed_error": "Post <authority>/v1/messages: EOF",
-      "same_id_eventually_accepted": true
+  "candidate_performance": {
+    "status": "complete",
+    "started_utc": "2026-11-05T22:46:16.308240+00:00",
+    "finished_utc": "2026-11-05T22:46:25.288199+00:00",
+    "samples": {
+      "sample_count": 50,
+      "percentile_method": "nearest rank",
+      "both_cache_visible_ms": {
+        "p50": 158.903,
+        "p95": 305.032,
+        "max": 512.477
+      },
+      "sender_acceptance_ms": {
+        "p50": 100.236,
+        "p95": 278.806
+      },
+      "samples_with_pending_error": 0,
+      "mac_origin_ms": {
+        "samples": 25,
+        "p50": 163.681,
+        "p95": 305.032,
+        "max": 512.477
+      },
+      "linux_origin_ms": {
+        "samples": 25,
+        "p50": 150.584,
+        "p95": 244.142,
+        "max": 331.508
+      }
     },
-    "later_recovery_does_not_convert_timeout_to_pass": true
+    "measurement": "CLI invocation to sender acceptance receipt and both derived caches visible, monotonic controller clock; upper bounds include CLI startup, serial diagnostic SSH observation and 20 ms polling. Short ASCII synthetic messages, sequential 25 in each direction; not network one-way latency or Agent read latency.",
+    "binary_hashes_after": {
+      "mac": "2beea973a4c4287e841131c39c8f8fe35e4fe5c49055ff07e97950b85397a1a6",
+      "linux": "c523dc83a08cc5875ec9f75267a719f60b02634fe01bd937a33d19fc07f36537"
+    }
   },
-  "prior_page_build_idle_reference": {
-    "kind": "idle-60-second-baseline",
-    "started_utc": "2026-11-05T22:09:46.883627+00:00",
-    "finished_utc": "2026-11-05T22:10:47.185759+00:00",
+  "candidate_idle_60_seconds": {
+    "kind": "candidate-idle-60-second-baseline",
+    "candidate": "0.1.0-alpha.2",
+    "started_utc": "2026-11-05T22:43:51.187701+00:00",
+    "finished_utc": "2026-11-05T22:44:51.522377+00:00",
     "mac_runtime": {
       "samples": 7,
-      "wall_seconds": 60.005699,
-      "cpu_seconds_delta": 0.08,
-      "average_percent_one_core": 0.13332,
+      "wall_seconds": 60.012049,
+      "cpu_seconds_delta": 0.05,
+      "average_percent_one_core": 0.08332,
       "cpu_time_resolution_seconds": 0.01,
-      "rss_kib_start": 17328,
-      "rss_kib_end": 16656,
-      "rss_kib_min": 16656,
-      "rss_kib_max": 17536,
-      "rss_kib_delta": -672
+      "rss_kib_start": 19408,
+      "rss_kib_end": 19488,
+      "rss_kib_min": 19408,
+      "rss_kib_max": 19488,
+      "rss_kib_delta": 80
     },
     "linux_runtime": {
       "samples": 7,
-      "wall_seconds": 60.00018,
+      "wall_seconds": 60.00015,
       "cpu_seconds_delta": 0.01,
       "average_percent_one_core": 0.01667,
       "cpu_time_resolution_seconds": 0.01,
-      "rss_kib_start": 13072,
-      "rss_kib_end": 13100,
-      "rss_kib_min": 13072,
-      "rss_kib_max": 13100,
-      "rss_kib_delta": 28
+      "rss_kib_start": 15344,
+      "rss_kib_end": 15700,
+      "rss_kib_min": 15344,
+      "rss_kib_max": 15700,
+      "rss_kib_delta": 356
     },
     "center": {
       "samples": 7,
-      "wall_seconds": 60.000213,
-      "cpu_seconds_delta": 0.04,
-      "average_percent_one_core": 0.06667,
+      "wall_seconds": 60.00019,
+      "cpu_seconds_delta": 0.06,
+      "average_percent_one_core": 0.1,
       "cpu_time_resolution_seconds": 0.01,
-      "rss_kib_start": 32752,
-      "rss_kib_end": 32752,
-      "rss_kib_min": 32752,
-      "rss_kib_max": 32752,
-      "rss_kib_delta": 0
+      "rss_kib_start": 32256,
+      "rss_kib_end": 32260,
+      "rss_kib_min": 32256,
+      "rss_kib_max": 32260,
+      "rss_kib_delta": 4
     },
-    "message_high_water_start": 8,
-    "message_high_water_end": 8,
+    "message_high_water_start": 107,
+    "message_high_water_end": 107,
     "no_new_messages": true,
     "process_identity_stable": true,
     "scope": "One 60-second idle window, no message contents or credentials; cumulative process CPU time and RSS only, not wakeups or long-run memory stability."
   },
-  "reused_recovery_evidence": {
-    "source": "../two-host-loop-20261106/summary.json",
-    "kind": "prior shared outbox feedback operation; not a new ordinary-message fault injection",
-    "queued_offline": true,
-    "accepted_response_lost_pending_preserved": true,
-    "queue_survived_daemon_restart": true,
-    "lookup_recovered_original": true,
-    "accepted_effect_count": 1,
-    "identity_unchanged": true
+  "controlled_authority_outages": [
+    {
+      "cycle": 1,
+      "status": "passed",
+      "started_utc": "2026-11-05T23:06:36.561083+00:00",
+      "outage_started_utc": "2026-11-05T23:06:37.188444+00:00",
+      "outage_finished_utc": "2026-11-05T23:06:52.554295+00:00",
+      "finished_utc": "2026-11-05T23:07:00.504311+00:00",
+      "runtime_pids_and_start_identity_unchanged": true,
+      "both_online_after": true,
+      "operations": [
+        {
+          "sender": "mac",
+          "same_id_accepted": true,
+          "authority_effect_count": 1,
+          "post_restart_both_visible_seconds": 7.622
+        },
+        {
+          "sender": "linux",
+          "same_id_accepted": true,
+          "authority_effect_count": 1,
+          "post_restart_both_visible_seconds": 7.85
+        }
+      ]
+    },
+    {
+      "cycle": 2,
+      "status": "passed",
+      "started_utc": "2026-11-05T23:07:03.753273+00:00",
+      "outage_started_utc": "2026-11-05T23:07:04.348144+00:00",
+      "outage_finished_utc": "2026-11-05T23:07:20.729400+00:00",
+      "finished_utc": "2026-11-05T23:07:28.433115+00:00",
+      "runtime_pids_and_start_identity_unchanged": true,
+      "both_online_after": true,
+      "operations": [
+        {
+          "sender": "mac",
+          "same_id_accepted": true,
+          "authority_effect_count": 1,
+          "post_restart_both_visible_seconds": 7.586
+        },
+        {
+          "sender": "linux",
+          "same_id_accepted": true,
+          "authority_effect_count": 1,
+          "post_restart_both_visible_seconds": 7.605
+        }
+      ]
+    },
+    {
+      "cycle": 3,
+      "status": "passed",
+      "started_utc": "2026-11-05T23:07:40.196797+00:00",
+      "outage_started_utc": "2026-11-05T23:07:40.853472+00:00",
+      "outage_finished_utc": "2026-11-05T23:07:56.858266+00:00",
+      "finished_utc": "2026-11-05T23:08:04.903145+00:00",
+      "runtime_pids_and_start_identity_unchanged": true,
+      "both_online_after": true,
+      "operations": [
+        {
+          "sender": "mac",
+          "same_id_accepted": true,
+          "authority_effect_count": 1,
+          "post_restart_both_visible_seconds": 7.868
+        },
+        {
+          "sender": "linux",
+          "same_id_accepted": true,
+          "authority_effect_count": 1,
+          "post_restart_both_visible_seconds": 7.907
+        }
+      ]
+    }
+  ],
+  "prior_results_retained": {
+    "status": "intermediate builds only; not mixed into alpha2 performance",
+    "intermediate_builds": {
+      "mac": {
+        "version": "otoha loop-20261106-v7",
+        "sha256": "a8a626f15f431efa4762b8f28ece4c8b364785806e47277c4d76ef53ad15c2ec"
+      },
+      "linux": {
+        "version": "otoha loop-20261106-v6",
+        "sha256": "b6bb074909f61cb74d23ad1c9dc8c651d8cad78d31b8e107812559cd648ab6c0"
+      }
+    },
+    "correctness": {
+      "bidirectional_cli": true,
+      "same_request_cli_retry_same_message": true,
+      "central_same_request_duplicate_http_status": 200,
+      "central_same_request_duplicate": true,
+      "different_content_same_id_http_status": 409,
+      "different_content_same_id_error": "idempotency_conflict",
+      "long_utf8_body": {
+        "status": 200,
+        "message_id": 11,
+        "bytes": 13558,
+        "sha256": "2ac9d80b4ba581dd137fbe1804091c02b8afe3a3a21388093bed910961a11e6a",
+        "matches_cli_input": true
+      },
+      "cache_boundary": {
+        "central_messages_total": 107,
+        "central_normal_messages": 101,
+        "mac_cached_messages": 100,
+        "linux_cached_messages": 100,
+        "mac_truncated_flag": true,
+        "linux_truncated_flag": true,
+        "removed_old_message_still_in_authority": true,
+        "history_probe_used": "authorized central history API, not the latest-100 CLI cache"
+      }
+    },
+    "state_layers": {
+      "new_unique_synthetic_submissions": 99,
+      "authority_accepted_unique_messages": 99,
+      "observed_in_both_derived_caches": 99,
+      "application_received_receipt_records": 0,
+      "application_read_receipt_records": 0,
+      "taken_delivered_or_user_accepted_not_inferred": true,
+      "caches_are_not_complete_member_replicas": true
+    },
+    "latency_failure": {
+      "within_15_second_observation_window": false,
+      "failed_sample_was_not_resent_with_new_id": true,
+      "eventually_accepted_effect_count": 1,
+      "original_local_queue_seconds": 41.081699,
+      "original_precise_error": "not captured; successful receipt removed last_error, so root cause remains unknown",
+      "additional_cold_connection_diagnostic": {
+        "samples": 3,
+        "first_two_seconds": [
+          0.337,
+          0.24
+        ],
+        "third_seconds": 3.585,
+        "observed_error": "Post <authority>/v1/messages: EOF",
+        "same_id_eventually_accepted": true
+      },
+      "later_recovery_does_not_convert_timeout_to_pass": true
+    },
+    "prior_page_build_idle_reference": {
+      "kind": "idle-60-second-baseline",
+      "started_utc": "2026-11-05T22:09:46.883627+00:00",
+      "finished_utc": "2026-11-05T22:10:47.185759+00:00",
+      "mac_runtime": {
+        "samples": 7,
+        "wall_seconds": 60.005699,
+        "cpu_seconds_delta": 0.08,
+        "average_percent_one_core": 0.13332,
+        "cpu_time_resolution_seconds": 0.01,
+        "rss_kib_start": 17328,
+        "rss_kib_end": 16656,
+        "rss_kib_min": 16656,
+        "rss_kib_max": 17536,
+        "rss_kib_delta": -672
+      },
+      "linux_runtime": {
+        "samples": 7,
+        "wall_seconds": 60.00018,
+        "cpu_seconds_delta": 0.01,
+        "average_percent_one_core": 0.01667,
+        "cpu_time_resolution_seconds": 0.01,
+        "rss_kib_start": 13072,
+        "rss_kib_end": 13100,
+        "rss_kib_min": 13072,
+        "rss_kib_max": 13100,
+        "rss_kib_delta": 28
+      },
+      "center": {
+        "samples": 7,
+        "wall_seconds": 60.000213,
+        "cpu_seconds_delta": 0.04,
+        "average_percent_one_core": 0.06667,
+        "cpu_time_resolution_seconds": 0.01,
+        "rss_kib_start": 32752,
+        "rss_kib_end": 32752,
+        "rss_kib_min": 32752,
+        "rss_kib_max": 32752,
+        "rss_kib_delta": 0
+      },
+      "message_high_water_start": 8,
+      "message_high_water_end": 8,
+      "no_new_messages": true,
+      "process_identity_stable": true,
+      "scope": "One 60-second idle window, no message contents or credentials; cumulative process CPU time and RSS only, not wakeups or long-run memory stability."
+    },
+    "reused_recovery_evidence": {
+      "source": "../two-host-loop-20261106/summary.json",
+      "kind": "prior shared outbox feedback operation; not a new ordinary-message fault injection",
+      "queued_offline": true,
+      "accepted_response_lost_pending_preserved": true,
+      "queue_survived_daemon_restart": true,
+      "lookup_recovered_original": true,
+      "accepted_effect_count": 1,
+      "identity_unchanged": true
+    },
+    "intermediate_runtime_cleanup": {
+      "mac_stopped": true,
+      "linux_stopped": true,
+      "test_local_ports_closed": true,
+      "main_receiver_and_center_stop_actions": false
+    }
   },
-  "candidate_performance": {
-    "status": "pending unified release build",
-    "planned_sample": "one new 60-second idle window and 30 sequential bidirectional messages after root freezes the same candidate",
-    "reason": "Do not mix page-only idle baseline, Mac v7 and Linux v6 into a release-performance claim"
+  "release_scope_limits": [
+    "Full member-visible durable local replicas are not implemented; old message retrieval requires the authority.",
+    "Per-message sent/received visibility ACL is not established by shared-channel tests; current verified ACL is project/channel membership.",
+    "Ordinary-member interrupt rejection is verified server-side; successful administrator steering into an actual busy model session is not tested or claimed.",
+    "Central acceptance and derived-cache visibility do not record application received/read/taken/delivered/user-accepted states.",
+    "The intermediate 41-second queue tail and later POST EOF remain in the record. Fifty alpha2 samples had no pending errors; this bounded retest does not establish every network failure mode eliminated."
+  ],
+  "alpha2_pending_across_daemon_restart": {
+    "status": "passed",
+    "started_utc": "2026-11-05T23:21:39.809301+00:00",
+    "finished_utc": "2026-11-05T23:21:41.797540+00:00",
+    "scope": "one normal synthetic pending operation across same-Home Mac B daemon restart while disposable authority offline; fixed authorized binary and existing local URL/token retained; no real receiver/config/source changes",
+    "body_bytes": 101,
+    "body_sha256": "1c8f84e37a869d12faa20e83be76c5e9c21a115d98b880ecb0680a241fa54a98",
+    "old_b_stopped_pending_retained": true,
+    "restart_before_authority_restore": {
+      "same_home": true,
+      "same_binary_sha256": true,
+      "local_url_unchanged": true,
+      "local_token_unchanged": true,
+      "original_pending_still_on_disk": true,
+      "same_request_id_and_immutable_body": true,
+      "original_created_at_preserved": true
+    },
+    "status_while_authority_offline_after_restart": {
+      "exit_code": 0,
+      "state": "queued"
+    },
+    "authority_effect_count": 1,
+    "original_body_matches_authority_and_both_caches": true,
+    "pending_file_cleared": true,
+    "identity_files_unchanged": true,
+    "linux_runtime_pid_unchanged": true,
+    "recovery_seconds_after_authority_ready": 0.92,
+    "after_resource_window": true,
+    "expected_mac_pid_change": true
   },
-  "release_gates": [
-    "Freeze and deploy one coherent candidate before reporting release performance.",
-    "Investigate/retest Mac POST EOF and 41-second queue tail; current observations do not establish fast stable delivery.",
-    "Do not advertise full communication-contract completion: summary-first default reads, complete visible local replicas, sent/received private ACL and administrator urgent dispatch remain separate acceptance gates.",
-    "Central acceptance and cache visibility do not prove receiver application acknowledgment, reading, taking ownership or user acceptance."
-  ]
+  "final_readback": {
+    "status": "passed",
+    "observed_utc": "2026-11-05T23:22:16.167801+00:00",
+    "fixed_candidate_binary_and_backend_hashes_reverified": true,
+    "both_online": true,
+    "both_pending_empty": true,
+    "ids_7_and_11_absent_from_both_latest_caches": true,
+    "normal_packaged_authority_running": true
+  },
+  "mac_receiver_process_tree_snapshots": {
+    "snapshots": [
+      {
+        "observed_utc": "2026-11-05T23:11:55.915820+00:00",
+        "process_count": 1,
+        "summed_rss_kib": 21312,
+        "go_pid_rss_kib": 21312
+      },
+      {
+        "observed_utc": "2026-11-05T23:21:32.555184+00:00",
+        "process_count": 1,
+        "summed_rss_kib": 21296,
+        "go_pid_rss_kib": 21296
+      }
+    ],
+    "scope": "PID/PPID descendant snapshots, no argv/environment. Both snapshots cover only observed instants; not a continuous subprocess CPU benchmark. Browser is separate."
+  },
+  "alpha2_accepted_response_lost": {
+    "status": "passed",
+    "started_utc": "2026-11-05T23:08:14.231326+00:00",
+    "finished_utc": "2026-11-05T23:08:18.843410+00:00",
+    "scope": "new ordinary synthetic operation on alpha2 authority; one accepted POST response lost and own by-client-id recovery held, then original packaged authority restored; no runtime restart or host network change",
+    "body_bytes": 92,
+    "body_sha256": "6024106b01b2bffb0e04c7c717d7812e835223f481f0f6453afa9179d45c5a8c",
+    "accepted_while_pending": {
+      "central_effect_count": 1,
+      "message_id": 168,
+      "body_hash_matches": true,
+      "pending_file_exists": true,
+      "receipt_not_yet_recorded": true
+    },
+    "authority_effect_count_after_recovery": 1,
+    "recovery_seconds_after_normal_ready": 1.473,
+    "runtime_pids_and_linux_start_identity_unchanged": true,
+    "normal_authority_restored": true,
+    "expected_center_process_transitions": [
+      "normal_stopped",
+      "fault_started",
+      "fault_stopped",
+      "normal_restored"
+    ],
+    "original_request_id_reused": true
+  },
+  "harness_incomplete_attempt_retained": {
+    "started_utc": "2026-11-05T23:05:48.638098+00:00",
+    "finished_utc": "2026-11-05T23:05:49.224019+00:00",
+    "result": "not counted as a successful message recovery sample",
+    "observed": "Temporary authority was terminated; immediate TCP probe still connected. Later socket inventory showed no listener. Normal authority restored before the three complete cycles.",
+    "message_submissions": 0,
+    "normal_authority_restored": true,
+    "no_root_cause_claim": "A shutdown-check timing issue was observed, not a new product message failure."
+  },
+  "candidate_idle_600_seconds": {
+    "kind": "candidate-idle-600-second-baseline",
+    "candidate": "0.1.0-alpha.2",
+    "started_utc": "2026-11-05T23:11:21.284931+00:00",
+    "finished_utc": "2026-11-05T23:21:21.365895+00:00",
+    "mac_runtime": {
+      "samples": 61,
+      "wall_seconds": 600.003576,
+      "cpu_seconds_delta": 1.29,
+      "average_percent_one_core": 0.215,
+      "cpu_time_resolution_seconds": 0.01,
+      "rss_kib_start": 21312,
+      "rss_kib_end": 21472,
+      "rss_kib_min": 20432,
+      "rss_kib_max": 21488,
+      "rss_kib_delta": 160
+    },
+    "linux_runtime": {
+      "samples": 61,
+      "wall_seconds": 600.000349,
+      "cpu_seconds_delta": 0.21,
+      "average_percent_one_core": 0.035,
+      "cpu_time_resolution_seconds": 0.01,
+      "rss_kib_start": 16084,
+      "rss_kib_end": 16120,
+      "rss_kib_min": 16040,
+      "rss_kib_max": 16644,
+      "rss_kib_delta": 36
+    },
+    "center": {
+      "samples": 61,
+      "wall_seconds": 600.00042,
+      "cpu_seconds_delta": 0.59,
+      "average_percent_one_core": 0.09833,
+      "cpu_time_resolution_seconds": 0.01,
+      "rss_kib_start": 33696,
+      "rss_kib_end": 33700,
+      "rss_kib_min": 33696,
+      "rss_kib_max": 33700,
+      "rss_kib_delta": 4
+    },
+    "message_high_water_start": 168,
+    "message_high_water_end": 168,
+    "no_new_messages": true,
+    "process_identity_stable": true,
+    "scope": "One 600-second quiescent idle window, no message contents or credentials; cumulative process CPU time and RSS only, not wakeups or long-run memory stability.",
+    "ui_condition": "IAB work page kept open with its normal local API polling, no human interaction; browser memory excluded. Confirmed by root operator.",
+    "measurement_processes": "Mac Go daemon, Linux Go daemon and Python authority, separately. Mac descendant snapshots at two instants contained only the Go daemon."
+  },
+  "stability_window": {
+    "status": "window_complete",
+    "started_utc": "2026-11-05T22:43:39.032687+00:00",
+    "finished_utc": "2026-11-05T23:13:39.064422+00:00",
+    "wall_seconds": 1800.019,
+    "samples": 181,
+    "observer_errors": 0,
+    "mac_runtime_alive_in_all_observed_samples": true,
+    "linux_runtime_alive_in_all_observed_samples": true,
+    "mac_process_identity_stable": true,
+    "linux_process_identity_stable": true,
+    "last_mac_connection": "online",
+    "last_linux_connection": "online",
+    "scope": "30-minute bounded observation, 10-second samples; includes three complete authority outage cycles, the separately retained incomplete harness attempt and accepted-response-lost fault center transitions. Not a long-run reliability or memory-leak proof."
+  }
 }
