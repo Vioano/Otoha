@@ -18,6 +18,7 @@ import urllib.parse
 
 from otoha_message import normalize
 from otoha_projection import MAX_SNAPSHOT_BYTES, PRESETS, ProjectionError, query as project_query
+from otoha_repository import RepositoryError, proxy_git_request, repository_info
 
 VERSION = '0.2.0'
 NAME = re.compile(r'^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$')
@@ -264,6 +265,8 @@ class Store:
                 return {'protocol': 'otoha-collaboration/1', 'version': VERSION, 'actor': {k: actor[k] for k in ('id', 'name', 'owner', 'device')}, 'grants': self.rows('SELECT project,role FROM grants WHERE actor=?', (aid,)), 'capabilities': ['channels', 'messages', 'sessions', 'history', 'events', 'sse', 'receipts', 'message_receipts', 'invitations', 'git_refs', 'projections', 'message_origin'], 'read_presets': list(PRESETS), 'projection_tables': ['projects','channels','messages','sessions','receipts'], 'repository_required': False, 'max_message_bytes': 65536}
             if method == 'POST' and path == '/v1/query':
                 return self.projection(actor, body)
+            if method == 'GET' and path == '/v1/repository':
+                return repository_info(self, actor, name(query.get('project', [None])[0]))
             if path == '/v1/projects':
                 if method == 'GET':
                     return {'projects': self.rows('SELECT * FROM projects') if actor['owner'] else self.rows('SELECT p.* FROM projects p JOIN grants g ON p.id=g.project WHERE g.actor=?', (aid,))}
@@ -377,6 +380,29 @@ class Store:
                 if not self.role(actor, project):
                     raise Error(403, 'project_forbidden')
                 return {'agents': self.rows('SELECT s.*,a.name,a.owner,coalesce(c.task,\'\') task FROM sessions s JOIN actors a ON a.id=s.actor LEFT JOIN session_context c ON c.actor=s.actor AND c.session=s.id WHERE a.disabled=0 AND (a.owner=1 OR EXISTS(SELECT 1 FROM grants g WHERE g.actor=a.id AND g.project=?)) ORDER BY s.actor,s.id', (project,)), 'presence': 'registration-and-last-contact; not proof of active generation'}
+            if method == 'GET' and path == '/v1/messages/by-id':
+                value = query.get('id', [''])[0]
+                if not re.fullmatch(r'[1-9][0-9]{0,18}', value) or int(value) > 2**63 - 1:
+                    raise Error(400, 'invalid_message_id')
+                row = self.row('SELECT * FROM messages WHERE id=?', (int(value),))
+                if not row:
+                    raise Error(404, 'message_not_found')
+                selected = query.get('channel', [None])[0]
+                if selected is not None and name(selected) != row['channel']:
+                    raise Error(404, 'message_not_found')
+                self.channel(actor, row['channel'])
+                return {'message': self.message(row), 'message_id': row['id']}
+            if method == 'GET' and path == '/v1/messages/by-client-id':
+                client_id = name(query.get('client_id', [None])[0])
+                row = self.row('SELECT * FROM messages WHERE actor=? AND client_id=?', (aid, client_id))
+                if not row:
+                    raise Error(404, 'message_not_found')
+                # Recover only this actor's operation, under its current read
+                # scope. A durable send receipt does not retain revoked access.
+                self.channel(actor, row['channel'])
+                message = self.message(row)
+                return {'message': message, 'message_id': row['id'],
+                        'client_id': client_id, 'uid': message['payload']['uid'], 'duplicate': True}
             if path == '/v1/messages':
                 channel = name(query.get('channel', [None])[0] if method == 'GET' else body.get('channel'))
                 c = self.channel(actor, channel, write=method != 'GET')
@@ -413,6 +439,8 @@ class Store:
                     raise Error(400, 'invalid_message_summary')
                 if not isinstance(payload['body'], str) or len(payload['body'].encode()) > 60000:
                     raise Error(400, 'invalid_message_body')
+                if payload.get('class') == 'interrupt' and self.role(actor, c['project']) not in ('owner', 'admin'):
+                    raise Error(403, 'interrupt_requires_admin')
                 data = encoded(payload)
                 old = self.row('SELECT * FROM messages WHERE actor=? AND client_id=?', (aid, client_id))
                 if old:
@@ -526,6 +554,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.send_header('Content-Length', str(len(raw)))
         self.send_header('Cache-Control', 'no-store')
         self.send_header('X-Content-Type-Options', 'nosniff')
+        if self.close_connection:
+            self.send_header('Connection', 'close')
         self.end_headers()
         self.wfile.write(raw)
     def do_GET(self):
@@ -549,6 +579,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 return
             header = self.headers.get('Authorization', '')
             token = header[7:] if header.startswith('Bearer ') else ''
+            if u.path.startswith('/v1/git/'):
+                proxy_git_request(self, token, u)
+                return
             if method == 'GET' and u.path == '/v1/events':
                 self.stream(token, query)
                 return
@@ -567,7 +600,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 with self.server.store.changed:
                     self.server.store.changed.notify_all()
             self.send_json(200, result)
-        except Error as e:
+        except (Error, RepositoryError) as e:
             self.close_connection = True
             self.send_json(e.status, {'error': e.code})
         except (ValueError, TypeError, KeyError, OverflowError):

@@ -1,0 +1,3399 @@
+{
+  "experiment": "otoha-core-surreal-minimal",
+  "status": "passed",
+  "started_utc": "2026-11-03T16:07:57.437435+00:00",
+  "platform": {
+    "os": "Linux",
+    "architecture": "x86_64",
+    "python": "3.14.7"
+  },
+  "backend": "3.3.5 for linux on x86_64",
+  "binary_bytes": 352368104,
+  "binary_sha256": "bd4ffffbf3daedb503fc876fa6d531578383ee10ed9b62649b9fa401b9375052",
+  "probe_sha256": "821f7af87852085a12e1b25b5f8e2589dbdf7483f5ee4afe74eb96cb364d1b0d",
+  "fixture_sha256": "f15e71a6e19eb2bb65703c1f82957debbea08d176f5b8069c40fe046b7df56f7",
+  "startup_ms": [
+    707.69,
+    707.95
+  ],
+  "checks": [
+    {
+      "name": "empty_graph",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "core_roundtrip_multiedges_loop_cycle_free_properties",
+      "passed": true,
+      "details": {
+        "nodes": [
+          {
+            "id": "a",
+            "p": {
+              "group": "A",
+              "id": "ordinary property",
+              "in": null,
+              "label": "接口约定",
+              "nested": {
+                "flags": [
+                  true,
+                  false,
+                  null
+                ],
+                "weight": 0.8
+              },
+              "status": "ready"
+            }
+          },
+          {
+            "id": "b1",
+            "p": {
+              "group": "B",
+              "note": null
+            }
+          },
+          {
+            "id": "b2",
+            "p": {
+              "group": "B",
+              "type": "a new vocabulary"
+            }
+          },
+          {
+            "id": "c",
+            "p": {
+              "group": "C"
+            }
+          },
+          {
+            "id": "loose",
+            "p": {}
+          }
+        ],
+        "edges": [
+          {
+            "id": "back",
+            "source": "b1",
+            "target": "a",
+            "p": {}
+          },
+          {
+            "id": "e1",
+            "source": "a",
+            "target": "b1",
+            "p": {
+              "relation": "uses"
+            }
+          },
+          {
+            "id": "e2",
+            "source": "a",
+            "target": "b1",
+            "p": {
+              "label": "independent edge",
+              "note": null
+            }
+          },
+          {
+            "id": "e3",
+            "source": "b2",
+            "target": "c",
+            "p": {
+              "weight": 2
+            }
+          },
+          {
+            "id": "loop",
+            "source": "c",
+            "target": "c",
+            "p": {}
+          }
+        ]
+      }
+    },
+    {
+      "name": "node_edge_identity_namespaces_distinct",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "missing_and_null_distinct",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "prop_unset_removes_key",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "new_property_without_ddl",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "duplicate_node_rejected",
+      "passed": true,
+      "details": [
+        {
+          "details": {
+            "details": {
+              "id": "node:a"
+            },
+            "kind": "Record"
+          },
+          "kind": "AlreadyExists",
+          "result": "Database record `node:a` already exists",
+          "status": "ERR",
+          "time": "204.997µs",
+          "type": null
+        }
+      ]
+    },
+    {
+      "name": "dangling_edge_rejected_by_enforced_relation",
+      "passed": true,
+      "details": [
+        {
+          "details": {
+            "details": {
+              "id": "node:missing"
+            },
+            "kind": "Record"
+          },
+          "kind": "NotFound",
+          "result": "The record 'node:missing' does not exist",
+          "status": "ERR",
+          "time": "263.227µs",
+          "type": null
+        }
+      ]
+    },
+    {
+      "name": "atomic_batch_reports_error",
+      "passed": true,
+      "details": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "NotExecuted"
+          },
+          "kind": "Query",
+          "result": "The query was not executed due to a failed transaction",
+          "status": "ERR",
+          "time": "185.6µs",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "NotExecuted"
+          },
+          "kind": "Query",
+          "result": "The query was not executed due to a failed transaction",
+          "status": "ERR",
+          "time": "51.327µs",
+          "type": null
+        },
+        {
+          "kind": "Thrown",
+          "result": "An error occurred: EXPECTED_ROLLBACK",
+          "status": "ERR",
+          "time": "55.966µs",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "NotExecuted"
+          },
+          "kind": "Query",
+          "result": "Cannot COMMIT: the transaction was aborted due to a prior error",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        }
+      ]
+    },
+    {
+      "name": "atomic_batch_leaves_no_partial_state",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "stale_precondition_rejected",
+      "passed": true,
+      "details": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "kind": "Thrown",
+          "result": "An error occurred: STALE_GUARD",
+          "status": "ERR",
+          "time": "187.023µs",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "Cancelled"
+          },
+          "kind": "Query",
+          "result": "The query was not executed due to a cancelled transaction",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "Cancelled"
+          },
+          "kind": "Query",
+          "result": "The query was not executed due to a cancelled transaction",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "NotExecuted"
+          },
+          "kind": "Query",
+          "result": "Cannot COMMIT: the transaction was aborted due to a prior error",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        }
+      ]
+    },
+    {
+      "name": "stale_request_did_not_advance_or_overwrite",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "projection_group_source_members",
+      "passed": true,
+      "details": [
+        {
+          "group": "A",
+          "members": [
+            "node:a"
+          ]
+        },
+        {
+          "group": "B",
+          "members": [
+            "node:b1",
+            "node:b2"
+          ]
+        },
+        {
+          "group": "C",
+          "members": [
+            "node:c"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "quotient_retains_parallel_edge_members",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "expand_and_boundary_ids",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "quotient_false_path_not_source_two_hop_path",
+      "passed": true,
+      "details": [
+        "node:a",
+        "node:a"
+      ]
+    },
+    {
+      "name": "source_graph_oracle_has_no_path_from_a_to_c",
+      "passed": true,
+      "details": [
+        "a",
+        "b1"
+      ]
+    },
+    {
+      "name": "projection_did_not_mutate_core",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "stale_projection_expansion_rejected",
+      "passed": true,
+      "details": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "kind": "Thrown",
+          "result": "An error occurred: STALE_PROJECTION",
+          "status": "ERR",
+          "time": "139.984µs",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "Cancelled"
+          },
+          "kind": "Query",
+          "result": "The query was not executed due to a cancelled transaction",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "NotExecuted"
+          },
+          "kind": "Query",
+          "result": "Cannot COMMIT: the transaction was aborted due to a prior error",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        }
+      ]
+    },
+    {
+      "name": "raw_endpoint_update_ignored_gap_recorded",
+      "passed": true,
+      "details": {
+        "id": "edge:e2",
+        "in": "node:a",
+        "out": "node:b1",
+        "p": {
+          "label": "independent edge",
+          "note": null
+        }
+      }
+    },
+    {
+      "name": "rewire_keeps_logical_edge_id_and_properties",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "rewire_updates_graph_traversal",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "rewire_back_removes_old_adjacency",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "guarded_node_delete_rejects_incident_edges",
+      "passed": true,
+      "details": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "kind": "Thrown",
+          "result": "An error occurred: INCIDENT_EDGES",
+          "status": "ERR",
+          "time": "362.064µs",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "Cancelled"
+          },
+          "kind": "Query",
+          "result": "The query was not executed due to a cancelled transaction",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "NotExecuted"
+          },
+          "kind": "Query",
+          "result": "Cannot COMMIT: the transaction was aborted due to a prior error",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        }
+      ]
+    },
+    {
+      "name": "guarded_delete_preserves_core",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "raw_backend_delete_cascades_edges_gap_recorded",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "graceful_restart_persists_exact_graph",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "export_import_preserves_ids_endpoints_properties",
+      "passed": true,
+      "details": null
+    }
+  ],
+  "queries": [
+    {
+      "database": "core",
+      "sql": "DEFINE NAMESPACE otoha_spike; USE NS otoha_spike; DEFINE DATABASE core; USE DB core; \nDEFINE TABLE node TYPE NORMAL SCHEMALESS;\nDEFINE TABLE edge TYPE RELATION IN node OUT node ENFORCED SCHEMALESS;\n",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "290.449µs",
+          "type": null
+        },
+        {
+          "result": {
+            "database": "core",
+            "namespace": "otoha_spike"
+          },
+          "status": "OK",
+          "time": "125.146µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "216.168µs",
+          "type": null
+        },
+        {
+          "result": {
+            "database": "core",
+            "namespace": "otoha_spike"
+          },
+          "status": "OK",
+          "time": "64.061µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "262.897µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "193.204µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 23.247
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [],
+          "status": "OK",
+          "time": "299.846µs",
+          "type": null
+        },
+        {
+          "result": [],
+          "status": "OK",
+          "time": "122.492µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "57.849µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.908
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; CREATE node:a CONTENT {\"p\": {\"group\": \"A\", \"status\": \"ready\", \"label\": \"接口约定\", \"id\": \"ordinary property\", \"in\": null, \"nested\": {\"flags\": [true, false, null], \"weight\": 0.8}}};\nCREATE node:b1 CONTENT {\"p\": {\"group\": \"B\", \"note\": null}};\nCREATE node:b2 CONTENT {\"p\": {\"group\": \"B\", \"type\": \"a new vocabulary\"}};\nCREATE node:c CONTENT {\"p\": {\"group\": \"C\"}};\nCREATE node:loose CONTENT {\"p\": {}};\nRELATE node:a->edge:e1->node:b1 CONTENT {\"p\": {\"relation\": \"uses\"}};\nRELATE node:a->edge:e2->node:b1 CONTENT {\"p\": {\"label\": \"independent edge\", \"note\": null}};\nRELATE node:b2->edge:e3->node:c CONTENT {\"p\": {\"weight\": 2}};\nRELATE node:b1->edge:back->node:a CONTENT {\"p\": {}};\nRELATE node:c->edge:loop->node:c CONTENT {\"p\": {}}; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "ready"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "267.846µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "35.217µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "17.653µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "13.675µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "14.056µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "96.261µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "40.176µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "32.732µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "29.455µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "29.035µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "93.036µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.158
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "ready"
+              }
+            },
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            },
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            },
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "274.308µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            },
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "89.208µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "45.636µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.585
+    },
+    {
+      "database": "core",
+      "sql": "CREATE node:e1 CONTENT {p: {}};",
+      "response": [
+        {
+          "result": [
+            {
+              "id": "node:e1",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "234.673µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.896
+    },
+    {
+      "database": "core",
+      "sql": "RETURN {node_id: node:e1.id, edge_id: edge:e1.id};",
+      "response": [
+        {
+          "result": {
+            "edge_id": "edge:e1",
+            "node_id": "node:e1"
+          },
+          "status": "OK",
+          "time": "230.134µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.152
+    },
+    {
+      "database": "core",
+      "sql": "DELETE node:e1;",
+      "response": [
+        {
+          "result": [],
+          "status": "OK",
+          "time": "525.241µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.316
+    },
+    {
+      "database": "core",
+      "sql": "RETURN {present: node:b1.p.note = NULL, missing: node:c.p.note = NONE};",
+      "response": [
+        {
+          "result": {
+            "missing": true,
+            "present": true
+          },
+          "status": "OK",
+          "time": "161.836µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.295
+    },
+    {
+      "database": "core",
+      "sql": "UPDATE node:b1 UNSET p.note;",
+      "response": [
+        {
+          "result": [
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "333.4µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.569
+    },
+    {
+      "database": "core",
+      "sql": "SELECT VALUE p FROM ONLY node:b1;",
+      "response": [
+        {
+          "result": {
+            "group": "B"
+          },
+          "status": "OK",
+          "time": "221.769µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.808
+    },
+    {
+      "database": "core",
+      "sql": "UPDATE node:b1 SET p.note = NULL; UPDATE node:loose SET p.experimental = [1, 'new', NULL];",
+      "response": [
+        {
+          "result": [
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "274.929µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:loose",
+              "p": {
+                "experimental": [
+                  1,
+                  "new",
+                  null
+                ]
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "94.398µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.737
+    },
+    {
+      "database": "core",
+      "sql": "RETURN node:loose.p.experimental;",
+      "response": [
+        {
+          "result": [
+            1,
+            "new",
+            null
+          ],
+          "status": "OK",
+          "time": "155.333µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.395
+    },
+    {
+      "database": "core",
+      "sql": "UPDATE node:loose UNSET p.experimental;",
+      "response": [
+        {
+          "result": [
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "255.211µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.408
+    },
+    {
+      "database": "core",
+      "sql": "CREATE node:a CONTENT {p: {}};",
+      "response": [
+        {
+          "details": {
+            "details": {
+              "id": "node:a"
+            },
+            "kind": "Record"
+          },
+          "kind": "AlreadyExists",
+          "result": "Database record `node:a` already exists",
+          "status": "ERR",
+          "time": "204.997µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.553
+    },
+    {
+      "database": "core",
+      "sql": "RELATE node:a->edge:bad->node:missing CONTENT {p: {}};",
+      "response": [
+        {
+          "details": {
+            "details": {
+              "id": "node:missing"
+            },
+            "kind": "Record"
+          },
+          "kind": "NotFound",
+          "result": "The record 'node:missing' does not exist",
+          "status": "ERR",
+          "time": "263.227µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.521
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "ready"
+              }
+            },
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            },
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            },
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "260.251µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            },
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "94.458µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "46.387µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 20.91
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; UPDATE node:a SET p.partial = true; CREATE node:rolledback CONTENT {p: {}}; THROW 'EXPECTED_ROLLBACK'; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "NotExecuted"
+          },
+          "kind": "Query",
+          "result": "The query was not executed due to a failed transaction",
+          "status": "ERR",
+          "time": "185.6µs",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "NotExecuted"
+          },
+          "kind": "Query",
+          "result": "The query was not executed due to a failed transaction",
+          "status": "ERR",
+          "time": "51.327µs",
+          "type": null
+        },
+        {
+          "kind": "Thrown",
+          "result": "An error occurred: EXPECTED_ROLLBACK",
+          "status": "ERR",
+          "time": "55.966µs",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "NotExecuted"
+          },
+          "kind": "Query",
+          "result": "Cannot COMMIT: the transaction was aborted due to a prior error",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 20.974
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "ready"
+              }
+            },
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            },
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            },
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "295.117µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            },
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "108.495µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "52.009µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.448
+    },
+    {
+      "database": "core",
+      "sql": "CREATE meta:head SET revision = 0;",
+      "response": [
+        {
+          "result": [
+            {
+              "id": "meta:head",
+              "revision": 0
+            }
+          ],
+          "status": "OK",
+          "time": "343.539µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 20.904
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; IF node:a.p.status != 'ready' { THROW 'STALE_GUARD'; }; UPDATE node:a SET p.status = 'done'; UPDATE meta:head SET revision += 1; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "155.814µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "done"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "119.997µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "meta:head",
+              "revision": 1
+            }
+          ],
+          "status": "OK",
+          "time": "51.347µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "61.096µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 20.925
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "done"
+              }
+            },
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            },
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            },
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "249.13µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            },
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "155.113µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "45.587µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.279
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; IF node:a.p.status != 'ready' { THROW 'STALE_GUARD'; }; UPDATE node:a SET p.status = 'overwritten'; UPDATE meta:head SET revision += 1; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "kind": "Thrown",
+          "result": "An error occurred: STALE_GUARD",
+          "status": "ERR",
+          "time": "187.023µs",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "Cancelled"
+          },
+          "kind": "Query",
+          "result": "The query was not executed due to a cancelled transaction",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "Cancelled"
+          },
+          "kind": "Query",
+          "result": "The query was not executed due to a cancelled transaction",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "NotExecuted"
+          },
+          "kind": "Query",
+          "result": "Cannot COMMIT: the transaction was aborted due to a prior error",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.657
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "done"
+              }
+            },
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            },
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            },
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "248.279µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            },
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "105.93µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "38.322µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.536
+    },
+    {
+      "database": "core",
+      "sql": "RETURN meta:head.revision;",
+      "response": [
+        {
+          "result": 1,
+          "status": "OK",
+          "time": "150.174µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.847
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "done"
+              }
+            },
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            },
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            },
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "245.133µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            },
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "119.466µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "49.673µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.589
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT p.group AS group, array::sort(array::group(id)) AS members FROM node WHERE p.group != NONE GROUP BY group ORDER BY group; SELECT in.p.group AS source_group, out.p.group AS target_group, array::sort(array::group(id)) AS members, count() AS count FROM edge GROUP BY source_group, target_group ORDER BY source_group, target_group; SELECT id, p FROM node WHERE p.group = 'B' ORDER BY id; SELECT id, in, out FROM edge WHERE in IN [node:b1,node:b2] OR out IN [node:b1,node:b2] ORDER BY id; RETURN meta:head.revision; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "group": "A",
+              "members": [
+                "node:a"
+              ]
+            },
+            {
+              "group": "B",
+              "members": [
+                "node:b1",
+                "node:b2"
+              ]
+            },
+            {
+              "group": "C",
+              "members": [
+                "node:c"
+              ]
+            }
+          ],
+          "status": "OK",
+          "time": "442.145µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "count": 2,
+              "members": [
+                "edge:e1",
+                "edge:e2"
+              ],
+              "source_group": "A",
+              "target_group": "B"
+            },
+            {
+              "count": 1,
+              "members": [
+                "edge:back"
+              ],
+              "source_group": "B",
+              "target_group": "A"
+            },
+            {
+              "count": 1,
+              "members": [
+                "edge:e3"
+              ],
+              "source_group": "B",
+              "target_group": "C"
+            },
+            {
+              "count": 1,
+              "members": [
+                "edge:loop"
+              ],
+              "source_group": "C",
+              "target_group": "C"
+            }
+          ],
+          "status": "OK",
+          "time": "227.079µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "86.713µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a"
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1"
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1"
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c"
+            }
+          ],
+          "status": "OK",
+          "time": "98.356µs",
+          "type": null
+        },
+        {
+          "result": 1,
+          "status": "OK",
+          "time": "36.188µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "38.102µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.666
+    },
+    {
+      "database": "core",
+      "sql": "RETURN node:a->edge->node->edge->node;",
+      "response": [
+        {
+          "result": [
+            "node:a",
+            "node:a"
+          ],
+          "status": "OK",
+          "time": "290.839µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 20.907
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "done"
+              }
+            },
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            },
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            },
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "231.447µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            },
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "128.102µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "42.039µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.6
+    },
+    {
+      "database": "core",
+      "sql": "UPDATE meta:head SET revision += 1;",
+      "response": [
+        {
+          "result": [
+            {
+              "id": "meta:head",
+              "revision": 2
+            }
+          ],
+          "status": "OK",
+          "time": "266.353µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.311
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; IF meta:head.revision != 1 { THROW 'STALE_PROJECTION'; }; SELECT * FROM node WHERE p.group = 'B'; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "kind": "Thrown",
+          "result": "An error occurred: STALE_PROJECTION",
+          "status": "ERR",
+          "time": "139.984µs",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "Cancelled"
+          },
+          "kind": "Query",
+          "result": "The query was not executed due to a cancelled transaction",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "NotExecuted"
+          },
+          "kind": "Query",
+          "result": "Cannot COMMIT: the transaction was aborted due to a prior error",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.428
+    },
+    {
+      "database": "core",
+      "sql": "UPDATE edge:e2 SET out = node:c;",
+      "response": [
+        {
+          "result": [
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "267.475µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.371
+    },
+    {
+      "database": "core",
+      "sql": "SELECT id, in, out, p FROM ONLY edge:e2;",
+      "response": [
+        {
+          "result": {
+            "id": "edge:e2",
+            "in": "node:a",
+            "out": "node:b1",
+            "p": {
+              "label": "independent edge",
+              "note": null
+            }
+          },
+          "status": "OK",
+          "time": "225.055µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.143
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; LET $p = edge:e2.p; DELETE edge:e2; RELATE node:a->edge:e2->node:c CONTENT {p: $p}; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "158.96µs",
+          "type": null
+        },
+        {
+          "result": [],
+          "status": "OK",
+          "time": "173.067µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:c",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "103.195µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "88.867µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.411
+    },
+    {
+      "database": "core",
+      "sql": "SELECT id, in, out, p FROM ONLY edge:e2;",
+      "response": [
+        {
+          "result": {
+            "id": "edge:e2",
+            "in": "node:a",
+            "out": "node:c",
+            "p": {
+              "label": "independent edge",
+              "note": null
+            }
+          },
+          "status": "OK",
+          "time": "204.786µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.659
+    },
+    {
+      "database": "core",
+      "sql": "RETURN node:a->edge->node;",
+      "response": [
+        {
+          "result": [
+            "node:b1",
+            "node:c"
+          ],
+          "status": "OK",
+          "time": "213.243µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.892
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; LET $p = edge:e2.p; DELETE edge:e2; RELATE node:a->edge:e2->node:b1 CONTENT {p: $p}; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "142.97µs",
+          "type": null
+        },
+        {
+          "result": [],
+          "status": "OK",
+          "time": "154.572µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "98.736µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "93.988µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.541
+    },
+    {
+      "database": "core",
+      "sql": "RETURN node:a->edge->node;",
+      "response": [
+        {
+          "result": [
+            "node:b1",
+            "node:b1"
+          ],
+          "status": "OK",
+          "time": "182.625µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.905
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "done"
+              }
+            },
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            },
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            },
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "268.837µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            },
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "88.518µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "41.789µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 21.994
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; IF array::len((SELECT VALUE id FROM edge WHERE in = node:a OR out = node:a)) > 0 { THROW 'INCIDENT_EDGES'; }; DELETE node:a; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "kind": "Thrown",
+          "result": "An error occurred: INCIDENT_EDGES",
+          "status": "ERR",
+          "time": "362.064µs",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "Cancelled"
+          },
+          "kind": "Query",
+          "result": "The query was not executed due to a cancelled transaction",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "details": {
+            "kind": "NotExecuted"
+          },
+          "kind": "Query",
+          "result": "Cannot COMMIT: the transaction was aborted due to a prior error",
+          "status": "ERR",
+          "time": "0ns",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.156
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "done"
+              }
+            },
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            },
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            },
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "249.782µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            },
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "129.104µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "39.094µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.868
+    },
+    {
+      "database": "core",
+      "sql": "CREATE node:temp1 CONTENT {p: {}}; CREATE node:temp2 CONTENT {p: {}}; RELATE node:temp1->edge:temporary->node:temp2 CONTENT {p: {}}; DELETE node:temp1;",
+      "response": [
+        {
+          "result": [
+            {
+              "id": "node:temp1",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "235.034µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:temp2",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "71.264µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:temporary",
+              "in": "node:temp1",
+              "out": "node:temp2",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "104.217µs",
+          "type": null
+        },
+        {
+          "result": [],
+          "status": "OK",
+          "time": "231.678µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.765
+    },
+    {
+      "database": "core",
+      "sql": "SELECT * FROM edge:temporary;",
+      "response": [
+        {
+          "result": [],
+          "status": "OK",
+          "time": "159.541µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.311
+    },
+    {
+      "database": "core",
+      "sql": "DELETE node:temp2;",
+      "response": [
+        {
+          "result": [],
+          "status": "OK",
+          "time": "295.708µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.851
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "done"
+              }
+            },
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            },
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            },
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "255.352µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            },
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "128.944µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "37.191µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.832
+    },
+    {
+      "database": "core",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "done"
+              }
+            },
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            },
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            },
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "496.848µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            },
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "250.903µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "83.628µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 24.105
+    },
+    {
+      "database": "core",
+      "sql": "DEFINE DATABASE roundtrip;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "446.242µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.304
+    },
+    {
+      "database": "roundtrip",
+      "sql": "\nDEFINE TABLE node TYPE NORMAL SCHEMALESS;\nDEFINE TABLE edge TYPE RELATION IN node OUT node ENFORCED SCHEMALESS;\nBEGIN; CREATE node:a CONTENT {\"p\": {\"group\": \"A\", \"id\": \"ordinary property\", \"in\": null, \"label\": \"接口约定\", \"nested\": {\"flags\": [true, false, null], \"weight\": 0.8}, \"status\": \"done\"}};\nCREATE node:b1 CONTENT {\"p\": {\"group\": \"B\", \"note\": null}};\nCREATE node:b2 CONTENT {\"p\": {\"group\": \"B\", \"type\": \"a new vocabulary\"}};\nCREATE node:c CONTENT {\"p\": {\"group\": \"C\"}};\nCREATE node:loose CONTENT {\"p\": {}};\nRELATE node:b1->edge:back->node:a CONTENT {\"p\": {}};\nRELATE node:a->edge:e1->node:b1 CONTENT {\"p\": {\"relation\": \"uses\"}};\nRELATE node:a->edge:e2->node:b1 CONTENT {\"p\": {\"label\": \"independent edge\", \"note\": null}};\nRELATE node:b2->edge:e3->node:c CONTENT {\"p\": {\"weight\": 2}};\nRELATE node:c->edge:loop->node:c CONTENT {\"p\": {}}; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "394.144µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "253.658µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "done"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "262.485µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "27.472µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "25.599µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "18.124µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "16.511µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "112.402µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "42.691µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "42.169µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "31.098µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "29.535µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "83.898µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 23.833
+    },
+    {
+      "database": "roundtrip",
+      "sql": "BEGIN; SELECT id, p FROM node ORDER BY id; SELECT id, in, out, p FROM edge ORDER BY id; COMMIT;",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "0ns",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:a",
+              "p": {
+                "group": "A",
+                "id": "ordinary property",
+                "in": null,
+                "label": "接口约定",
+                "nested": {
+                  "flags": [
+                    true,
+                    false,
+                    null
+                  ],
+                  "weight": 0.8
+                },
+                "status": "done"
+              }
+            },
+            {
+              "id": "node:b1",
+              "p": {
+                "group": "B",
+                "note": null
+              }
+            },
+            {
+              "id": "node:b2",
+              "p": {
+                "group": "B",
+                "type": "a new vocabulary"
+              }
+            },
+            {
+              "id": "node:c",
+              "p": {
+                "group": "C"
+              }
+            },
+            {
+              "id": "node:loose",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "263.027µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:back",
+              "in": "node:b1",
+              "out": "node:a",
+              "p": {}
+            },
+            {
+              "id": "edge:e1",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "relation": "uses"
+              }
+            },
+            {
+              "id": "edge:e2",
+              "in": "node:a",
+              "out": "node:b1",
+              "p": {
+                "label": "independent edge",
+                "note": null
+              }
+            },
+            {
+              "id": "edge:e3",
+              "in": "node:b2",
+              "out": "node:c",
+              "p": {
+                "weight": 2
+              }
+            },
+            {
+              "id": "edge:loop",
+              "in": "node:c",
+              "out": "node:c",
+              "p": {}
+            }
+          ],
+          "status": "OK",
+          "time": "85.461µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "53.09µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.534
+    }
+  ],
+  "projection": {
+    "source_revision": 1,
+    "groups": [
+      {
+        "group": "A",
+        "members": [
+          "node:a"
+        ]
+      },
+      {
+        "group": "B",
+        "members": [
+          "node:b1",
+          "node:b2"
+        ]
+      },
+      {
+        "group": "C",
+        "members": [
+          "node:c"
+        ]
+      }
+    ],
+    "quotient": [
+      {
+        "count": 2,
+        "members": [
+          "edge:e1",
+          "edge:e2"
+        ],
+        "source_group": "A",
+        "target_group": "B"
+      },
+      {
+        "count": 1,
+        "members": [
+          "edge:back"
+        ],
+        "source_group": "B",
+        "target_group": "A"
+      },
+      {
+        "count": 1,
+        "members": [
+          "edge:e3"
+        ],
+        "source_group": "B",
+        "target_group": "C"
+      },
+      {
+        "count": 1,
+        "members": [
+          "edge:loop"
+        ],
+        "source_group": "C",
+        "target_group": "C"
+      }
+    ],
+    "expanded": [
+      {
+        "id": "node:b1",
+        "p": {
+          "group": "B",
+          "note": null
+        }
+      },
+      {
+        "id": "node:b2",
+        "p": {
+          "group": "B",
+          "type": "a new vocabulary"
+        }
+      }
+    ],
+    "boundary_edges": [
+      {
+        "id": "edge:back",
+        "in": "node:b1",
+        "out": "node:a"
+      },
+      {
+        "id": "edge:e1",
+        "in": "node:a",
+        "out": "node:b1"
+      },
+      {
+        "id": "edge:e2",
+        "in": "node:a",
+        "out": "node:b1"
+      },
+      {
+        "id": "edge:e3",
+        "in": "node:b2",
+        "out": "node:c"
+      }
+    ],
+    "complete_for": "nodes with p.group; group B incident edges",
+    "ungrouped_node_ids": [
+      "node:loose"
+    ],
+    "source_two_hop_from_a": [
+      "node:a",
+      "node:a"
+    ],
+    "source_reachable_from_a_oracle": [
+      "a",
+      "b1"
+    ]
+  },
+  "native_rewire": {
+    "returned_ok": true,
+    "response": [
+      {
+        "result": [
+          {
+            "id": "edge:e2",
+            "in": "node:a",
+            "out": "node:b1",
+            "p": {
+              "label": "independent edge",
+              "note": null
+            }
+          }
+        ],
+        "status": "OK",
+        "time": "267.475µs",
+        "type": null
+      }
+    ],
+    "readback": {
+      "id": "edge:e2",
+      "in": "node:a",
+      "out": "node:b1",
+      "p": {
+        "label": "independent edge",
+        "note": null
+      }
+    },
+    "applied": false
+  },
+  "final_graph": {
+    "nodes": [
+      {
+        "id": "a",
+        "p": {
+          "group": "A",
+          "id": "ordinary property",
+          "in": null,
+          "label": "接口约定",
+          "nested": {
+            "flags": [
+              true,
+              false,
+              null
+            ],
+            "weight": 0.8
+          },
+          "status": "done"
+        }
+      },
+      {
+        "id": "b1",
+        "p": {
+          "group": "B",
+          "note": null
+        }
+      },
+      {
+        "id": "b2",
+        "p": {
+          "group": "B",
+          "type": "a new vocabulary"
+        }
+      },
+      {
+        "id": "c",
+        "p": {
+          "group": "C"
+        }
+      },
+      {
+        "id": "loose",
+        "p": {}
+      }
+    ],
+    "edges": [
+      {
+        "id": "back",
+        "source": "b1",
+        "target": "a",
+        "p": {}
+      },
+      {
+        "id": "e1",
+        "source": "a",
+        "target": "b1",
+        "p": {
+          "relation": "uses"
+        }
+      },
+      {
+        "id": "e2",
+        "source": "a",
+        "target": "b1",
+        "p": {
+          "label": "independent edge",
+          "note": null
+        }
+      },
+      {
+        "id": "e3",
+        "source": "b2",
+        "target": "c",
+        "p": {
+          "weight": 2
+        }
+      },
+      {
+        "id": "loop",
+        "source": "c",
+        "target": "c",
+        "p": {}
+      }
+    ]
+  },
+  "final_graph_sha256": "1073dd0a19da614060c6c807453d354d0fe04542022bcccbe85985c8de334bd2",
+  "data_bytes": 10921,
+  "finished_utc": "2026-11-03T16:08:00.814641+00:00"
+}

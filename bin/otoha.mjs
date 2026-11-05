@@ -16,7 +16,18 @@ const routes = {
   mailbox: [python, [path.join(root, 'integrations/mailbox/skills/otoha-mailbox/scripts/mailbox.py'), ...args]],
 };
 
-if (!command || ['help', '--help', '-h'].includes(command)) {
+if (!command) {
+  const executable = path.join(root, 'dist', process.platform === 'win32' ? 'otoha.exe' : 'otoha');
+  if (fs.existsSync(executable)) {
+    const child = spawn(executable, [], { stdio: 'inherit' });
+    for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => child.kill(signal));
+    child.on('error', error => { console.error(error.message); process.exitCode = 1; });
+    child.on('exit', (code, signal) => { if (signal) process.exitCode = 1; else process.exitCode = code ?? 1; });
+  } else {
+    console.log(`Otoha 原生 CLI 尚未构建；先运行 npm run build:cli，然后再次输入 otoha。\n`);
+    console.log(`也可以运行 node bin/otoha.mjs help 查看源码入口。`);
+  }
+} else if (['help', '--help', '-h'].includes(command)) {
   console.log(`Otoha — 人与多 Agent 协作基础设施
 
   otoha graph <command>     图谱、查询、看板与本地预览

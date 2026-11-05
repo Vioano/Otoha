@@ -44,8 +44,7 @@ func main() {
 }
 func run(args []string) error {
 	if len(args) == 0 {
-		help()
-		return nil
+		return a.Console(os.Stdin, os.Stdout)
 	}
 	ctx := context.Background()
 	command := args[0]
@@ -57,6 +56,11 @@ func run(args []string) error {
 	case "help", "--help", "-h":
 		help()
 		return nil
+	case "demo":
+		f := flags("demo")
+		slow := f.Bool("slow", false, "recording pace")
+		parse(f, args)
+		return a.RunConsoleDemo(os.Stdout, *slow)
 	case "admit":
 		f := flags("admit")
 		thread := f.String("thread", "", "existing Desktop target chat UUID")
@@ -256,7 +260,34 @@ func run(args []string) error {
 			output(result)
 		}
 		return err
+	case "page":
+		result, err := a.PageCommand(ctx, args)
+		if result != nil {
+			output(result)
+		}
+		return err
+	case "message":
+		result, err := a.MessageCommand(ctx, args)
+		if result != nil {
+			output(result)
+		}
+		return err
 	case "join":
+		if len(args) == 0 || args[0] == "help" || hasHelpFlag(args) {
+			output(a.JoinCommandHelp())
+			return nil
+		}
+		// A collaboration invite is the primary project join entry point.
+		// Keep historical packed keys on their existing compatibility path.
+		for _, arg := range args {
+			if arg == "--invite" || strings.HasPrefix(arg, "--invite=") {
+				result, err := a.TeamCommand(ctx, append([]string{"join"}, args...))
+				if result != nil {
+					output(result)
+				}
+				return err
+			}
+		}
 		// Accept key before flags so the invitation really is one copyable command.
 		key := ""
 		if len(args) > 0 && !strings.HasPrefix(args[0], "-") {
@@ -326,29 +357,33 @@ func run(args []string) error {
 		r["elapsed_ms"] = float64(time.Since(start).Microseconds()) / 1000
 		output(r)
 		return nil
-	case "status", "doctor":
-		s := settings()
-		p, c := profile(s)
-		defer c.Transport.Close()
-		start := time.Now()
-		m, e := c.Call(ctx, "GET", "/v1/manifest", nil)
+	case "doctor":
+		r, e := a.Doctor(ctx)
+		if r != nil {
+			output(r)
+		}
 		if e != nil {
 			return e
 		}
-		r := a.Object{"actor": a.O(m, "actor"), "grants": m["grants"], "transport": c.Transport.Mode, "elapsed_ms": float64(time.Since(start).Microseconds()) / 1000, "credentials_expire": false}
-		if b, e := a.Load(filepath.Join(a.Home(), "binding.json")); e == nil {
-			if status, err := a.BindingStatus(b); err == nil {
-				b = status
+		if ok, exists := r["ok"].(bool); exists && !ok {
+			return fmt.Errorf("doctor found failing checks")
+		}
+		return nil
+	case "status":
+		r, e := a.LocalStatus(ctx)
+		if e != nil {
+			return e
+		}
+		// Existing legacy-only installations retain their authenticated status
+		// fields. A joined team never needs a second legacy setup/config file.
+		if len(a.Array(r["teams"])) == 0 && a.B(r, "legacy_configured") {
+			legacy, err := legacyStatus(ctx)
+			if err != nil {
+				return err
 			}
-			delete(b, "profile")
-			delete(b, "settings")
-			r["agent_binding"] = b
+			legacy["teams"], legacy["daemon"], legacy["state"] = r["teams"], r["daemon"], "legacy"
+			r = legacy
 		}
-		r["legacy_identity"] = a.S(s, "profile")
-		if proxy, e := a.Load(filepath.Join(a.Home(), "git-proxy-status.json")); e == nil {
-			r["git_proxy"] = proxy
-		}
-		r["channel"] = p["channel"]
 		output(r)
 		return nil
 	case "agents":
@@ -473,17 +508,12 @@ func run(args []string) error {
 				return e
 			}
 			binding := a.Object{"actor": a.S(p, "actor"), "session": session, "channel": channel}
-			bridge, e := a.NewChannelBridge(g, c, binding, func(message a.Object) string {
-				payload := a.O(message, "payload")
-				for _, target := range a.Array(payload["to_sessions"]) {
-					if chat := cfg.Recipients[fmt.Sprint(target)]; chat != "" {
-						return chat
-					}
-				}
-				return cfg.Recipients["public"]
-			})
+			bridge, e := a.NewChannelBridge(g, c, binding, nil)
 			if e != nil {
 				return e
+			}
+			bridge.RecipientChecked = func(message a.Object) (string, error) {
+				return a.TelegramRecipient(cfg, message)
 			}
 			return bridge.Run(ctx)
 		default:
@@ -563,6 +593,12 @@ func run(args []string) error {
 			return a.Receive(ctx)
 		}
 		return fmt.Errorf("otoha service install or otoha service run")
+	case "daemon":
+		r, e := a.DaemonCommand(args)
+		if r != nil {
+			output(r)
+		}
+		return e
 	case "send":
 		f := flags("send")
 		channel := f.String("channel", "", "channel")
@@ -682,9 +718,52 @@ func run(args []string) error {
 		return a.CloneRepo(ctx, args)
 	case "credential":
 		return a.Credential(args, os.Stdin, os.Stdout)
+	case "gitea-credential":
+		return a.GiteaCredential(args, os.Stdin, os.Stdout)
+	case "page-git-credential":
+		return a.PageGitCredential(args, os.Stdin, os.Stdout)
 	default:
 		return fmt.Errorf("unknown command %q; run otoha help", command)
 	}
+}
+
+func hasHelpFlag(args []string) bool {
+	for _, arg := range args {
+		if arg == "--help" || arg == "-h" {
+			return true
+		}
+	}
+	return false
+}
+
+func legacyStatus(ctx context.Context) (a.Object, error) {
+	s, err := loadSettings()
+	if err != nil {
+		return nil, err
+	}
+	p, c, err := a.OpenProfile(s)
+	if err != nil {
+		return nil, err
+	}
+	defer c.Transport.Close()
+	start := time.Now()
+	m, err := c.Call(ctx, "GET", "/v1/manifest", nil)
+	if err != nil {
+		return nil, err
+	}
+	r := a.Object{"actor": a.O(m, "actor"), "grants": m["grants"], "transport": c.Transport.Mode, "elapsed_ms": float64(time.Since(start).Microseconds()) / 1000, "credentials_expire": false, "legacy_identity": a.S(s, "profile"), "channel": p["channel"]}
+	if b, e := a.Load(filepath.Join(a.Home(), "binding.json")); e == nil {
+		if status, e := a.BindingStatus(b); e == nil {
+			b = status
+		}
+		delete(b, "profile")
+		delete(b, "settings")
+		r["agent_binding"] = b
+	}
+	if proxy, e := a.Load(filepath.Join(a.Home(), "git-proxy-status.json")); e == nil {
+		r["git_proxy"] = proxy
+	}
+	return r, nil
 }
 func invitationText(key, platform string) string {
 	inv, _ := a.Unpack(key)
@@ -740,14 +819,24 @@ func proxy(ctx context.Context, args []string) error {
 func help() {
 	io.WriteString(os.Stdout, `Otoha — private projects and instant agent collaboration
 
+  otoha                         open the local collaboration console
+  otoha demo [--slow]           play the multi-agent recording sequence
+  otoha join --invite FILE      join a project and its Otoha services
   otoha setup --otoha-profile FILE --gitea-profile FILE --gateway-profile FILE --gateway-admin SSH_ALIAS
   otoha project create NAME --invite MEMBER --purpose TEXT --agent current
   otoha project grant NAME --member MEMBER
-  otoha team init NAME [--mode local] [--data DIR] [--port PORT]
+  otoha team init NAME [--mode local|server] [--data DIR] [--port PORT]
   otoha team invite TEAM MEMBER [--role member|admin|reader] [--out FILE]
   otoha team join --invite FILE
   otoha team status [TEAM]
   otoha team doctor [TEAM]
+  otoha page open|status --team TEAM
+  otoha page publish --team TEAM --file FILE [--request-id ID]
+  otoha page feedback --team TEAM [--text TEXT --page REQUEST_ID --page-message-id N]
+  otoha page operation --team TEAM --request-id REQUEST_ID
+  otoha message send --team TEAM --text TEXT [--request-id ID]
+  otoha message list|status --team TEAM
+  otoha daemon install|uninstall|start|stop|restart|status|logs [--follow]
   otoha join KEY --agent current
   otoha import EXISTING_IDENTITY.json
   otoha pack EXISTING_BUNDLE.json

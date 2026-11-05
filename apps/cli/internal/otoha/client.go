@@ -3,6 +3,8 @@ package otoha
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"golang.org/x/crypto/ssh"
@@ -17,6 +19,37 @@ import (
 	"sync"
 	"time"
 )
+
+func ConfigureClientTLS(c *Client) error {
+	if c == nil || c.Transport == nil {
+		return fmt.Errorf("client transport is missing")
+	}
+	caFile := S(c.Profile, "ca_file")
+	caPEM := S(c.Profile, "ca_pem")
+	if caFile == "" && caPEM == "" {
+		return nil
+	}
+	if caFile != "" {
+		b, err := os.ReadFile(caFile)
+		if err != nil {
+			return fmt.Errorf("read CA file: %w", err)
+		}
+		caPEM += string(b)
+	}
+	pool, err := x509.SystemCertPool()
+	if err != nil || pool == nil {
+		pool = x509.NewCertPool()
+	}
+	if !pool.AppendCertsFromPEM([]byte(caPEM)) {
+		return fmt.Errorf("CA certificate is not valid PEM")
+	}
+	transport, ok := c.Transport.HTTP.Transport.(*http.Transport)
+	if !ok {
+		return fmt.Errorf("unsupported HTTP transport")
+	}
+	transport.TLSClientConfig = &tls.Config{MinVersion: tls.VersionTLS12, RootCAs: pool}
+	return nil
+}
 
 type APIError struct {
 	Status int

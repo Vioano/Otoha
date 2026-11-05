@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Otoha · 通信需求模拟</title>
+<style>
+:root{color-scheme:dark;--bg:#151714;--surface:#1b1f19;--selected:#283222;--text:#edf0e6;--muted:#a4ae9c;--dim:#839075;--line:#363e31;--accent:#bed29f;--ink:#202a18;--warn:#e0b880;--danger:#e7a38f;--code:#d4debc}
+:root[data-theme="light"]{color-scheme:light;--bg:#f5f4eb;--surface:#eeeee3;--selected:#e3ead4;--text:#252c1e;--muted:#5c6851;--dim:#616d53;--line:#cdd0bf;--accent:#48652f;--ink:#f7f8ef;--warn:#8d5d20;--danger:#a63e29;--code:#3f5b26}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;-webkit-font-smoothing:antialiased}button,input,textarea,select{font:inherit}button,input,textarea,select{color:inherit}button,summary,select{cursor:pointer}button:disabled{opacity:.4;cursor:default}button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:4px}[hidden]{display:none!important}.shell{max-width:1640px;padding:0 34px;margin:auto}.topbar{min-height:78px;display:flex;gap:22px;align-items:center;border-bottom:1px solid var(--line);flex-wrap:wrap}.brand{font-size:22px;font-weight:620;letter-spacing:-1px}.sim-label{font-size:11px;color:var(--accent);border:1px solid var(--line);padding:3px 8px;border-radius:3px}.top-actions{margin-left:auto;display:flex;align-items:center;gap:10px}button{border:1px solid var(--line);border-radius:4px;background:transparent;padding:8px 12px;min-height:37px}button:not(:disabled):hover{background:var(--selected)}.quiet-button{font-size:12px;color:var(--muted);min-height:34px;padding:6px 10px}.controls{display:flex;flex-wrap:wrap;gap:20px 30px;align-items:end;padding:23px 0;border-bottom:1px solid var(--line)}.control{display:flex;flex-direction:column;gap:6px}.control-label,.field-label{font-size:11px;color:var(--muted)}select{font-size:12px;padding:6px 25px 6px 0;border:0;border-bottom:1px solid var(--line);background:transparent;border-radius:0;min-height:34px}option{background:var(--bg);color:var(--text)}.online-control{margin-left:auto;display:flex;align-items:center;gap:10px;padding-bottom:6px;font-size:12px}.online-control input{accent-color:var(--accent);width:16px;height:16px}.online-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}.online-control.offline{color:var(--warn)}.online-control.offline .online-dot{background:var(--warn)}.context{display:flex;justify-content:space-between;gap:30px;align-items:baseline;padding:24px 0 28px}.context h1{font-size:25px;font-weight:540;letter-spacing:-.03em;margin:0}.context p{font-size:12px;color:var(--muted);margin:0;max-width:530px}.flow{display:grid;grid-template-columns:1fr 1fr 1.08fr 1.05fr;gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.stage{padding:21px 23px 24px;min-width:0;display:flex;flex-direction:column;min-height:575px;border-left:1px solid var(--line)}.stage:first-child{padding-left:0;border-left:0}.stage:last-child{padding-right:0}.stage-head{display:flex;gap:10px;align-items:baseline;padding-bottom:20px;margin-bottom:20px;border-bottom:1px solid var(--line)}.stage-number{font:11px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--dim)}.stage h2{font-size:16px;font-weight:580;line-height:1.4;margin:0}.stage-arrow{margin-left:auto;color:var(--dim);font-size:17px}.field{display:block;margin-bottom:19px}.field-label{display:block;margin-bottom:7px}textarea{width:100%;resize:vertical;background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:4px;padding:10px 11px;font-size:13px;line-height:1.75}textarea:disabled{color:var(--muted)}.summary-input{min-height:103px}.body-input{min-height:190px}details{min-width:0}summary{color:var(--muted);font-size:12px;list-style-position:outside;margin-left:15px}details[open]>summary{margin-bottom:13px}.source-note{font-size:11px;color:var(--dim);line-height:1.65}.action{margin-top:auto;padding-top:24px}.action button{width:100%;font-size:12px}.primary{background:var(--accent);color:var(--ink);border-color:transparent;font-weight:570}.primary:not(:disabled):hover{filter:brightness(1.06);background:var(--accent)}.secondary-action{margin-top:9px}.state-text{font-size:12px;color:var(--muted);margin:10px 0 0;min-height:37px}.state-text[data-tone="pending"]{color:var(--warn)}.state-text[data-tone="good"]{color:var(--accent)}.state-text[data-tone="error"]{color:var(--danger)}.restricted{font-size:13px;color:var(--muted);border-left:2px solid var(--line);padding:7px 0 7px 13px;margin:0 0 20px}.record{margin-bottom:22px}.record-head{display:flex;gap:10px;justify-content:space-between;align-items:baseline;margin-bottom:8px}.record-title{font-size:12px;font-weight:550}.tag{font-size:10px;color:var(--dim);border:1px solid var(--line);border-radius:3px;padding:1px 5px;white-space:nowrap}.tag.good{color:var(--accent)}.tag.pending{color:var(--warn)}.record-copy{font-size:12px;color:var(--muted);margin:0;white-space:pre-wrap;overflow-wrap:anywhere}.record-id{font:10px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--code);margin-top:9px;overflow-wrap:anywhere}.library-body{font-size:12px;color:var(--muted);white-space:pre-wrap;line-height:1.8}.visibility-table{width:100%;border-collapse:collapse;font-size:11px;margin:20px 0 0}.visibility-table th{text-align:left;font-weight:400;color:var(--dim)}.visibility-table td,.visibility-table th{padding:7px 0;border-bottom:1px solid var(--line)}.visibility-table td:last-child,.visibility-table th:last-child{text-align:right}.visibility-table .yes{color:var(--accent)}.visibility-table .no{color:var(--dim)}.session{background:var(--surface);border-top:2px solid var(--line);padding:14px 13px;min-height:258px;font-size:12px}.session-label{font-size:10px;color:var(--dim);margin-bottom:14px}.session-work{line-height:1.85;margin:0 0 15px}.map-version{font:11px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--code)}.session-message{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}.session-message p{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;margin:7px 0}.queue{font-size:11px;color:var(--warn);padding:12px 0 0}.document{min-height:258px;font-size:12px;line-height:1.85;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--muted);border-top:2px solid var(--line);padding:14px 0}.document.empty{color:var(--dim);display:flex;align-items:center;padding:0}.read-source{font-size:10px;color:var(--dim);padding-top:11px}.timeline{display:grid;grid-template-columns:1fr 320px;gap:30px;padding:25px 0}.timeline h2,.rules summary{font-size:13px;font-weight:550;margin:0}.milestones{display:flex;gap:0;margin-top:18px}.milestone{flex:1;border-top:1px solid var(--line);padding-top:12px;position:relative;font-size:11px;color:var(--dim)}.milestone::before{content:"";position:absolute;top:-4px;left:0;width:7px;height:7px;background:var(--bg);border:1px solid var(--line);border-radius:50%}.milestone.done{color:var(--accent)}.milestone.done::before{background:var(--accent);border-color:var(--accent)}.milestone p{margin:5px 0 0;color:var(--muted);font-size:10px}.events{list-style:none;padding:0;margin:13px 0 0;max-height:132px;overflow:auto}.events li{display:flex;gap:12px;padding:5px 0;font-size:11px;color:var(--muted)}.events .seq{font:10px/1.8 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--dim);min-width:20px}.rules{border-top:1px solid var(--line);padding:19px 0}.rules summary{margin-left:15px;color:var(--muted)}.rule-note{font-size:11px;color:var(--warn);margin-left:12px;font-weight:400}.rules-content{padding:14px 0 0;display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:30px}.rules-table{width:100%;border-collapse:collapse;font-size:11px}.rules-table th{text-align:left;color:var(--dim);font-weight:400}.rules-table th,.rules-table td{padding:9px 12px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}.rules-table td:last-child{color:var(--warn)}.rules-side{font-size:11px;color:var(--muted)}.rules-side label{display:flex;align-items:start;gap:8px;margin-bottom:12px}.rules-side input{accent-color:var(--accent);margin-top:3px}.rules-side a{color:var(--accent)}.json{font:10px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--dim);max-height:250px;overflow:auto}.footer{border-top:1px solid var(--line);padding:17px 0 24px;font-size:10px;color:var(--dim);display:flex;gap:20px;justify-content:space-between}.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0,0,0,0)}
+@media(max-width:1250px){.shell{padding:0 25px}.stage{padding-left:17px;padding-right:17px}.controls{gap:17px 24px}.context p{max-width:410px}.stage h2{font-size:15px}.timeline{grid-template-columns:1fr 280px}}
+@media(max-width:1050px){.flow{grid-template-columns:1fr 1fr}.stage{min-height:540px}.stage:nth-child(3){border-left:0;padding-left:0;border-top:1px solid var(--line)}.stage:nth-child(4){border-top:1px solid var(--line)}.stage:nth-child(2){padding-right:0}.timeline{grid-template-columns:1fr}.rules-content{grid-template-columns:1fr}.online-control{margin-left:0}.context{align-items:start}.context p{max-width:350px}}
+@media(max-width:650px){.shell{padding:0 19px}.topbar{gap:12px;padding:16px 0;min-height:70px}.brand{font-size:20px}.top-actions{gap:6px}.quiet-button{font-size:10px;padding:5px 8px}.sim-label{font-size:10px}.controls{gap:15px 22px;padding:19px 0}.control{flex:1;min-width:110px}.online-control{width:100%}.context{display:block;padding:23px 0}.context h1{font-size:23px}.context p{margin-top:10px;max-width:none}.flow{display:block}.stage,.stage:nth-child(3){border-left:0;border-top:1px solid var(--line);padding:21px 0;min-height:0}.stage:first-child{border-top:0}.stage-head{margin-bottom:18px}.action{padding-top:22px}.session,.document{min-height:190px}.timeline{padding:22px 0;gap:23px}.milestones{gap:8px}.milestone{font-size:10px}.footer{display:block;line-height:1.8}.footer span{display:block}.rules-table th:nth-child(3),.rules-table td:nth-child(3){display:none}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="topbar"><span class="brand">Otoha<span style="color:var(--accent)">.</span></span><span class="sim-label">需求模拟 · 虚构数据</span><div class="top-actions"><button id="reset" class="quiet-button" type="button">重置模拟</button><button id="theme" class="quiet-button" type="button">浅色</button></div></header>
+  <section class="controls" aria-label="模拟条件">
+    <label class="control"><span class="control-label">当前观察者</span><select id="observer"><option value="admin">管理员 · 队长</option><option value="alpha">队友甲 · Agent 甲</option><option value="beta">队友乙 · Agent 乙</option></select></label>
+    <label class="control"><span class="control-label">中心位置</span><select id="center"><option value="server">常驻服务器</option><option value="captain">队长电脑</option></select></label>
+    <label class="control"><span class="control-label">消息范围</span><select id="audience"><option value="alpha">队长 → 队友甲</option><option value="public">项目公开</option></select></label>
+    <label class="control"><span class="control-label">紧急程度</span><select id="priority"><option value="normal">普通消息</option><option value="urgent">紧急消息</option></select></label>
+    <label class="control" id="normalModeControl"><span class="control-label">普通消息的读取策略</span><select id="normalMode"><option value="queue">queue · 任务边界查收</option><option value="scan">主动扫描 · Agent 自行查收</option></select></label>
+    <label class="online-control" id="onlineLabel"><span class="online-dot" aria-hidden="true"></span><span id="onlineText">中心在线</span><input id="online" type="checkbox" checked aria-label="中心在线"></label>
+  </section>
+  <div class="context"><h1>采用地图 v3</h1><p>沿同一条消息观察：保存正文、送出摘要、读取原文，再决定采用。每个按钮只推进对应一步。</p></div>
+  <main class="flow" aria-label="一条消息的模拟流程">
+    <section class="stage" id="step-store" aria-labelledby="storeTitle">
+      <div class="stage-head"><span class="stage-number">01</span><h2 id="storeTitle">发送端</h2><span class="stage-arrow" aria-hidden="true">→</span></div>
+      <div id="composer"><label class="field"><span class="field-label">一句摘要</span><textarea id="summaryInput" class="summary-input" maxlength="280">地图已更新为 v3；关卡实现请按引用核对新版。</textarea></label><details id="bodyDetails"><summary>完整正文</summary><textarea id="bodyInput" class="body-input" aria-label="完整正文" maxlength="10000">采用地图 v3，替换此前的 v2。
+
+北侧入口改到桥边，出生点仍在东岸。甲负责更新关卡路径；乙的音效工作暂不调整。
+
+实施前请核对地图原件 map-v3.svg，并在交付说明中写明采用的地图版本。若当前实现仍依赖旧入口，请先报告差异。</textarea></details></div>
+      <p class="restricted" id="senderHidden" hidden>当前观察者不能查看队长的私发草稿。</p>
+      <p class="source-note" id="composerNote">发件人为队长；只在此模拟里操作。</p>
+      <div class="action"><button id="store" class="primary" type="button">存入 Otoha 消息库</button><p id="storeState" class="state-text" aria-live="polite">尚未保存</p></div>
+    </section>
+    <section class="stage" id="step-library" aria-labelledby="libraryTitle">
+      <div class="stage-head"><span class="stage-number">02</span><h2 id="libraryTitle">存储与可见范围</h2><span class="stage-arrow" aria-hidden="true">→</span></div>
+      <div class="record"><div class="record-head"><span class="record-title" id="authorityTitle">权威消息库 · 服务器</span><span class="tag" id="authorityTag">无记录</span></div><p class="record-copy" id="authorityCopy">完整正文在保存后进入消息库。</p><div class="record-id" id="messageRef" hidden></div><details id="libraryBodyDetails" hidden style="margin-top:13px"><summary>查看库中原文</summary><div id="libraryBody" class="library-body"></div></details></div>
+      <div class="record"><div class="record-head"><span class="record-title" id="replicaTitle">管理员的本机记录</span><span class="tag" id="replicaTag">无记录</span></div><p class="record-copy" id="replicaCopy">尚未收纳消息。</p></div>
+      <table class="visibility-table" aria-label="这条消息的可见范围"><thead><tr><th>观察者</th><th>本例可见性</th></tr></thead><tbody id="visibilityRows"></tbody></table>
+      <p class="source-note">库中可见与进入 Agent 上下文是两件事。</p>
+      <div class="action"><button id="notify" class="primary" type="button" disabled>发送摘要与引用</button><p id="notifyState" class="state-text" aria-live="polite">先保存消息</p></div>
+    </section>
+    <section class="stage" id="step-session" aria-labelledby="sessionTitle">
+      <div class="stage-head"><span class="stage-number">03</span><h2 id="sessionTitle">Session 窗口</h2><span class="stage-arrow" aria-hidden="true">→</span></div>
+      <div class="session" id="session"><div class="session-label" id="sessionLabel">队长 · 模拟 Session</div><p class="session-work" id="sessionWork"></p><div class="session-message" id="sessionMessage" hidden><span class="tag" id="routeTag">摘要与引用</span><p id="contextSummary"></p><div class="record-id" id="contextRef"></div><p id="contextBodyNote" class="source-note">正文尚未进入此 Session。</p></div><p class="source-note" id="sessionEmpty">这里还没有收到新摘要。</p></div>
+      <p id="queueState" class="queue"></p>
+      <div class="action"><button id="check" class="primary" type="button" disabled>本轮结束，查收</button><button id="switchRecipient" class="secondary-action" type="button">切到队友甲观察</button><p id="checkState" class="state-text" aria-live="polite">接收方自行选择读取时机。</p></div>
+    </section>
+    <section class="stage" id="step-read" aria-labelledby="readTitle">
+      <div class="stage-head"><span class="stage-number">04</span><h2 id="readTitle">按引用读取</h2></div>
+      <div class="document empty" id="readDocument">先取得摘要和引用，再按需 query 原文。</div><div class="read-source" id="readSource"></div>
+      <div class="action"><button id="query" class="primary" type="button" disabled>query 原文</button><button id="adopt" class="secondary-action" type="button" disabled>采用地图 v3，继续工作</button><p id="readState" class="state-text" aria-live="polite">取原文不会自动替 Agent 作决定。</p></div>
+    </section>
+  </main>
+  <section class="timeline" aria-label="本次模拟的变化"><div><h2 id="milestoneTitle">队友甲这条链</h2><div class="milestones" id="milestones"></div></div><div><h2>操作记录</h2><ol class="events" id="events"></ol></div></section>
+  <details class="rules"><summary>规则与来源 <span class="rule-note" id="rulesStatus">已确认需求 / 既有决定 / 本例设定</span></summary><div class="rules-content"><table class="rules-table"><thead><tr><th>规则</th><th>本页怎样模拟</th><th>来源</th><th>需求与取证状态</th></tr></thead><tbody id="rulesRows"></tbody></table><div class="rules-side"><label><input id="backup" type="checkbox"><span>中心离线时，启用既有记录中的备用渠道示例：接收方先收纳，中心恢复后再汇总。<br><span style="color:var(--warn)">既有决定的原话待补证；具体渠道与恢复细节待定。默认关闭只是本次比较条件。</span></span></label><p>本页的管理员限定为这个虚构项目的演示角色，不据此决定跨项目全局权限。成员在收纳时复制整条可见记录，是本例采用的副本方式；历史完整度与复制时机仍待核清。</p><p>消息待查收队列与宿主 queue 是不同层。本例用按钮模拟到任务边界后呈现摘要；真实宿主接受、窗口可见和模型消费仍须分别验证。</p><p><a href="COMMUNICATION-CONTRACT.zh-CN.md">通信契约</a> · <a href="REQUIREMENTS-STATE.zh-CN.md">需求演化与证据</a>。回读覆盖及缺口见后者；实例操作不代表真实验收。</p><details><summary>步骤 JSON</summary><pre id="stepsJson" class="json"></pre></details></div></div></details>
+  <footer class="footer"><span>全部状态只在本页内变化；不连接真实数据库，不向真实 Session 发消息。</span><span>可以对具体步骤留下浏览器评论。</span></footer>
+</div>
+<script>
+(() => {
+  'use strict';
+  // Requirement standing and evidence coverage are separate. The project-local
+  // role mapping and replica timing below are scenario choices, not Core axioms.
+  const RULES = [
+    {id:'visibility',name:'可见范围',model:'保留管理员完整、成员只看公共与本人收发的既有决定。本页把管理员范围设为这个项目，不决定全局映射。',source:'通信契约 §5；演化证据 §6',href:'COMMUNICATION-CONTRACT.zh-CN.md',status:'既有决定；原话待补证',requirementState:'existing_decision',evidenceState:'original_quote_pending'},
+    {id:'replica',name:'本机副本',model:'保留成员只存可见部分的既有决定。本例在收纳时复制可见整条记录，完整度与时机仍待核清。',source:'通信契约 §5–6；演化证据 §6',href:'COMMUNICATION-CONTRACT.zh-CN.md',status:'既有决定；副本细节待定',requirementState:'existing_decision',evidenceState:'original_quote_pending',scenarioChoice:'copy_visible_full_record_on_receipt'},
+    {id:'context',name:'完整存储 / 摘要引用',model:'完整原件保存在消息库；提示先带摘要与引用，query 后才取选定原文。',source:'C17a / C17b；通信契约 §1–3',href:'REQUIREMENTS-STATE.zh-CN.md',status:'用户明确，仍有效',requirementState:'current_explicit',evidenceState:'latest_user_message_verified'},
+    {id:'routing',name:'普通 queue / scan，紧急 steer',model:'普通消息 queue 或接收方主动扫描；紧急消息使用宿主支持的 steer。本例假定宿主支持，真实效果另验。',source:'C17a / C17b；通信契约 §4',href:'REQUIREMENTS-STATE.zh-CN.md',status:'用户明确，仍有效',requirementState:'current_explicit',evidenceState:'latest_user_message_verified'},
+    {id:'offline',name:'备用渠道与汇总',model:'保留队长离线时经可用渠道互发、由 CLI 后续汇总的既有决定；不推导多主接受。',source:'通信契约 §6；演化证据 §6',href:'COMMUNICATION-CONTRACT.zh-CN.md',status:'既有决定；原话待补证',requirementState:'existing_decision',evidenceState:'original_quote_pending'},
+    {id:'adoption',name:'读取与采用分开',model:'读取不证明采用。“采用地图 v3”是本例用于观察工作依据改变的显式操作。',source:'通信契约 §2、§4；地图版本实例',href:'COMMUNICATION-CONTRACT.zh-CN.md',status:'边界已明确；按钮为实例设定',requirementState:'scenario_design',evidenceState:'contract_boundary',scenarioChoice:'explicit_adopt_map_v3'}
+  ];
+  const SCENARIO_RULES={administratorScope:'this_example_project',administrators:['admin'],recipients:{alpha:['alpha'],public:['alpha','beta']},urgentRoute:'steer'};
+  const ACTORS={admin:'管理员 · 队长',alpha:'队友甲 · Agent 甲',beta:'队友乙 · Agent 乙'};
+  const $=id=>document.getElementById(id);
+  const ui=Object.fromEntries(['reset','theme','observer','center','audience','priority','normalMode','normalModeControl','online','onlineLabel','onlineText','composer','summaryInput','bodyInput','senderHidden','composerNote','store','storeState','authorityTitle','authorityTag','authorityCopy','messageRef','libraryBodyDetails','libraryBody','replicaTitle','replicaTag','replicaCopy','visibilityRows','notify','notifyState','sessionLabel','sessionWork','sessionMessage','routeTag','contextSummary','contextRef','contextBodyNote','sessionEmpty','queueState','check','switchRecipient','checkState','readDocument','readSource','query','adopt','readState','milestoneTitle','milestones','events','rulesRows','rulesStatus','backup','stepsJson'].map(id=>[id,$(id)]));
+  const newSession=()=>({received:false,summary:false,body:false,adopted:false,localCopy:false});
+  const fresh=()=>({message:null,authority:false,outbox:false,notifyRequested:false,sessions:{admin:newSession(),alpha:newSession(),beta:newSession()},events:[],next:1});
+  let state=fresh();
+  const actor=()=>ui.observer.value;
+  const online=()=>ui.online.checked;
+  const recipients=message=>SCENARIO_RULES.recipients[message.audience] || [];
+  const canSee=(who,message)=>Boolean(message && (SCENARIO_RULES.administrators.includes(who) || message.sender===who || message.audience==='public' || recipients(message).includes(who)));
+  const route=message=>message.priority==='urgent'?SCENARIO_RULES.urgentRoute:message.normalMode;
+  const sourceAvailable=who=>state.sessions[who].localCopy || (online() && state.authority && canSee(who,state.message));
+  function text(node,value){const s=String(value ?? '');if(node.textContent!==s)node.textContent=s;}
+  function status(node,value,tone=''){text(node,value);node.dataset.tone=tone;}
+  function tag(node,value,tone=''){text(node,value);node.className='tag'+(tone?' '+tone:'');}
+  function log(action,detail){state.events.push({step:state.next++,action,detail});}
+  function saveTheme(value){document.documentElement.dataset.theme=value;try{localStorage.setItem('otoha-requirement-theme',value);}catch(_){}text(ui.theme,value==='dark'?'浅色':'深色');ui.theme.setAttribute('aria-label',value==='dark'?'切换到浅色主题':'切换到深色主题');}
+  try{saveTheme(localStorage.getItem('otoha-requirement-theme')==='light'?'light':'dark');}catch(_){saveTheme('dark');}
+  function deliver() {
+    const m=state.message;if(!m || !state.notifyRequested)return;
+    if(!online() && !ui.backup.checked){state.outbox=true;return;}
+    for(const who of recipients(m)){
+      const session=state.sessions[who];if(session.received)continue;
+      session.received=true;session.localCopy=true;
+      if(route(m)==='steer')session.summary=true;
+      log('收纳与提示',ACTORS[who]+' 收纳可见记录；'+(route(m)==='steer'?'steer 将摘要与引用放进当前轮。':'摘要与引用等待 '+(route(m)==='queue'?'任务边界查收。':'主动扫描。')));
+    }
+    state.outbox=!state.authority;
+  }
+  function storeMessage(){
+    if(actor()!=='admin' || state.message)return;
+    const summary=ui.summaryInput.value.trim(),body=ui.bodyInput.value.trim();
+    if(!summary || !body){status(ui.storeState,'摘要与正文都需要有内容。','error');return;}
+    state.message={id:'M-001',ref:'otoha://map-project/messages/M-001',sender:'admin',audience:ui.audience.value,priority:ui.priority.value,normalMode:ui.normalMode.value,summary,body};
+    state.sessions.admin.localCopy=true;
+    if(online()){state.authority=true;log('保存','完整正文与摘要保存在中心消息库。');}
+    else{state.outbox=true;log('本机待发','中心离线；完整记录先留在队长本机发件箱。');}
+    render();
+  }
+  function notify(){if(actor()!=='admin' || !state.message || state.notifyRequested)return;state.notifyRequested=true;log('请求提示','只把摘要与引用送给接收方 Session；正文仍留在库里。');deliver();render();}
+  function check(){const who=actor(),session=state.sessions[who];if(!state.message || !session.received || session.summary)return;session.summary=true;log('查收摘要',ACTORS[who]+' 在'+(route(state.message)==='scan'?'主动扫描时':'当前轮结束后')+'读入摘要与引用，尚未取正文。');render();}
+  function query(){const who=actor(),session=state.sessions[who];if(!state.message || !session.summary || session.body || !canSee(who,state.message) || !sourceAvailable(who))return;session.body=true;session.localCopy=true;log('取原文',ACTORS[who]+' 按引用 query 完整正文；工作仍使用地图 v2。');render();}
+  function adopt(){const who=actor(),session=state.sessions[who];if(!session.body || session.adopted)return;session.adopted=true;log('采用新依据',ACTORS[who]+' 显式采用地图 v3，下一步更新北侧入口路径。');render();}
+  function centerChanged(){
+    log(online()?'中心恢复':'中心离线',ui.center.value==='captain'?'队长电脑（模拟）':'常驻服务器（模拟）');
+    if(online() && state.message && !state.authority){state.authority=true;state.outbox=false;log('补发与汇总','沿用 M-001 汇总到中心；不新建第二条消息，不推导图谱多主接受。');}
+    deliver();render();
+  }
+  function render(){
+    const who=actor(),m=state.message,session=state.sessions[who],visible=canSee(who,m),isAdmin=who==='admin';
+    const allowedDraft=isAdmin;
+    ui.composer.hidden=!allowedDraft;ui.senderHidden.hidden=allowedDraft;
+    text(ui.senderHidden,m && visible?'这是队长的发送操作。当前观察者可从自己的消息库读取已收纳内容。':'当前观察者不能查看队长的私发草稿。');
+    text(ui.composerNote,isAdmin?'发件人为队长；只在此模拟里操作。':'切换观察者不改变消息、权限或接收状态。');
+    ui.store.disabled=!isAdmin || Boolean(m);ui.summaryInput.disabled=Boolean(m);ui.bodyInput.disabled=Boolean(m);
+    for(const control of [ui.audience,ui.priority,ui.normalMode])control.disabled=Boolean(m);
+    ui.normalModeControl.hidden=ui.priority.value==='urgent';
+    text(ui.onlineText,online()?'中心在线':ui.center.value==='captain'?'队长中心不可达（模拟）':'服务器不可达（模拟）');ui.onlineLabel.classList.toggle('offline',!online());
+    status(ui.storeState,!m?'尚未保存':state.authority?'中心已保存完整记录':'本机已保存 · 待发 / 待汇总',m?(state.authority?'good':'pending'):'');
+    text(ui.authorityTitle,'权威消息库 · '+(ui.center.value==='captain'?'队长电脑':'服务器'));
+    tag(ui.authorityTag,state.authority?(online()?'已保存':'已保存 · 离线'):m?'待汇总':'无记录',state.authority && online()?'good':m?'pending':'');
+    if(!m)text(ui.authorityCopy,'完整正文在保存后进入消息库。');
+    else if(!state.authority)text(ui.authorityCopy,'中心尚未汇总此记录。离线收纳不等于中心已接受。');
+    else if(!visible)text(ui.authorityCopy,'当前观察者没有这条消息的读取范围。');
+    else if(!online())text(ui.authorityCopy,'中心暂不可达；不从这里查询正文。本机已收纳的副本仍可读取。');
+    else text(ui.authorityCopy,m.summary+'\n正文 '+m.body.length+' 字 · 独立保存');
+    const knowsReference=Boolean(m && visible && (session.localCopy || online() && state.authority));
+    ui.messageRef.hidden=!knowsReference;text(ui.messageRef,knowsReference?m.ref:'');
+    const canInspect=Boolean(m && visible && (state.authority && online() || session.localCopy));
+    ui.libraryBodyDetails.hidden=!canInspect;text(ui.libraryBody,canInspect?m.body:'');
+    text(ui.replicaTitle,isAdmin?'管理员的本机记录':ACTORS[who].split(' · ')[0]+'的本机副本');
+    tag(ui.replicaTag,session.localCopy?(state.authority?'已收纳':'待汇总'):'无记录',session.localCopy?(state.authority?'good':'pending'):'');
+    text(ui.replicaCopy,session.localCopy?'已保存自己可见的完整记录。正文并未因此自动进入 Session。':m && !visible?'不收纳这条私发记录。':'尚未收纳这条消息。');
+    ui.visibilityRows.replaceChildren();
+    for(const id of ['admin','alpha','beta']){const row=document.createElement('tr'),name=document.createElement('td'),scope=document.createElement('td');name.textContent=ACTORS[id].split(' · ')[0];const yes=m?canSee(id,m):id==='admin' || ui.audience.value==='public' || id==='alpha';scope.textContent=yes?'可见':'不可见';scope.className=yes?'yes':'no';row.append(name,scope);ui.visibilityRows.append(row);}
+    ui.notify.disabled=!isAdmin || !m || state.notifyRequested;
+    text(ui.notify,m && route(m)==='steer'?'steer 摘要与引用':m && route(m)==='scan'?'使摘要与引用可查收':'发送摘要与引用');
+    status(ui.notifyState,!m?'先保存消息':!state.notifyRequested?'正文已保存，Session 尚未收到提示。':state.outbox && !ui.backup.checked?'待发：中心恢复后继续。':!state.authority?'备用渠道已收纳 · 中心待汇总':'接收端已收纳；是否入上下文、取正文仍分别记录。',state.outbox?'pending':state.notifyRequested?'good':'');
+    text(ui.sessionLabel,ACTORS[who]+' · 模拟 Session');
+    text(ui.sessionWork,isAdmin?'当前工作：协调地图版本。':'当前工作：'+(who==='alpha'?'更新关卡路径。':'处理环境音效。')+'\n工作依据：地图 '+(session.adopted?'v3':'v2'));
+    ui.sessionMessage.hidden=!session.summary;ui.sessionEmpty.hidden=session.summary;
+    text(ui.sessionEmpty,m && !visible?'此 Session 看不到这条私发消息。':'这里还没有收到新摘要。');
+    text(ui.routeTag,m?route(m)+' · 摘要与引用':'摘要与引用');text(ui.contextSummary,session.summary?m.summary:'');text(ui.contextRef,session.summary?m.ref:'');
+    text(ui.contextBodyNote,session.body?'正文已按需读取；不会因读取自动采用。':'正文尚未进入此 Session。');
+    text(ui.queueState,session.received && !session.summary?(route(m)==='scan'?'可扫描记录：1 条；Session 尚未读取。':'queue：1 条；当前轮尚未结束。'):session.summary && m && route(m)==='steer'?'此模拟假定宿主支持 steer；真实宿主能力另验。':'');
+    ui.check.disabled=!session.received || session.summary;text(ui.check,m && route(m)==='scan'?'主动扫描，查收摘要':'本轮结束，查收');
+    ui.switchRecipient.hidden=who==='alpha';
+    status(ui.checkState,session.summary?'摘要已进入上下文；尚不证明执行依据已更新。':'接收方自行选择读取时机。',session.summary?'good':'');
+    ui.query.disabled=!session.summary || session.body || !visible || !sourceAvailable(who);ui.adopt.disabled=!session.body || session.adopted;
+    ui.readDocument.classList.toggle('empty',!session.body);text(ui.readDocument,session.body?m.body:m && !visible?'当前观察者没有读取这条消息的范围。':'先取得摘要和引用，再按需 query 原文。');
+    text(ui.readSource,session.body?'query 返回已进入此 Session · '+m.ref+' · 本机可见副本':'');
+    status(ui.readState,session.adopted?'已采用地图 v3；下一步将按北侧新入口更新实现。':session.body?'已读原文；工作依据仍是地图 v2。':'取原文不会自动替 Agent 作决定。',session.adopted?'good':'');
+    renderMilestones();renderEvents();
+  }
+  function renderMilestones(){
+    const targetActor=actor()==='admin'?'alpha':actor(),target=state.sessions[targetActor],name=targetActor==='alpha'?'甲':'乙';
+    text(ui.milestoneTitle,'队友'+name+'这条链');
+    const values=[['保存',Boolean(state.message),state.message?(state.authority?'中心完整库':'本机待发'):'尚未保存'],['提示',target.received,target.received?(target.summary?'摘要已入上下文':'接收端待查收'):'尚未收纳'],['读取',target.body,target.body?name+'已 query 原文':name+'尚未取正文'],['采用',target.adopted,target.adopted?name+'采用地图 v3':name+'仍按地图 v2 工作']];
+    ui.milestones.replaceChildren();for(const [label,done,detail]of values){const el=document.createElement('div');el.className='milestone'+(done?' done':'');const name=document.createElement('span'),desc=document.createElement('p');name.textContent=label;desc.textContent=detail;el.append(name,desc);ui.milestones.append(el);}
+  }
+  function renderEvents(){const visible=canSee(actor(),state.message);const visibleEvents=state.message && !visible?state.events.filter(item=>['中心恢复','中心离线','中心位置','切换模拟分支'].includes(item.action)):state.events;ui.events.replaceChildren();if(!visibleEvents.length){const row=document.createElement('li');row.textContent=state.message && !visible?'当前观察者没有可见的消息步骤。':'尚未操作。先以管理员身份保存消息。';ui.events.append(row);}else for(const item of visibleEvents.slice(-8)){const row=document.createElement('li'),seq=document.createElement('span'),detail=document.createElement('span');seq.className='seq';seq.textContent=String(item.step).padStart(2,'0');detail.textContent=item.detail;row.append(seq,detail);ui.events.append(row);}const visibleMessage=canSee(actor(),state.message)?state.message:state.message?{visible:false}:null;text(ui.stepsJson,JSON.stringify({simulation:true,fictional_data:true,rules_status:RULES.map(rule=>({id:rule.id,requirement_state:rule.requirementState,evidence_state:rule.evidenceState,...(rule.scenarioChoice?{scenario_choice:rule.scenarioChoice}:{})})),administrator_scope:SCENARIO_RULES.administratorScope,observer:actor(),center:ui.center.value,online:online(),message:visibleMessage,authority_recorded:state.authority,current_session:state.sessions[actor()],steps:visibleEvents},null,2));}
+  function renderRules(){ui.rulesRows.replaceChildren();for(const rule of RULES){const row=document.createElement('tr');for(const [index,value]of [rule.name,rule.model,rule.source,rule.status].entries()){const cell=document.createElement('td');if(index===2){const link=document.createElement('a');link.href=rule.href;link.textContent=value;link.style.color='var(--accent)';cell.append(link);}else cell.textContent=value;if(index===3)cell.style.color=rule.requirementState==='current_explicit'?'var(--accent)':rule.requirementState==='existing_decision'?'var(--warn)':'var(--muted)';row.append(cell);}ui.rulesRows.append(row);}}
+  ui.store.addEventListener('click',storeMessage);ui.notify.addEventListener('click',notify);ui.check.addEventListener('click',check);ui.query.addEventListener('click',query);ui.adopt.addEventListener('click',adopt);
+  ui.observer.addEventListener('change',render);ui.switchRecipient.addEventListener('click',()=>{ui.observer.value='alpha';render();});
+  ui.online.addEventListener('change',centerChanged);ui.center.addEventListener('change',()=>{log('中心位置',ui.center.value==='captain'?'中心改为队长电脑；不会建立第二个权威库。':'中心改为常驻服务器；不会建立第二个权威库。');render();});
+  for(const control of [ui.audience,ui.priority,ui.normalMode])control.addEventListener('change',render);
+  ui.backup.addEventListener('change',()=>{log('切换模拟分支',ui.backup.checked?'启用既有记录中的备用渠道示例；原话待补证。':'关闭本次备用渠道示例。');deliver();render();});
+  ui.reset.addEventListener('click',()=>{state=fresh();ui.libraryBodyDetails.open=false;render();});
+  ui.theme.addEventListener('click',()=>saveTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
+  // Pure rules and serializable state support a later audit without rewriting layout.
+  window.OtohaCommunicationSimulation=Object.freeze({rules:RULES.map(rule=>({...rule})),snapshot:()=>JSON.parse(JSON.stringify(state)),canSee:(who,message)=>canSee(who,message)});
+  renderRules();render();
+})();
+</script>
+</body>
+</html>

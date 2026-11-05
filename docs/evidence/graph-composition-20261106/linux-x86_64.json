@@ -1,0 +1,623 @@
+{
+  "experiment": "logical-graph-reference-storage-boundary",
+  "status": "passed",
+  "started_utc": "2026-11-05T20:05:18.526045+00:00",
+  "platform": {
+    "os": "Linux",
+    "architecture": "x86_64",
+    "python": "3.14.7"
+  },
+  "scope": "synthetic storage representation and explicit routing only; not an Otoha resolver, authorization policy, graph revision protocol, federation or multi-database atomicity test",
+  "helper": "experiments/graph-db-surreal/probe.py",
+  "probe_sha256": "eef50c49008a26195513b9fbd838a52f649d26c663cc1ba9541603ec571ea739",
+  "startup_ms": [
+    710.44
+  ],
+  "checks": [
+    {
+      "name": "two_ordinary_nodes_reference_same_logical_graph",
+      "passed": true,
+      "details": [
+        {
+          "id": "node:pay",
+          "p": {
+            "label": "Pay",
+            "ref": {
+              "graph_id": "g_pay"
+            }
+          }
+        },
+        {
+          "id": "node:pay_other",
+          "p": {
+            "label": "Another Pay view",
+            "ref": {
+              "graph_id": "g_pay"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "colliding_local_ids_preserved_in_separate_databases",
+      "passed": true,
+      "details": [
+        {
+          "graph_id": "g_enterprise",
+          "id": "node:shared",
+          "p": {
+            "owner": "enterprise"
+          }
+        },
+        {
+          "graph_id": "g_shop",
+          "id": "node:shared",
+          "p": {
+            "owner": "shop"
+          }
+        },
+        {
+          "graph_id": "g_pay",
+          "id": "node:shared",
+          "p": {
+            "owner": "pay"
+          }
+        }
+      ]
+    },
+    {
+      "name": "explicit_graph_id_to_database_routing_reads_target",
+      "passed": true,
+      "details": {
+        "id": "node:refund",
+        "p": {
+          "label": "Refund API",
+          "version": 1
+        }
+      }
+    },
+    {
+      "name": "target_record_not_present_in_enterprise_scope",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "native_enforced_edge_does_not_resolve_other_database_target",
+      "passed": true,
+      "details": [
+        {
+          "details": {
+            "details": {
+              "id": "node:refund"
+            },
+            "kind": "Record"
+          },
+          "kind": "NotFound",
+          "result": "The record 'node:refund' does not exist",
+          "status": "ERR",
+          "time": "253.398µs",
+          "type": null
+        }
+      ]
+    },
+    {
+      "name": "rejected_cross_database_edge_not_persisted",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "deleting_one_reference_preserves_other_reference",
+      "passed": true,
+      "details": null
+    },
+    {
+      "name": "deleting_enterprise_reference_does_not_delete_target",
+      "passed": true,
+      "details": {
+        "id": "node:refund",
+        "p": {
+          "label": "Refund API",
+          "version": 1
+        }
+      }
+    }
+  ],
+  "queries": [
+    {
+      "database": "enterprise",
+      "sql": "DEFINE NAMESPACE otoha_spike; USE NS otoha_spike; DEFINE DATABASE enterprise; USE DB enterprise; \nDEFINE TABLE node TYPE NORMAL SCHEMALESS;\nDEFINE TABLE edge TYPE RELATION IN node OUT node ENFORCED SCHEMALESS;\n",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "618.558µs",
+          "type": null
+        },
+        {
+          "result": {
+            "database": "enterprise",
+            "namespace": "otoha_spike"
+          },
+          "status": "OK",
+          "time": "126.95µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "213.984µs",
+          "type": null
+        },
+        {
+          "result": {
+            "database": "enterprise",
+            "namespace": "otoha_spike"
+          },
+          "status": "OK",
+          "time": "70.463µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "283.836µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "214.705µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 24.284
+    },
+    {
+      "database": "enterprise",
+      "sql": "DEFINE DATABASE shop; USE DB shop; \nDEFINE TABLE node TYPE NORMAL SCHEMALESS;\nDEFINE TABLE edge TYPE RELATION IN node OUT node ENFORCED SCHEMALESS;\n",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "211.659µs",
+          "type": null
+        },
+        {
+          "result": {
+            "database": "shop",
+            "namespace": "otoha_spike"
+          },
+          "status": "OK",
+          "time": "92.244µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "278.285µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "148.911µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.867
+    },
+    {
+      "database": "enterprise",
+      "sql": "DEFINE DATABASE pay; USE DB pay; \nDEFINE TABLE node TYPE NORMAL SCHEMALESS;\nDEFINE TABLE edge TYPE RELATION IN node OUT node ENFORCED SCHEMALESS;\n",
+      "response": [
+        {
+          "result": null,
+          "status": "OK",
+          "time": "175.261µs",
+          "type": null
+        },
+        {
+          "result": {
+            "database": "pay",
+            "namespace": "otoha_spike"
+          },
+          "status": "OK",
+          "time": "63.891µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "227.699µs",
+          "type": null
+        },
+        {
+          "result": null,
+          "status": "OK",
+          "time": "121.86µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.856
+    },
+    {
+      "database": "enterprise",
+      "sql": "\n        CREATE node:shop CONTENT {p: {label: \"Shop\", ref: {graph_id: \"g_shop\"}}};\n        CREATE node:pay CONTENT {p: {label: \"Pay\", ref: {graph_id: \"g_pay\"}}};\n        CREATE node:pay_other CONTENT {p: {label: \"Another Pay view\", ref: {graph_id: \"g_pay\"}}};\n        RELATE node:shop->edge:depends->node:pay CONTENT {p: {relation: \"depends_on\"}};\n        CREATE node:shared CONTENT {p: {owner: \"enterprise\"}};\n    ",
+      "response": [
+        {
+          "result": [
+            {
+              "id": "node:shop",
+              "p": {
+                "label": "Shop",
+                "ref": {
+                  "graph_id": "g_shop"
+                }
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "421.035µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:pay",
+              "p": {
+                "label": "Pay",
+                "ref": {
+                  "graph_id": "g_pay"
+                }
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "153.42µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:pay_other",
+              "p": {
+                "label": "Another Pay view",
+                "ref": {
+                  "graph_id": "g_pay"
+                }
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "105.058µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "edge:depends",
+              "in": "node:shop",
+              "out": "node:pay",
+              "p": {
+                "relation": "depends_on"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "255.773µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:shared",
+              "p": {
+                "owner": "enterprise"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "90.24µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 23.671
+    },
+    {
+      "database": "enterprise",
+      "sql": "SELECT id, p FROM node WHERE p.ref.graph_id = \"g_pay\" ORDER BY id;",
+      "response": [
+        {
+          "result": [
+            {
+              "id": "node:pay",
+              "p": {
+                "label": "Pay",
+                "ref": {
+                  "graph_id": "g_pay"
+                }
+              }
+            },
+            {
+              "id": "node:pay_other",
+              "p": {
+                "label": "Another Pay view",
+                "ref": {
+                  "graph_id": "g_pay"
+                }
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "448.887µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.737
+    },
+    {
+      "database": "shop",
+      "sql": "CREATE node:shared CONTENT {p: {owner: \"shop\"}}; CREATE node:checkout CONTENT {p: {label: \"Checkout\"}};",
+      "response": [
+        {
+          "result": [
+            {
+              "id": "node:shared",
+              "p": {
+                "owner": "shop"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "319.734µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:checkout",
+              "p": {
+                "label": "Checkout"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "94.518µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 23.375
+    },
+    {
+      "database": "pay",
+      "sql": "CREATE node:shared CONTENT {p: {owner: \"pay\"}}; CREATE node:refund CONTENT {p: {label: \"Refund API\", version: 1}};",
+      "response": [
+        {
+          "result": [
+            {
+              "id": "node:shared",
+              "p": {
+                "owner": "pay"
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "267.535µs",
+          "type": null
+        },
+        {
+          "result": [
+            {
+              "id": "node:refund",
+              "p": {
+                "label": "Refund API",
+                "version": 1
+              }
+            }
+          ],
+          "status": "OK",
+          "time": "108.855µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 23.174
+    },
+    {
+      "database": "enterprise",
+      "sql": "SELECT id, p FROM ONLY node:shared;",
+      "response": [
+        {
+          "result": {
+            "id": "node:shared",
+            "p": {
+              "owner": "enterprise"
+            }
+          },
+          "status": "OK",
+          "time": "222.349µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.467
+    },
+    {
+      "database": "shop",
+      "sql": "SELECT id, p FROM ONLY node:shared;",
+      "response": [
+        {
+          "result": {
+            "id": "node:shared",
+            "p": {
+              "owner": "shop"
+            }
+          },
+          "status": "OK",
+          "time": "245.393µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.8
+    },
+    {
+      "database": "pay",
+      "sql": "SELECT id, p FROM ONLY node:shared;",
+      "response": [
+        {
+          "result": {
+            "id": "node:shared",
+            "p": {
+              "owner": "pay"
+            }
+          },
+          "status": "OK",
+          "time": "213.493µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.893
+    },
+    {
+      "database": "pay",
+      "sql": "SELECT id, p FROM ONLY node:refund;",
+      "response": [
+        {
+          "result": {
+            "id": "node:refund",
+            "p": {
+              "label": "Refund API",
+              "version": 1
+            }
+          },
+          "status": "OK",
+          "time": "180.571µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.42
+    },
+    {
+      "database": "enterprise",
+      "sql": "SELECT * FROM node:refund;",
+      "response": [
+        {
+          "result": [],
+          "status": "OK",
+          "time": "132.38µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.521
+    },
+    {
+      "database": "enterprise",
+      "sql": "RELATE node:shop->edge:invalid_cross->node:refund CONTENT {p: {}};",
+      "response": [
+        {
+          "details": {
+            "details": {
+              "id": "node:refund"
+            },
+            "kind": "Record"
+          },
+          "kind": "NotFound",
+          "result": "The record 'node:refund' does not exist",
+          "status": "ERR",
+          "time": "253.398µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.432
+    },
+    {
+      "database": "enterprise",
+      "sql": "SELECT * FROM edge:invalid_cross;",
+      "response": [
+        {
+          "result": [],
+          "status": "OK",
+          "time": "199.276µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.717
+    },
+    {
+      "database": "enterprise",
+      "sql": "DELETE node:pay;",
+      "response": [
+        {
+          "result": [],
+          "status": "OK",
+          "time": "466.952µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.619
+    },
+    {
+      "database": "enterprise",
+      "sql": "SELECT VALUE p.ref.graph_id FROM ONLY node:pay_other;",
+      "response": [
+        {
+          "result": "g_pay",
+          "status": "OK",
+          "time": "185.861µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 22.615
+    },
+    {
+      "database": "pay",
+      "sql": "SELECT id, p FROM ONLY node:refund;",
+      "response": [
+        {
+          "result": {
+            "id": "node:refund",
+            "p": {
+              "label": "Refund API",
+              "version": 1
+            }
+          },
+          "status": "OK",
+          "time": "169.7µs",
+          "type": null
+        }
+      ],
+      "elapsed_ms": 23.076
+    }
+  ],
+  "backend": "3.3.5 for linux on x86_64",
+  "binary_bytes": 352368104,
+  "binary_sha256": "bd4ffffbf3daedb503fc876fa6d531578383ee10ed9b62649b9fa401b9375052",
+  "helper_sha256": "821f7af87852085a12e1b25b5f8e2589dbdf7483f5ee4afe74eb96cb364d1b0d",
+  "explicit_test_registry": {
+    "g_enterprise": "enterprise",
+    "g_shop": "shop",
+    "g_pay": "pay"
+  },
+  "qualified_addresses": [
+    {
+      "graph_id": "g_enterprise",
+      "id": "node:shared",
+      "p": {
+        "owner": "enterprise"
+      }
+    },
+    {
+      "graph_id": "g_shop",
+      "id": "node:shared",
+      "p": {
+        "owner": "shop"
+      }
+    },
+    {
+      "graph_id": "g_pay",
+      "id": "node:shared",
+      "p": {
+        "owner": "pay"
+      }
+    }
+  ],
+  "finished_utc": "2026-11-05T20:05:20.520378+00:00"
+}

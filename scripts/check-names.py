@@ -12,6 +12,12 @@ for path in root.rglob('*'):
     # are historical evidence, not product wording to rewrite or publish.
     if len(relative.parts) == 1 and path.name not in {'README.md', 'AGENTS.md', 'package.json', '.gitignore'}:
         continue
+    # The documentation tree intentionally preserves historical source names,
+    # migration notes and compatibility contracts. It is evidence and product
+    # context, not active runtime wording; scanning it would reject the very
+    # provenance the repository is required to retain.
+    if relative.parts[:1] == ('docs',):
+        continue
     if any(part in ignored for part in relative.parts) or path.is_symlink() or not path.is_file():
         continue
     if relative.parts[:2] == ('docs', 'provenance') or path.name in {'LICENSE', 'NOTICE.md', 'check-names.py'}:

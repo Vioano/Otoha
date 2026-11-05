@@ -1,5 +1,6 @@
 import concurrent.futures
 import contextlib
+import http.client
 import json
 import pathlib
 import secrets
@@ -122,6 +123,44 @@ class ServiceTest(unittest.TestCase):
         self.assertIsNotNone(receipt['read'])
         listed = self.call('GET', '/v1/receipts?channel=general', token=self.owner)
         self.assertEqual(len(listed['message_receipts']), 1)
+
+    def test_interrupt_requires_project_admin_without_changing_normal_delivery(self):
+        member, _, _ = self.member('member')
+        admin, _, _ = self.member('project-admin', 'admin')
+        reader, _, _ = self.member('reader', 'reader')
+        self.send(token=member, actor='member', identifier='normal-member', **{'class': 'queued'})
+        rejected = self.send(token=member, actor='member', identifier='member-interrupt',
+                             status=403, **{'class': 'interrupt'})
+        self.assertEqual(rejected['error'], 'interrupt_requires_admin')
+        self.assertIsNone(self.store.row('SELECT id FROM messages WHERE actor=? AND client_id=?',
+                                        ('member', 'member-interrupt')))
+        self.send(token=admin, actor='project-admin', identifier='admin-interrupt', **{'class': 'interrupt'})
+        self.send(identifier='owner-interrupt', **{'class': 'interrupt'})
+        self.send(token=reader, actor='reader', identifier='reader-interrupt',
+                  status=403, **{'class': 'interrupt'})
+        self.call('POST', '/v1/projects', {'id': 'unrelated'}, self.owner)
+        self.call('POST', '/v1/channels', {'id': 'unrelated-general', 'project': 'unrelated'}, self.owner)
+        self.send(token=admin, actor='project-admin', channel='unrelated-general',
+                  identifier='cross-project-interrupt', status=403, **{'class': 'interrupt'})
+
+    def test_error_response_declares_closed_connection_before_following_write(self):
+        connection = http.client.HTTPConnection('127.0.0.1', self.server.server_port, timeout=3)
+        try:
+            connection.request('GET', '/v1/messages/by-client-id?client_id=not-yet-sent',
+                               headers={'Authorization': 'Bearer ' + self.owner})
+            response = connection.getresponse()
+            self.assertEqual(response.status, 404)
+            self.assertEqual(response.getheader('Connection'), 'close')
+            self.assertTrue(response.will_close)
+            response.read()
+            body = json.dumps({'channel': 'general', 'client_id': 'following-write', 'text': 'Synthetic message'})
+            connection.request('POST', '/v1/messages', body=body,
+                               headers={'Authorization': 'Bearer ' + self.owner, 'Content-Type': 'application/json'})
+            following = connection.getresponse()
+            self.assertEqual(following.status, 200)
+            self.assertGreater(json.loads(following.read())['message_id'], 0)
+        finally:
+            connection.close()
 
     def test_realtime_receipts_and_stream_revocation(self):
         alice, _, _ = self.member('alice')

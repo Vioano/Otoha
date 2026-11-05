@@ -1,0 +1,124 @@
+{
+  "date_local": "2026-11-06",
+  "scope": "Isolated Mac and Omarchy experiment; synthetic project, identities, repository and messages. Not production adoption or user acceptance.",
+  "verified": {
+    "existing_gitea_reused": true,
+    "private_test_repository_created": true,
+    "legacy_advanced_join_clone_and_fetch": true,
+    "same_invitation_preserved_identity": true,
+    "linux_codex_read_feedback_and_published_update": true,
+    "mac_browser_observed_cross_host_update": true,
+    "feedback_kept_observed_accepted_version": true,
+    "dark_light_and_theme_memory_observed": true,
+    "center_offline_kept_page_and_persisted_feedback": true
+  },
+  "recovery": {
+    "queued_offline": true,
+    "accepted_response_lost_pending_preserved": true,
+    "local_url_unchanged": true,
+    "runtime_token_unchanged": true,
+    "queue_survived_daemon_restart": true,
+    "automatic_receipt_settled": true,
+    "lookup_recovered_original": true,
+    "identity_unchanged": true,
+    "pending_count": 0,
+    "connection_after": "online",
+    "accepted_effect_count": 1,
+    "test_member_credential_count": 1
+  },
+  "onboarding": {
+    "invitation_bytes_before_irrelevant_ca_removed": 1539,
+    "invitation_bytes_after": 335,
+    "cold_operator_trial_seconds": 3.039,
+    "cold_operator_trial_result": "passed with network permission already/just granted; not a statistical benchmark",
+    "luna_fresh_session": {
+      "elapsed_seconds": 31,
+      "initial_join_pass": false,
+      "initial_clone_pass": false,
+      "message_initially_queued": true,
+      "message_later_automatically_accepted": true,
+      "os_local_network_permission_observed": true,
+      "wrong_repository_readback_excluded": true
+    },
+    "preconditions": [
+      "CLI installed",
+      "machine network provider preconfigured with existing pinned SSH route",
+      "same original Gitea; server-side test identity limited to test repository"
+    ],
+    "no_first_attempt_success_rate_claim": true,
+    "luna_fresh_session_b": {
+      "elapsed_seconds": 39,
+      "join_seconds": 3.028,
+      "command_retries": 0,
+      "project_joined": true,
+      "clean_test_checkout_read": true,
+      "message_accepted": true,
+      "message_id": 8,
+      "direct_internal_git_url_probe_pass": false,
+      "git_origin_read_passed_in_post_trial_diagnostic": true,
+      "preconditions": [
+        "Same already OS-authorized executable",
+        "Fresh isolated project identity and Home",
+        "Daemon prestarted by operator",
+        "Existing pinned machine route"
+      ],
+      "limitation": "Repository authority URL was mistaken for a directly usable native Git endpoint; post-trial diagnostics do not count as model-autonomous verification."
+    }
+  },
+  "credential_integrity": {
+    "mac_files_checked": 5,
+    "mac_all_unchanged": true,
+    "linux_login_files_checked": 1,
+    "linux_all_unchanged": true
+  },
+  "resource_snapshot": {
+    "scope": "single small-sample snapshot, not a benchmark; browser/host agent excluded",
+    "mac_daemon": {
+      "rss_mib": 18.34,
+      "cpu_percent_snapshot": 0.1,
+      "elapsed": "25:58"
+    },
+    "linux": {
+      "daemon": {
+        "rss_mib": 12.85,
+        "cpu_percent_snapshot": 0.0,
+        "elapsed": "33:27"
+      },
+      "center": {
+        "rss_mib": 31.96,
+        "cpu_percent_snapshot": 0.1,
+        "elapsed": "23:41"
+      }
+    }
+  },
+  "not_proven": [
+    "Full latest communication contract compliance",
+    "summary-first default query interface",
+    "ordinary-member sent/received privacy model",
+    "complete member-visible local message replicas",
+    "urgent administrator enforcement and class-aware steer/queue routing",
+    "Generic Graph Core backend integration",
+    "Free HTML artifact end-to-end browser acceptance after the source extension",
+    "Stable cold onboarding without a first macOS network permission prompt",
+    "LFS or large-repository capacity"
+  ],
+  "requirement_prototype": {
+    "path": "docs/communication-requirement-instance.html",
+    "fictional_local_state_only": true,
+    "real_service_or_session_writes": false,
+    "browser_observed": [
+      "queue then summary then query then explicit adoption",
+      "private recipient visible and unrelated member hidden",
+      "urgent steer summary without full body injection",
+      "captain authority offline pending then recovery and active scan",
+      "dark and light themes with remembered choice"
+    ],
+    "screenshot": "communication-requirement-instance.jpg",
+    "user_requirement_acceptance": false,
+    "limits": [
+      "Page-local role filtering only; does not prove service ACL",
+      "Host steer/queue behavior is simulated",
+      "Replica timing is a scenario choice, not a finalized protocol"
+    ]
+  }
+}

@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Otoha · 系统图谱数学模型</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1017;
+      --bg-2: #111923;
+      --panel: rgba(18, 27, 38, .88);
+      --panel-strong: #182331;
+      --panel-soft: rgba(27, 39, 53, .74);
+      --line: #2d4154;
+      --line-soft: rgba(139, 166, 190, .16);
+      --text: #e8f1f5;
+      --muted: #9bb0bc;
+      --faint: #66808f;
+      --teal: #59e1ce;
+      --teal-soft: rgba(89, 225, 206, .15);
+      --coral: #ff967d;
+      --coral-soft: rgba(255, 150, 125, .15);
+      --lime: #c9e76e;
+      --lime-soft: rgba(201, 231, 110, .13);
+      --violet: #c2a8ff;
+      --violet-soft: rgba(194, 168, 255, .14);
+      --shadow: 0 20px 60px rgba(0, 0, 0, .28);
+      --radius-lg: 28px;
+      --radius-md: 18px;
+      --radius-sm: 11px;
+      --sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+    :root[data-theme="light"] {
+      color-scheme: light;
+      --bg: #eef4f1;
+      --bg-2: #e4eee9;
+      --panel: rgba(255, 255, 255, .9);
+      --panel-strong: #ffffff;
+      --panel-soft: rgba(247, 251, 249, .88);
+      --line: #c6d7d1;
+      --line-soft: rgba(59, 87, 79, .14);
+      --text: #142420;
+      --muted: #587069;
+      --faint: #7d9790;
+      --shadow: 0 18px 50px rgba(61, 93, 82, .13);
+    }
+    * { box-sizing: border-box; }
+    html { min-height: 100%; scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 5%, rgba(89,225,206,.08), transparent 27rem),
+        radial-gradient(circle at 95% 25%, rgba(255,150,125,.08), transparent 30rem),
+        linear-gradient(140deg, var(--bg), var(--bg-2));
+      font-family: var(--sans);
+      letter-spacing: -.012em;
+    }
+    button, input, textarea { font: inherit; }
+    button { color: inherit; }
+    .shell { width: min(1500px, calc(100% - 44px)); margin: 0 auto; padding: 24px 0 70px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 38px; }
+    .brand { display: flex; align-items: center; gap: 13px; }
+    .brand img { width: 37px; height: 37px; filter: drop-shadow(0 0 15px rgba(89,225,206,.26)); }
+    .brand-copy { display: grid; gap: 1px; }
+    .brand-name { font-size: 14px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .brand-sub { font-size: 11px; color: var(--muted); letter-spacing: .02em; }
+    .top-actions { display: flex; align-items: center; gap: 9px; }
+    .icon-btn, .ghost-btn, .solid-btn { border: 1px solid var(--line); background: var(--panel); border-radius: 999px; cursor: pointer; transition: .2s ease; }
+    .icon-btn { width: 39px; height: 39px; display: grid; place-items: center; font-size: 16px; }
+    .ghost-btn, .solid-btn { padding: 10px 14px; font-size: 12px; font-weight: 700; }
+    .solid-btn { border-color: transparent; color: #0d1718; background: var(--teal); }
+    .icon-btn:hover, .ghost-btn:hover, .solid-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.16); }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(400px, .98fr); gap: 26px; align-items: end; margin-bottom: 29px; }
+    .eyebrow { color: var(--teal); font: 700 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; }
+    h1 { max-width: 760px; margin: 12px 0 18px; font-size: clamp(38px, 5.6vw, 77px); line-height: .98; letter-spacing: -.065em; text-wrap: balance; }
+    .hero p { max-width: 650px; margin: 0; color: var(--muted); font-size: 16px; line-height: 1.65; text-wrap: pretty; }
+    .hero-note { border-left: 2px solid var(--coral); padding: 14px 0 14px 18px; color: var(--text); font-size: 14px; line-height: 1.6; }
+    .hero-note strong { display: block; color: var(--coral); font-size: 11px; font-family: var(--mono); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 7px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(310px, .72fr); gap: 18px; align-items: start; }
+    .panel { border: 1px solid var(--line-soft); border-radius: var(--radius-lg); background: var(--panel); box-shadow: var(--shadow); backdrop-filter: blur(18px); }
+    .graph-panel { min-height: 680px; overflow: hidden; position: relative; }
+    .panel-head { display: flex; align-items: start; justify-content: space-between; gap: 12px; padding: 22px 23px 14px; }
+    .panel-title { margin: 0; font-size: 17px; letter-spacing: -.02em; }
+    .panel-copy { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .status-pill { flex: none; padding: 7px 10px; border-radius: 999px; border: 1px solid rgba(89,225,206,.35); background: var(--teal-soft); color: var(--teal); font: 700 10px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+    .graph-toolbar { display: flex; flex-wrap: wrap; gap: 7px; padding: 0 23px 12px; }
+    .filter { border: 1px solid var(--line); border-radius: 999px; background: transparent; padding: 7px 10px; color: var(--muted); cursor: pointer; font-size: 11px; transition: .18s ease; }
+    .filter.active, .filter:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-soft); }
+    .graph-wrap { position: relative; height: 505px; margin: 0 12px 16px; border-top: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); overflow: hidden; background: radial-gradient(circle at 50% 50%, rgba(89,225,206,.05), transparent 38%), linear-gradient(transparent 24px, rgba(150,180,195,.045) 25px), linear-gradient(90deg, transparent 24px, rgba(150,180,195,.045) 25px); background-size: auto, 25px 25px, 25px 25px; }
+    .graph-wrap::before { content: "G₍c₎  /  accepted semantic graph"; position: absolute; top: 13px; left: 15px; color: var(--faint); font: 10px var(--mono); letter-spacing: .08em; z-index: 3; }
+    #graphSvg { width: 100%; height: 100%; display: block; }
+    .edge { fill: none; stroke: var(--line); stroke-width: 1.5; opacity: .66; transition: .25s ease; }
+    .edge[data-kind="implements"], .edge[data-kind="instantiates"] { stroke: var(--teal); }
+    .edge[data-kind="responds_to"], .edge[data-kind="decides"] { stroke: var(--coral); }
+    .edge[data-kind="assigned_to"], .edge[data-kind="produces"] { stroke: var(--violet); stroke-dasharray: 5 5; }
+    .edge[data-kind="verifies"] { stroke: var(--lime); stroke-dasharray: 2 5; }
+    .edge.dim { opacity: .09; }
+    .edge.focus { opacity: 1; stroke-width: 3; filter: drop-shadow(0 0 5px currentColor); }
+    .node { cursor: pointer; }
+    .node rect { fill: var(--panel-strong); stroke: var(--line); stroke-width: 1.3; transition: .2s ease; }
+    .node:hover rect, .node.selected rect { stroke: var(--teal); stroke-width: 2.5; filter: drop-shadow(0 0 13px rgba(89,225,206,.2)); }
+    .node.selected rect { fill: color-mix(in srgb, var(--teal-soft) 54%, var(--panel-strong)); }
+    .node .type-mark { fill: var(--teal); }
+    .node[data-type="feedback"] .type-mark, .node[data-type="decision"] .type-mark { fill: var(--coral); }
+    .node[data-type="task"] .type-mark, .node[data-type="actor"] .type-mark { fill: var(--violet); }
+    .node[data-type="evidence"] .type-mark { fill: var(--lime); }
+    .node .label { fill: var(--text); font-size: 12px; font-weight: 760; pointer-events: none; }
+    .node .kind { fill: var(--muted); font: 9px var(--mono); letter-spacing: .08em; pointer-events: none; }
+    .node .id { fill: var(--faint); font: 8px var(--mono); pointer-events: none; }
+    .graph-legend { display: flex; flex-wrap: wrap; gap: 12px; padding: 0 23px 21px; color: var(--muted); font-size: 11px; }
+    .legend-item { display: inline-flex; align-items: center; gap: 6px; }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+    .legend-dot.coral { background: var(--coral); }.legend-dot.violet { background: var(--violet); }.legend-dot.lime { background: var(--lime); }
+    .side { display: grid; gap: 18px; }
+    .inspector { min-height: 310px; padding: 22px; }
+    .inspector-kicker { color: var(--teal); font: 700 10px var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .inspector h2 { margin: 9px 0 8px; font-size: 26px; letter-spacing: -.04em; }
+    .inspector p { color: var(--muted); font-size: 13px; line-height: 1.6; margin: 0; }
+    .meta-row { display: flex; gap: 7px; flex-wrap: wrap; margin: 16px 0; }
+    .tag { border: 1px solid var(--line); border-radius: 999px; padding: 5px 8px; color: var(--muted); font: 10px var(--mono); }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 15px; }
+    .detail { padding: 10px; border-radius: var(--radius-sm); background: var(--panel-soft); border: 1px solid var(--line-soft); }
+    .detail b { display: block; color: var(--faint); font: 9px var(--mono); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+    .detail span { font-size: 12px; line-height: 1.35; }
+    .callout { margin-top: 16px; padding: 12px 13px; border-radius: var(--radius-sm); background: var(--coral-soft); color: var(--text); font-size: 12px; line-height: 1.5; }
+    .callout strong { color: var(--coral); }
+    .section { padding: 22px; }
+    .section h3 { margin: 0 0 7px; font-size: 15px; }
+    .section > p { margin: 0 0 15px; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .formula { margin: 15px 0; padding: 15px; border-radius: var(--radius-md); background: #0d1720; border: 1px solid var(--line); color: var(--teal); font: 600 17px/1.4 var(--mono); text-align: center; letter-spacing: -.05em; }
+    :root[data-theme="light"] .formula { background: #f0f7f4; }
+    .step-list { display: grid; gap: 8px; }
+    .step { display: grid; grid-template-columns: 24px 1fr; gap: 9px; align-items: start; font-size: 12px; line-height: 1.45; }
+    .step-num { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--teal-soft); color: var(--teal); font: 700 10px var(--mono); }
+    .step b { color: var(--text); }.step span { color: var(--muted); }
+    .lab { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 18px; margin-top: 1px; padding: 24px; }
+    .lab-left h2 { margin: 0 0 8px; font-size: 24px; letter-spacing: -.04em; }.lab-left p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; max-width: 500px; }
+    .checks { display: grid; gap: 9px; margin-top: 19px; }
+    .check { display: flex; align-items: center; justify-content: space-between; gap: 9px; padding: 11px 12px; border-radius: var(--radius-sm); border: 1px solid var(--line-soft); background: var(--panel-soft); font-size: 12px; }
+    .check label { display: flex; align-items: center; gap: 8px; cursor: pointer; }.check input { accent-color: var(--teal); }
+    .check-state { color: var(--teal); font: 700 10px var(--mono); }.check-state.warn { color: var(--coral); }
+    .prompt-box { display: grid; gap: 11px; }.prompt-box textarea { min-height: 142px; resize: vertical; width: 100%; border: 1px solid var(--line); border-radius: var(--radius-md); padding: 14px; color: var(--text); background: var(--panel-soft); outline: none; line-height: 1.55; font-size: 13px; }.prompt-box textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-soft); }
+    .prompt-output { padding: 13px 14px; border-radius: var(--radius-md); background: var(--teal-soft); color: var(--text); font-size: 12px; line-height: 1.55; min-height: 72px; }.prompt-output strong { color: var(--teal); }
+    .footer { display: flex; justify-content: space-between; gap: 14px; align-items: center; margin-top: 20px; color: var(--faint); font: 10px var(--mono); }.footer a { color: var(--teal); text-decoration: none; }.footer a:hover { text-decoration: underline; }
+    @media (max-width: 1060px) { .hero { grid-template-columns: 1fr; }.hero-note { max-width: 650px; }.layout { grid-template-columns: 1fr; }.side { grid-template-columns: 1fr 1fr; }.lab { grid-column: auto; grid-template-columns: 1fr; } }
+    @media (max-width: 700px) { .shell { width: min(100% - 24px, 1500px); padding-top: 14px; }.topbar { margin-bottom: 28px; }.top-actions .ghost-btn { display: none; } h1 { font-size: clamp(38px, 13vw, 62px); }.graph-panel { min-height: 610px; }.graph-wrap { height: 420px; margin-inline: 0; }.side { grid-template-columns: 1fr; }.panel-head, .graph-toolbar, .graph-legend, .inspector, .section, .lab { padding-left: 17px; padding-right: 17px; }.panel-head { padding-top: 18px; }.formula { font-size: 14px; }.footer { align-items: flex-start; flex-direction: column; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; scroll-behavior: auto !important; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><img src="../assets/brand/otoha-mark.svg" alt="Otoha"><div class="brand-copy"><div class="brand-name">Otoha Graph</div><div class="brand-sub">系统图谱数学模型 · 可视讲解器</div></div></div>
+      <div class="top-actions"><button class="ghost-btn" id="jumpLab">进入模型实验台</button><button class="icon-btn" id="themeToggle" aria-label="切换浅色和深色主题" title="切换主题">☼</button></div>
+    </header>
+
+    <section class="hero">
+      <div><div class="eyebrow">model / 01 · semantic graph</div><h1>先看关系，<br><span style="color:var(--teal)">再谈自由度。</span></h1><p>这不是把 Markdown 重新排版。这里把“需求怎样变成实例、反馈怎样改变决策、模块怎样承接决策”画成一张可以操作的语义图。每条线都有类型，每个对象都有稳定身份，画布只是阅读方式。</p></div>
+      <div class="hero-note"><strong>你现在看到的</strong>接受游标 <span style="font-family:var(--mono);color:var(--teal)">c = 12</span> 下的一张语义图。点击节点查看端点、证据和边界；切换关系过滤器，观察“同一组对象”怎样产生不同的局部上下文。</div>
+    </section>
+
+    <section class="layout">
+      <article class="panel graph-panel">
+        <div class="panel-head"><div><h2 class="panel-title">G<sub>c</sub> · 语义图</h2><p class="panel-copy">节点是工程对象，边是声明过的关系。布局不会改变图本体。</p></div><div class="status-pill">accepted / c=12</div></div>
+        <div class="graph-toolbar" role="toolbar" aria-label="关系筛选"><button class="filter active" data-filter="all">全部关系</button><button class="filter" data-filter="intent">意图链</button><button class="filter" data-filter="work">执行链</button><button class="filter" data-filter="evidence">证据链</button><button class="filter" data-filter="contains">层级</button></div>
+        <div class="graph-wrap"><svg id="graphSvg" viewBox="0 0 900 500" role="img" aria-label="Otoha 系统图谱关系图"></svg></div>
+        <div class="graph-legend"><span class="legend-item"><i class="legend-dot"></i>意图与实现</span><span class="legend-item"><i class="legend-dot coral"></i>反馈与决策</span><span class="legend-item"><i class="legend-dot violet"></i>任务与产出</span><span class="legend-item"><i class="legend-dot lime"></i>证据</span></div>
+      </article>
+
+      <aside class="side">
+        <article class="panel inspector" id="inspector"><div class="inspector-kicker">selected object</div><h2 id="inspectorTitle">需求 · r1</h2><p id="inspectorText">需要让人判断地图版本是否符合目标。它是图谱里“为什么做”的起点，不等于某个模块或任务。</p><div class="meta-row" id="inspectorTags"><span class="tag">kind: requirement</span><span class="tag">stable id: r1</span></div><div class="detail-grid"><div class="detail"><b>incoming</b><span id="incoming">0 条关系</span></div><div class="detail"><b>outgoing</b><span id="outgoing">1 条关系</span></div><div class="detail"><b>support</b><span id="support">待绑定证据</span></div><div class="detail"><b>scope</b><span id="scope">accepted graph</span></div></div><div class="callout" id="inspectorCallout"><strong>读图提示</strong><br>点击“实例”可以看见需求如何被放到一个可判断的具体体验里。</div></article>
+        <article class="panel section"><h3>一条关系怎样工作</h3><p>关系不是线条样式。它有方向、类型和端点域，查询才能复用。</p><div class="formula">Q<sub>selector,budget</sub>(G<sub>c</sub>) → (R, B, complete, c)</div><div class="step-list"><div class="step"><div class="step-num">01</div><div><b>选对象</b><br><span>从稳定 ID 找到起点，不靠画布坐标。</span></div></div><div class="step"><div class="step-num">02</div><div><b>选关系</b><br><span>只沿指定语义遍历，例如 implements 或 depends_on。</span></div></div><div class="step"><div class="step-num">03</div><div><b>带边界</b><br><span>结果明确告诉你省略了什么，不能把局部当全图。</span></div></div></div></article>
+      </aside>
+
+      <article class="panel lab" id="lab">
+        <div class="lab-left"><div class="eyebrow">model lab / iterative</div><h2>把你的要求变成模型检查</h2><p>你可以在这里先试着表达一个要求。系统会把它拆成可能影响的层：对象、关系、约束或查询。右侧的开关则展示当前第一版模型最关键的护栏。</p><div class="checks"><div class="check"><label><input type="checkbox" data-rule="forest" checked> `contains` 保持单父无环</label><span class="check-state">ON</span></div><div class="check"><label><input type="checkbox" data-rule="typed" checked> 关系端点必须有类型域</label><span class="check-state">ON</span></div><div class="check"><label><input type="checkbox" data-rule="projection" checked> 视图只是投影</label><span class="check-state">ON</span></div><div class="check"><label><input type="checkbox" data-rule="evidence" checked> 证据失效会降低有效状态</label><span class="check-state">ON</span></div></div></div>
+        <div class="prompt-box"><label class="eyebrow" for="modelRequest">your next modeling request</label><textarea id="modelRequest" placeholder="例如：我希望任务可以同时属于两个模块，但仍然保留独立的交接关系。"></textarea><button class="solid-btn" id="analyzeRequest">分析这条要求</button><div class="prompt-output" id="promptOutput"><strong>等待你的要求。</strong><br>写一句你想新增、放宽或收紧的建模规则，页面会给出第一版落点和需要重新检查的约束。</div></div>
+      </article>
+    </section>
+
+    <footer class="footer"><span>当前内容对应 docs/SYSTEM-GRAPH-MATH.zh-CN.md · 设计建议 · c=12</span><a href="./SYSTEM-GRAPH-MATH.zh-CN.md">打开原始定义 →</a></footer>
+  </main>
+  <script>
+    const graph = {
+      nodes: [
+        { id:'r1', type:'requirement', label:'地图目标', x:120, y:106, desc:'需要让人判断地图版本是否符合目标。', outgoing:['instantiates'], incoming:[], support:'待绑定证据', scope:'accepted graph', callout:'点击“实例”可以看见需求如何被放到一个可判断的具体体验里。' },
+        { id:'i1', type:'instance', label:'可操作预览', x:345, y:106, desc:'为判断需求而制作的具体地图预览。', outgoing:['responds_to'], incoming:['instantiates'], support:'预览哈希', scope:'accepted graph', callout:'实例让抽象目标变成可以操作、可以反馈的对象。' },
+        { id:'f1', type:'feedback', label:'层级反馈', x:570, y:106, desc:'预览中发现标记层级不清。', outgoing:['decides'], incoming:['responds_to'], support:'用户反馈记录', scope:'accepted graph', callout:'反馈是一个独立对象；它可以针对实例，也可以回到需求或决策。' },
+        { id:'d1', type:'decision', label:'接受地图 v2', x:760, y:106, desc:'接受地图 v2，并保留标记层级。', outgoing:['implements'], incoming:['decides'], support:'设计记录', scope:'accepted graph', callout:'决策表达取舍，但不会自动把模块标成已验证。' },
+        { id:'m1', type:'module', label:'地图渲染器', x:260, y:315, desc:'承担地图渲染职责的系统模块。', outgoing:['produces'], incoming:['implements'], support:'源码证据', scope:'module', callout:'模块承接决策。它的 implementation 和 integration 仍是两条独立轴。' },
+        { id:'t1', type:'task', label:'实现地图 v2', x:520, y:315, desc:'一项可交接的实现工作。', outgoing:['assigned_to','produces'], incoming:[], support:'任务记录', scope:'board projection', callout:'任务是独立对象；完成任务不会自动提升模块成熟度。' },
+        { id:'a1', type:'actor', label:'执行 Agent A', x:750, y:315, desc:'任务当前的交接对象。', outgoing:[], incoming:['assigned_to'], support:'协作记录', scope:'team', callout:'assigned_to 表示归属或交接，不表示独占锁或在线状态。' },
+        { id:'e1', type:'evidence', label:'预览 + 测试', x:390, y:445, desc:'支撑实例与实现声明的证据集合。', outgoing:['verifies'], incoming:['produces'], support:'哈希 / 测试结果', scope:'evidence index', callout:'源文件哈希只证明字节一致；测试通过只证明测试范围。' },
+        { id:'a2', type:'artifact', label:'地图 v2 产出物', x:650, y:445, desc:'任务产生的可定位产出物。', outgoing:[], incoming:['produces'], support:'产出物记录', scope:'artifact', callout:'产出物可以被证据绑定，形成可追溯的交付链。' }
+      ],
+      edges: [
+        { id:'e01', from:'r1', to:'i1', kind:'instantiates', group:'intent' },
+        { id:'e02', from:'i1', to:'f1', kind:'responds_to', group:'intent' },
+        { id:'e03', from:'f1', to:'d1', kind:'decides', group:'intent' },
+        { id:'e04', from:'d1', to:'m1', kind:'implements', group:'intent' },
+        { id:'e05', from:'t1', to:'a1', kind:'assigned_to', group:'work' },
+        { id:'e06', from:'t1', to:'a2', kind:'produces', group:'work' },
+        { id:'e07', from:'m1', to:'e1', kind:'produces', group:'evidence' },
+        { id:'e08', from:'e1', to:'i1', kind:'verifies', group:'evidence' }
+      ]
+    };
+    const svg = document.getElementById('graphSvg');
+    const ns = 'http://www.w3.org/2000/svg';
+    const nodeMap = new Map(graph.nodes.map(n => [n.id,n]));
+    let selected = 'r1';
+    let filter = 'all';
+    function el(tag, attrs={}) { const e=document.createElementNS(ns,tag); Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v)); return e; }
+    function nodeW(n){ return n.type === 'evidence' || n.type === 'artifact' ? 138 : 150; }
+    function edgePath(a,b){ const dx=b.x-a.x, dy=b.y-a.y; const x1=a.x+Math.sign(dx||1)*nodeW(a)/2, y1=a.y+13; const x2=b.x-Math.sign(dx||1)*nodeW(b)/2, y2=b.y-13; const mid=(x1+x2)/2; return `M ${x1} ${y1} C ${mid} ${y1}, ${mid} ${y2}, ${x2} ${y2}`; }
+    function renderGraph(){
+      svg.replaceChildren();
+      const defs=el('defs'); const marker=el('marker',{id:'arrow',viewBox:'0 0 10 10',refX:'9',refY:'5',markerWidth:'6',markerHeight:'6',orient:'auto-start-reverse'}); marker.appendChild(el('path',{d:'M 0 0 L 10 5 L 0 10 z',fill:'currentColor'})); defs.appendChild(marker); svg.appendChild(defs);
+      const edgeLayer=el('g');
+      graph.edges.forEach(edge=>{ const a=nodeMap.get(edge.from), b=nodeMap.get(edge.to); const p=el('path',{d:edgePath(a,b),class:'edge',id:`edge-${edge.id}`, 'data-kind':edge.kind, 'data-group':edge.group, 'marker-end':'url(#arrow)'}); if(filter!=='all' && filter!==edge.group && filter!=='contains') p.classList.add('dim'); if(selected===edge.from||selected===edge.to) p.classList.add('focus'); edgeLayer.appendChild(p); });
+      svg.appendChild(edgeLayer);
+      const nodeLayer=el('g');
+      graph.nodes.forEach(n=>{ const g=el('g',{class:`node ${n.id===selected?'selected':''}`,'data-type':n.type,tabindex:'0','role':'button','aria-label':`${n.label}，${n.type}`}); g.setAttribute('transform',`translate(${n.x-nodeW(n)/2},${n.y-24})`); const w=nodeW(n); g.appendChild(el('rect',{width:w,height:48,rx:12})); g.appendChild(el('rect',{class:'type-mark',x:0,y:0,width:4,height:48,rx:2})); const kind=el('text',{class:'kind',x:14,y:15}); kind.textContent=n.type; g.appendChild(kind); const label=el('text',{class:'label',x:14,y:31}); label.textContent=n.label; g.appendChild(label); const id=el('text',{class:'id',x:w-12,y:15,'text-anchor':'end'}); id.textContent=n.id; g.appendChild(id); g.addEventListener('click',()=>{ selected=n.id; updateInspector(); renderGraph(); }); g.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault(); selected=n.id; updateInspector(); renderGraph();}}); nodeLayer.appendChild(g); });
+      svg.appendChild(nodeLayer);
+    }
+    function updateInspector(){
+      const n=nodeMap.get(selected); const incoming=graph.edges.filter(e=>e.to===n.id), outgoing=graph.edges.filter(e=>e.from===n.id);
+      document.getElementById('inspectorTitle').textContent=`${n.label} · ${n.id}`; document.getElementById('inspectorText').textContent=n.desc;
+      document.getElementById('inspectorTags').innerHTML=`<span class="tag">kind: ${n.type}</span><span class="tag">stable id: ${n.id}</span>`;
+      document.getElementById('incoming').textContent=`${incoming.length} 条关系`; document.getElementById('outgoing').textContent=`${outgoing.length} 条关系`; document.getElementById('support').textContent=n.support; document.getElementById('scope').textContent=n.scope; document.getElementById('inspectorCallout').innerHTML=`<strong>读图提示</strong><br>${n.callout}`;
+    }
+    document.querySelectorAll('.filter').forEach(btn=>btn.addEventListener('click',()=>{ document.querySelectorAll('.filter').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); filter=btn.dataset.filter; renderGraph(); }));
+    document.getElementById('themeToggle').addEventListener('click',()=>{ const root=document.documentElement; const next=root.dataset.theme==='dark'?'light':'dark'; root.dataset.theme=next; localStorage.setItem('otoha-explainer-theme',next); });
+    const savedTheme=localStorage.getItem('otoha-explainer-theme'); if(savedTheme) document.documentElement.dataset.theme=savedTheme;
+    document.getElementById('jumpLab').addEventListener('click',()=>{ const lab=document.getElementById('lab'); window.scrollTo({top:lab.offsetTop-18,behavior:'smooth'}); document.getElementById('modelRequest').focus(); });
+    const ruleCopy={forest:'层级关系会变成可循环的图，无法确定唯一父级。',typed:'查询无法判断关系是否适用，Agent 只能把它当作标签。',projection:'画布可以反过来制造包含关系，视图和本体会混在一起。',evidence:'旧声明仍显示为有效，无法区分当前状态与历史记录。'};
+    document.querySelectorAll('[data-rule]').forEach(input=>input.addEventListener('change',()=>{ const row=input.closest('.check'); const state=row.querySelector('.check-state'); state.textContent=input.checked?'ON':'OFF'; state.classList.toggle('warn',!input.checked); }));
+    document.getElementById('analyzeRequest').addEventListener('click',()=>{ const text=document.getElementById('modelRequest').value.trim(); const out=document.getElementById('promptOutput'); if(!text){out.innerHTML='<strong>还没有要求。</strong><br>写一句你想新增、放宽或收紧的规则，我会先判断它影响哪一层。';return;} const hit=[]; let note='我会先把这条要求写成候选节点、关系或约束，再检查它是否破坏端点域、单父层级、视图投影或证据边界。模型仍保持可迭代。'; if(/同时属于|多个模块|多归属/.test(text)){ hit.push('task → module / associated_with'); note='“属于”需要先区分语义归属和工作交接：可新增允许多值的 associated_with，保留 assigned_to 作为当前交接；不能把它直接改成 contains。'; } else if(/任务|工作|交接|归属/.test(text)) hit.push('task / assigned_to'); if(/模块|系统|组件/.test(text)) hit.push('module / implements'); if(/需求|目标|意图/.test(text)) hit.push('requirement'); if(/反馈|体验|实例|原型/.test(text)) hit.push('instance / feedback'); if(/层级|父级|嵌套|包含/.test(text)) hit.push('contains / forest constraint'); if(/证据|测试|验证|运行/.test(text)) hit.push('evidence / maturity'); if(/查询|读取|上下文|邻居|路径/.test(text)) hit.push('query budget'); const targets=hit.length?Array.from(new Set(hit)).join('、'):'需要先形成一个新对象或关系候选'; out.innerHTML=`<strong>第一版落点：${targets}</strong><br>${note}`; });
+    renderGraph(); updateInspector();
+  </script>
+</body>
+</html>

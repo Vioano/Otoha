@@ -3,7 +3,6 @@ package otoha
 import (
 	"context"
 	"os"
-	"syscall"
 	"testing"
 	"time"
 )
@@ -26,7 +25,7 @@ func TestTeamLocalInitInviteJoinAndFakeChannel(t *testing.T) {
 	if pid < 1 {
 		t.Fatalf("missing local server pid: %#v", initialized)
 	}
-	defer syscall.Kill(pid, syscall.SIGTERM)
+	defer stopProcess(pid)
 
 	invited, err := TeamCommand(ctx, []string{"invite", "demo", "alice", "--out", root + "/alice.json"})
 	if err != nil {

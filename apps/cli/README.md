@@ -2,6 +2,8 @@
 
 原生 Go 客户端：项目接入、身份导入、消息、持续接收、Git 代理与 Codex 会话适配。需要 Go 1.26+。
 
+直接运行 `otoha` 会进入人类可读的本地协作控制台；显式子命令仍保持 JSON 输出，便于 Agent 调用。`otoha demo --slow` 播放不需要凭据的多 Agent 录屏序列。
+
 从仓库根目录：
 
 ```sh
@@ -73,6 +75,27 @@ otoha team join --invite /private/alice-invite.json
 
 `team init` 默认在 `OTOHA_HOME/teams/NAME/` 下创建 SQLite 服务状态、队长身份和服务日志，并在本机回环地址启动协作服务。`team invite` 写出权限受限的接入包；接入包包含服务地址、项目/频道、一次性邀请和过期时间，不包含任何私钥、队长凭据或 Telegram Token。`team join` 在成员本机生成凭据并保存本机身份，重复执行会恢复已有身份。
 
-当前 `--mode server`、远程 SSH provisioning、TLS 证书安装和宿主服务管理尚未实现；本阶段只保证队长电脑本机模式和 FakeChannel 联调。
+服务器模式也支持通过固定 HostKey 的 SSH 做远端初始化/启动，再用 HTTPS/TLS 访问：
+
+```sh
+otoha team init demo --mode server \
+  --url https://team.example.com \
+  --ssh-target captain@team.example.com \
+  --ssh-key /private/ssh/id_ed25519 \
+  --known-hosts /private/ssh/known_hosts \
+  --remote-script /opt/otoha/otoha_server.py \
+  --remote-state /srv/otoha/demo \
+  --remote-cert /srv/otoha/tls/fullchain.pem \
+  --remote-tls-key /srv/otoha/tls/privkey.pem \
+  --ca-file /private/ssh/team-ca.pem
+```
+
+SSH 只用于远端初始化和启动，成员通过 HTTPS/TLS 接入；邀请包可以携带公开 CA 证书，但不会携带 SSH 私钥。远端 systemd/launchd 服务注册和真实服务器验收仍需单独完成。
+
+## Doctor and daemon
+
+`otoha doctor` 是统一的只读检查入口：它检查本机私有目录、Go CLI、Python/Node 运行时、协作服务源文件、本机团队服务、SQLite 完整性、受管 receiver 和旧版 profile。它只报告问题，不自动修复或接管旧服务。
+
+后台接收沿用已有的一个 receiver。使用 `otoha daemon install|status|start|stop|restart|uninstall` 管理当前平台的 launchd、systemd user service 或 Windows Task Scheduler；`otoha daemon logs [--follow]` 读取同一个 receiver 日志。没有旧版 profile 或绑定时，daemon 不会凭空创建第二个 receiver。
 
 [MIT 许可](LICENSE)，代码来源见根目录 [NOTICE.md](../../NOTICE.md)。

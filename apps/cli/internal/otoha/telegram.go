@@ -65,14 +65,15 @@ type Inbound struct {
 }
 
 type TelegramConfig struct {
-	Token        string            `json:"token,omitempty"`
-	TokenFile    string            `json:"token_file,omitempty"`
-	APIBase      string            `json:"api_base,omitempty"`
-	StateDir     string            `json:"state_dir,omitempty"`
-	DefaultRoute string            `json:"default_route,omitempty"`
-	Routes       map[string]string `json:"routes,omitempty"`     // chat ID -> local session
-	Recipients   map[string]string `json:"recipients,omitempty"` // local session/member -> chat ID
-	MinInterval  time.Duration     `json:"-"`
+	Token          string            `json:"token,omitempty"`
+	TokenFile      string            `json:"token_file,omitempty"`
+	APIBase        string            `json:"api_base,omitempty"`
+	StateDir       string            `json:"state_dir,omitempty"`
+	DefaultRoute   string            `json:"default_route,omitempty"`
+	Routes         map[string]string `json:"routes,omitempty"`          // chat ID -> local session
+	Recipients     map[string]string `json:"recipients,omitempty"`      // local session/member -> chat ID
+	AllowedUpdates []string          `json:"allowed_updates,omitempty"` // nil preserves the bot's existing subscription
+	MinInterval    time.Duration     `json:"-"`
 }
 
 type telegramSent struct {
@@ -83,11 +84,13 @@ type telegramSent struct {
 }
 
 type telegramState struct {
-	Offset      int64           `json:"offset"`
-	SeenUpdates map[string]bool `json:"seen_updates"`
-	SeenIDs     map[string]bool `json:"seen_ids"`
-	Messages    []Inbound       `json:"messages"`
-	Sent        []telegramSent  `json:"sent"`
+	Offset      int64             `json:"offset"`
+	SeenUpdates map[string]bool   `json:"seen_updates"`
+	SeenIDs     map[string]bool   `json:"seen_ids"`
+	Messages    []Inbound         `json:"messages"`
+	Sent        []telegramSent    `json:"sent"`
+	Pending     []Inbound         `json:"pending,omitempty"`
+	Unsupported map[string]Object `json:"unsupported_updates,omitempty"`
 }
 
 type TelegramGateway struct {
@@ -98,6 +101,7 @@ type TelegramGateway struct {
 	connected bool
 	me        Object
 	mu        sync.Mutex
+	stateMu   sync.Mutex
 	lastSend  map[string]time.Time
 }
 
@@ -163,12 +167,31 @@ func LoadTelegramConfig(path string) (TelegramConfig, error) {
 			recipients[k] = s
 		}
 	}
-	return TelegramConfig{Token: S(b, "token"), TokenFile: S(b, "token_file"), APIBase: S(b, "api_base"), StateDir: S(b, "state_dir"), DefaultRoute: S(b, "default_route"), Routes: routes, Recipients: recipients}, nil
+	var allowedUpdates []string
+	if value, present := b["allowed_updates"]; present {
+		values, ok := value.([]any)
+		if !ok {
+			return TelegramConfig{}, errors.New("Telegram allowed_updates must be an array of strings when explicitly configured")
+		}
+		allowedUpdates = []string{}
+		for _, value := range values {
+			update, ok := value.(string)
+			if !ok {
+				return TelegramConfig{}, errors.New("Telegram allowed_updates must contain strings")
+			}
+			allowedUpdates = append(allowedUpdates, update)
+		}
+	}
+	return TelegramConfig{Token: S(b, "token"), TokenFile: S(b, "token_file"), APIBase: S(b, "api_base"), StateDir: S(b, "state_dir"), DefaultRoute: S(b, "default_route"), Routes: routes, Recipients: recipients, AllowedUpdates: allowedUpdates}, nil
 }
 
 func (g *TelegramGateway) Name() string { return "telegram" }
 
-func (g *TelegramGateway) Identity() Object { return Clone(g.me) }
+func (g *TelegramGateway) Identity() Object {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	return Clone(g.me)
+}
 
 func (g *TelegramGateway) StatePath() string { return g.statePath() }
 
@@ -177,6 +200,8 @@ func (g *TelegramGateway) Capabilities() Capabilities {
 }
 
 func (g *TelegramGateway) Connect(ctx context.Context) error {
+	g.mu.Lock()
+	defer g.mu.Unlock()
 	if g.connected {
 		return nil
 	}
@@ -236,9 +261,25 @@ func (g *TelegramGateway) Send(ctx context.Context, out Outbound) (SendResult, e
 	if err := g.waitChat(ctx, chat); err != nil {
 		return SendResult{}, err
 	}
-	state.Sent = append(state.Sent, telegramSent{ID: out.ID, Status: "pending", ChatID: chat})
-	if err := g.saveState(state); err != nil {
+	var concurrentPrevious *telegramSent
+	if _, err = g.updateState(func(current *telegramState) error {
+		for _, previous := range current.Sent {
+			if previous.ID == out.ID {
+				copy := previous
+				concurrentPrevious = &copy
+				return nil
+			}
+		}
+		current.Sent = append(current.Sent, telegramSent{ID: out.ID, Status: "pending", ChatID: chat})
+		return nil
+	}); err != nil {
 		return SendResult{}, err
+	}
+	if concurrentPrevious != nil {
+		if concurrentPrevious.Status != "sent" {
+			return SendResult{}, fmt.Errorf("Telegram send outcome for %s is unknown; do not resend blindly", out.ID)
+		}
+		return SendResult{ID: concurrentPrevious.ID, ExternalID: concurrentPrevious.ExternalID, ChatID: concurrentPrevious.ChatID}, nil
 	}
 	var message Object
 	err = g.call(ctx, "sendMessage", map[string]any{"chat_id": chat, "text": text}, &message)
@@ -251,12 +292,15 @@ func (g *TelegramGateway) Send(ctx context.Context, out Outbound) (SendResult, e
 	g.lastSend[chat] = time.Now()
 	g.mu.Unlock()
 	result := SendResult{ID: out.ID, ExternalID: int64(N(message, "message_id")), ChatID: chatID}
-	for i := range state.Sent {
-		if state.Sent[i].ID == out.ID {
-			state.Sent[i].Status, state.Sent[i].ExternalID, state.Sent[i].ChatID = "sent", result.ExternalID, chatID
+	if _, err := g.updateState(func(current *telegramState) error {
+		for i := range current.Sent {
+			if current.Sent[i].ID == out.ID {
+				current.Sent[i].Status, current.Sent[i].ExternalID, current.Sent[i].ChatID = "sent", result.ExternalID, chatID
+				return nil
+			}
 		}
-	}
-	if err = g.saveState(state); err != nil {
+		return errors.New("Telegram accepted send but its local pending record is missing")
+	}); err != nil {
 		return SendResult{}, err
 	}
 	return result, nil
@@ -301,7 +345,14 @@ func (g *TelegramGateway) receiveOnce(ctx context.Context, sink func(Inbound) er
 	if err != nil {
 		return false, err
 	}
-	params := map[string]any{"timeout": 10, "allowed_updates": `["message"]`}
+	progress, err := g.deliverPending(&state, sink)
+	if err != nil {
+		return progress, err
+	}
+	params := map[string]any{"timeout": 10}
+	if g.cfg.AllowedUpdates != nil {
+		params["allowed_updates"] = g.cfg.AllowedUpdates
+	}
 	if state.Offset > 0 {
 		params["offset"] = state.Offset
 	}
@@ -310,7 +361,23 @@ func (g *TelegramGateway) receiveOnce(ctx context.Context, sink func(Inbound) er
 		return false, err
 	}
 	if len(updates) == 0 {
-		return false, nil
+		return progress, nil
+	}
+	// Preserve unsupported originals and stop before confirming any update in
+	// this batch. Keeping an existing all-types subscription must not silently
+	// discard callbacks or media that this text adapter cannot deliver.
+	for _, update := range updates {
+		message := O(update, "message")
+		if _, textMessage := message["text"].(string); len(message) == 0 || !textMessage {
+			key := strconv.FormatInt(int64(N(update, "update_id")), 10)
+			if state, err = g.updateState(func(current *telegramState) error {
+				current.Unsupported[key] = Clone(update)
+				return nil
+			}); err != nil {
+				return progress, err
+			}
+			return progress, fmt.Errorf("Telegram update %s is not a supported text message; original retained for inspection and source cursor unchanged", key)
+		}
 	}
 	maxID := state.Offset - 1
 	for _, update := range updates {
@@ -323,35 +390,68 @@ func (g *TelegramGateway) receiveOnce(ctx context.Context, sink func(Inbound) er
 			continue
 		}
 		message := O(update, "message")
-		if len(message) == 0 {
-			state.SeenUpdates[key] = true
-			continue
-		}
 		chatID := telegramNumber(O(message, "chat"), "id")
 		inbound := decodeTelegramUpdate(update, g.route(chatID))
 		if inbound.EnvelopeID != "" && state.SeenIDs[inbound.EnvelopeID] {
-			state.SeenUpdates[key] = true
+			if state, err = g.updateState(func(current *telegramState) error { current.SeenUpdates[key] = true; return nil }); err != nil {
+				return progress, err
+			}
 			continue
 		}
-		state.Messages = append(state.Messages, inbound)
-		state.SeenUpdates[key] = true
-		if inbound.EnvelopeID != "" {
-			state.SeenIDs[inbound.EnvelopeID] = true
-		}
-		if err = g.saveState(state); err != nil {
+		if state, err = g.updateState(func(current *telegramState) error {
+			if current.SeenUpdates[key] {
+				return nil
+			}
+			current.Messages = append(current.Messages, inbound)
+			current.SeenUpdates[key] = true
+			if inbound.EnvelopeID != "" {
+				current.SeenIDs[inbound.EnvelopeID] = true
+			}
+			current.Pending = append(current.Pending, inbound)
+			return nil
+		}); err != nil {
 			return false, err
 		}
-		if err = sink(inbound); err != nil {
-			return false, err
+		if _, err = g.deliverPending(&state, sink); err != nil {
+			return progress, err
 		}
 	}
 	if maxID >= state.Offset {
-		state.Offset = maxID + 1
-		if err = g.saveState(state); err != nil {
+		if state, err = g.updateState(func(current *telegramState) error {
+			if maxID >= current.Offset {
+				current.Offset = maxID + 1
+			}
+			return nil
+		}); err != nil {
 			return false, err
 		}
 	}
 	return true, nil
+}
+
+func (g *TelegramGateway) deliverPending(state *telegramState, sink func(Inbound) error) (bool, error) {
+	progress := false
+	for len(state.Pending) > 0 {
+		if err := sink(state.Pending[0]); err != nil {
+			return progress, err
+		}
+		eventID := state.Pending[0].EventID
+		next, err := g.updateState(func(current *telegramState) error {
+			for i, pending := range current.Pending {
+				if pending.EventID == eventID {
+					current.Pending = append(current.Pending[:i], current.Pending[i+1:]...)
+					break
+				}
+			}
+			return nil
+		})
+		if err != nil {
+			return progress, err
+		}
+		*state = next
+		progress = true
+	}
+	return progress, nil
 }
 
 func (g *TelegramGateway) route(chatID string) string {
@@ -359,6 +459,31 @@ func (g *TelegramGateway) route(chatID string) string {
 		return route
 	}
 	return g.cfg.DefaultRoute
+}
+
+// TelegramRecipient resolves a targeted message without ever falling back to a
+// public destination. A bridge currently forwards to one distinct chat at a time.
+func TelegramRecipient(cfg TelegramConfig, message Object) (string, error) {
+	targets := Array(O(message, "payload")["to_sessions"])
+	if len(targets) == 0 {
+		if recipient := strings.TrimSpace(cfg.Recipients["public"]); recipient != "" {
+			return recipient, nil
+		}
+		return "", errors.New("Telegram public route is not configured")
+	}
+	recipient := ""
+	for _, value := range targets {
+		target, ok := value.(string)
+		if !ok || target == "" || strings.TrimSpace(cfg.Recipients[target]) == "" {
+			return "", errors.New("Telegram targeted session has no configured recipient; refusing public fallback")
+		}
+		chat := strings.TrimSpace(cfg.Recipients[target])
+		if recipient != "" && recipient != chat {
+			return "", errors.New("Telegram bridge cannot forward one targeted envelope to multiple distinct chats")
+		}
+		recipient = chat
+	}
+	return recipient, nil
 }
 
 func (g *TelegramGateway) waitChat(ctx context.Context, chat string) error {
@@ -396,17 +521,17 @@ func (g *TelegramGateway) call(ctx context.Context, method string, params map[st
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, base, strings.NewReader(form.Encode()))
 	if err != nil {
-		return err
+		return g.callError(method, err)
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	resp, err := g.client.Do(req)
 	if err != nil {
-		return err
+		return g.callError(method, err)
 	}
 	defer resp.Body.Close()
 	body, err := io.ReadAll(io.LimitReader(resp.Body, 2<<20))
 	if err != nil {
-		return err
+		return g.callError(method, err)
 	}
 	var envelope struct {
 		OK          bool            `json:"ok"`
@@ -431,7 +556,7 @@ func (g *TelegramGateway) call(ctx context.Context, method string, params map[st
 			}
 			return g.call(ctx, method, params, out)
 		}
-		return fmt.Errorf("Telegram %s: %s", method, envelope.Description)
+		return fmt.Errorf("Telegram %s: %s", method, strings.ReplaceAll(envelope.Description, g.token, "[redacted]"))
 	}
 	if out == nil || len(envelope.Result) == 0 {
 		return nil
@@ -439,10 +564,28 @@ func (g *TelegramGateway) call(ctx context.Context, method string, params map[st
 	return json.Unmarshal(envelope.Result, out)
 }
 
+type telegramCallError struct {
+	message string
+	cause   error
+}
+
+func (e *telegramCallError) Error() string { return e.message }
+func (e *telegramCallError) Unwrap() error { return e.cause }
+
+func (g *TelegramGateway) callError(method string, err error) error {
+	// net/http includes the full request URL in url.Error. Bot API puts the
+	// credential in that URL, so printing the transport error verbatim leaks it.
+	var requestError *url.Error
+	if errors.As(err, &requestError) {
+		err = requestError.Err
+	}
+	return &telegramCallError{message: "Telegram " + method + " request failed: " + strings.ReplaceAll(err.Error(), g.token, "[redacted]"), cause: err}
+}
+
 func (g *TelegramGateway) statePath() string { return filepath.Join(g.cfg.StateDir, "state.json") }
 
 func (g *TelegramGateway) loadState() (telegramState, error) {
-	state := telegramState{SeenUpdates: map[string]bool{}, SeenIDs: map[string]bool{}, Messages: []Inbound{}, Sent: []telegramSent{}}
+	state := telegramState{SeenUpdates: map[string]bool{}, SeenIDs: map[string]bool{}, Messages: []Inbound{}, Sent: []telegramSent{}, Pending: []Inbound{}, Unsupported: map[string]Object{}}
 	o, err := Load(g.statePath())
 	if os.IsNotExist(err) {
 		return state, nil
@@ -465,11 +608,33 @@ func (g *TelegramGateway) loadState() (telegramState, error) {
 	_ = json.Unmarshal(b, &state.Messages)
 	b, _ = json.Marshal(o["sent"])
 	_ = json.Unmarshal(b, &state.Sent)
+	b, _ = json.Marshal(o["pending"])
+	_ = json.Unmarshal(b, &state.Pending)
+	b, _ = json.Marshal(o["unsupported_updates"])
+	_ = json.Unmarshal(b, &state.Unsupported)
+	if state.Unsupported == nil {
+		state.Unsupported = map[string]Object{}
+	}
 	return state, nil
 }
 
 func (g *TelegramGateway) saveState(state telegramState) error {
 	return Save(g.statePath(), state)
+}
+
+// Only short local state updates hold this lock. A long poll, Telegram send or
+// sink call must not block the opposite direction of the same bridge instance.
+func (g *TelegramGateway) updateState(update func(*telegramState) error) (telegramState, error) {
+	g.stateMu.Lock()
+	defer g.stateMu.Unlock()
+	state, err := g.loadState()
+	if err != nil {
+		return state, err
+	}
+	if err = update(&state); err != nil {
+		return state, err
+	}
+	return state, g.saveState(state)
 }
 
 func encodeTelegramEnvelope(out Outbound) string {

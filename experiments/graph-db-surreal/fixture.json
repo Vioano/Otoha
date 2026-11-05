@@ -1,0 +1,16 @@
+{
+  "nodes": [
+    {"id": "a", "p": {"group": "A", "status": "ready", "label": "接口约定", "id": "ordinary property", "in": null, "nested": {"flags": [true, false, null], "weight": 0.8}}},
+    {"id": "b1", "p": {"group": "B", "note": null}},
+    {"id": "b2", "p": {"group": "B", "type": "a new vocabulary"}},
+    {"id": "c", "p": {"group": "C"}},
+    {"id": "loose", "p": {}}
+  ],
+  "edges": [
+    {"id": "e1", "source": "a", "target": "b1", "p": {"relation": "uses"}},
+    {"id": "e2", "source": "a", "target": "b1", "p": {"label": "independent edge", "note": null}},
+    {"id": "e3", "source": "b2", "target": "c", "p": {"weight": 2}},
+    {"id": "back", "source": "b1", "target": "a", "p": {}},
+    {"id": "loop", "source": "c", "target": "c", "p": {}}
+  ]
+}

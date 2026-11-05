@@ -115,6 +115,7 @@ func (d *Desktop) Settings(thread string) (Object, error) {
 }
 
 var ErrDesktopIdle = errors.New("Desktop has no active turn to steer")
+var ErrHostQueueUnavailable = errors.New("host queue is unavailable; message remains in Otoha inbox")
 
 func knownIdleRejection(message string) bool {
 	return strings.Contains(message, "no active turn to steer") || strings.Contains(message, "is not being streamed") || strings.Contains(message, "because its active turn already ended")
@@ -196,28 +197,74 @@ func DeliveryText(sourceThread, text string) string {
 	return text
 }
 
-func AdmitCodex(ctx context.Context, codex, thread, sourceThread, text string, messageID int) (Object, error) {
-	if threadRE.MatchString(thread) {
+// AdmitCodex routes a notification according to its declared class. Missing or
+// unfamiliar legacy classes are non-urgent. BusyAdmit remains the separate,
+// explicitly invoked steer primitive used by an existing receiver owner.
+func AdmitCodex(ctx context.Context, codex, thread, sourceThread, text string, messageID int, classes ...string) (Object, error) {
+	class := "queued"
+	if len(classes) > 0 && classes[0] == "interrupt" {
+		class = "interrupt"
+	}
+	fallback := ""
+	if class == "interrupt" && threadRE.MatchString(thread) {
 		if desktop, err := OpenDesktop(ctx, thread); err == nil {
 			result, err := desktop.Steer(thread, DeliveryText(sourceThread, text), messageID)
 			desktop.Close()
 			if err == nil {
+				result["requested_class"], result["interrupt_delivered"] = class, true
 				return result, nil
 			}
 			if !errors.Is(err, ErrDesktopIdle) {
 				return nil, err
 			}
+			fallback = "desktop_idle"
+		} else {
+			fallback = "desktop_unavailable"
 		}
 	}
-	return QueueCodex(ctx, codex, thread, sourceThread, text)
+	result, err := QueueCodex(ctx, codex, thread, sourceThread, text)
+	if err != nil {
+		return nil, err
+	}
+	result["requested_class"], result["interrupt_delivered"] = class, false
+	if fallback != "" {
+		result["fallback_reason"] = fallback
+	}
+	return result, nil
 }
+
+func unsupportedQueueOutput(output []byte, err error) bool {
+	var exit *exec.ExitError
+	if !errors.As(err, &exit) || exit.ExitCode() != 2 {
+		return false
+	}
+	// Recognize argument-parser rejection before any host submission. Do not
+	// search arbitrary echoed notification text for an error-looking phrase.
+	for _, line := range strings.Split(strings.ToLower(string(output)), "\n") {
+		message := strings.TrimSpace(line)
+		for _, prefix := range []string{
+			"error: unrecognized subcommand 'queue'", `error: unrecognized subcommand "queue"`,
+			"error: unknown subcommand 'queue'", `error: unknown subcommand "queue"`,
+			`error: unknown command "queue"`, "error: unexpected argument '--thread'", "error: unexpected argument '--message'",
+		} {
+			if strings.HasPrefix(message, prefix) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 func QueueCodex(ctx context.Context, codex, thread, sourceThread, text string) (Object, error) {
 	// Raw Desktop start can leave an optimistic turn without an ID when a
 	// running turn is returned. The supported queue lets Desktop manage its
 	// own turn transitions. Unknown outcomes are stopped by the delivery journal.
 	text = DeliveryText(sourceThread, text)
-	output, err := exec.CommandContext(ctx, codex, "queue", "--thread", thread, "--message", text).Output()
+	output, err := exec.CommandContext(ctx, codex, "queue", "--thread", thread, "--message", text).CombinedOutput()
 	if err != nil {
+		if errors.Is(err, exec.ErrNotFound) || errors.Is(err, os.ErrNotExist) || errors.Is(err, os.ErrPermission) || unsupportedQueueOutput(output, err) {
+			return nil, fmt.Errorf("%w: %v", ErrHostQueueUnavailable, err)
+		}
 		return nil, fmt.Errorf("Codex queue failed: %w", err)
 	}
 	h := sha256.Sum256(output)

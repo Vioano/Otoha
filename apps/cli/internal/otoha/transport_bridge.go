@@ -15,11 +15,12 @@ import (
 // accepted by the service and then pass through the normal local inbox path.
 // The bridge does not treat a channel delivery as an application read.
 type ChannelBridge struct {
-	Channel    Channel
-	Client     *Client
-	Binding    Object
-	CursorPath string
-	Recipient  func(Object) string
+	Channel          Channel
+	Client           *Client
+	Binding          Object
+	CursorPath       string
+	Recipient        func(Object) string
+	RecipientChecked func(Object) (string, error)
 }
 
 func NewChannelBridge(channel Channel, client *Client, binding Object, recipient func(Object) string) (*ChannelBridge, error) {
@@ -108,8 +109,19 @@ func (b *ChannelBridge) ForwardServerEvents(ctx context.Context, wait int) (Obje
 		if S(event, "kind") == "message.created" {
 			message := O(event, "payload")
 			payload := O(message, "payload")
-			recipient := b.Recipient(message)
-			if recipient != "" && S(message, "actor") != S(b.Binding, "actor") {
+			if S(message, "actor") != S(b.Binding, "actor") {
+				recipient := ""
+				if b.RecipientChecked != nil {
+					recipient, err = b.RecipientChecked(message)
+					if err != nil {
+						return nil, err
+					}
+				} else {
+					recipient = b.Recipient(message)
+				}
+				if recipient == "" {
+					continue
+				}
 				if _, err = b.Channel.Send(ctx, Outbound{ID: S(payload, "uid"), Recipient: recipient, Text: S(payload, "body"), Kind: S(payload, "kind")}); err != nil {
 					return nil, err
 				}

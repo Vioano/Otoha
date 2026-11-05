@@ -90,6 +90,9 @@ func InstalledExecutable() (string, bool, error) {
 
 func proxyFingerprint() (string, error) {
 	settings, err := Load(filepath.Join(Home(), "config.json"))
+	if os.IsNotExist(err) {
+		return teamReceiverFingerprint()
+	}
 	if err != nil {
 		return "", err
 	}
@@ -115,6 +118,136 @@ func proxyFingerprint() (string, error) {
 	sum := sha256.Sum256(data)
 	return hex.EncodeToString(sum[:]), nil
 }
+
+// New team enrollment has its own private profiles and does not need a legacy
+// config.json or a Git proxy. Only the digest is stored in service metadata.
+func teamReceiverFingerprint() (string, error) {
+	paths, err := filepath.Glob(filepath.Join(Home(), "teams", "*", "team.json"))
+	if err != nil {
+		return "", err
+	}
+	if len(paths) == 0 {
+		return "", fmt.Errorf("join or initialize a team before installing the Otoha daemon")
+	}
+	routes := make([]Object, 0, len(paths))
+	for _, path := range paths {
+		cfg, err := loadTeamConfig(filepath.Base(filepath.Dir(path)))
+		if err != nil {
+			return "", err
+		}
+		profile, err := Load(cfg.Profile)
+		if err != nil {
+			return "", fmt.Errorf("team %s identity: %w", cfg.Name, err)
+		}
+		if S(profile, "actor") == "" || S(profile, "token") == "" || strings.TrimRight(S(profile, "url"), "/") != strings.TrimRight(cfg.URL, "/") {
+			return "", fmt.Errorf("team %s identity does not match its configured service", cfg.Name)
+		}
+		routes = append(routes, Object{"team": cfg.Name, "url": cfg.URL,
+			"actor": profile["actor"], "token": profile["token"],
+			"gateway": profile["gateway"], "ca_pem": profile["ca_pem"], "ca_file": profile["ca_file"]})
+	}
+	data, err := json.Marshal(routes)
+	if err != nil {
+		return "", err
+	}
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:]), nil
+}
+
+// A detached receiver can predate systemd registration. Confirm that the live
+// process is this user's receiver for this Home before handing it to systemd.
+func stopUnmanagedLinuxReceiver(previous Object, executable string) error {
+	if B(previous, "managed") {
+		return nil
+	}
+	state, err := Load(filepath.Join(Home(), "receiver-status.json"))
+	if os.IsNotExist(err) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	pid := N(state, "pid")
+	if !processAlive(pid) {
+		return nil
+	}
+	if err = verifyLinuxReceiver(pid, executable); err != nil {
+		return fmt.Errorf("unmanaged receiver is running; original process preserved: %w", err)
+	}
+	process, err := os.FindProcess(pid)
+	if err != nil {
+		return err
+	}
+	if err = process.Signal(os.Interrupt); err != nil {
+		return fmt.Errorf("stop verified receiver: %w", err)
+	}
+	deadline := time.Now().Add(5 * time.Second)
+	for time.Now().Before(deadline) {
+		lock, err := os.OpenFile(filepath.Join(Home(), "receiver.lock"), os.O_CREATE|os.O_RDWR, 0600)
+		if err != nil {
+			return err
+		}
+		err = lockReceiver(lock)
+		lock.Close()
+		if err == nil {
+			return nil
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+	return fmt.Errorf("verified receiver did not release its lock; systemd was not started")
+}
+
+func verifyLinuxReceiver(pid int, installed string) error {
+	proc := filepath.Join("/proc", strconv.Itoa(pid))
+	status, err := os.ReadFile(filepath.Join(proc, "status"))
+	if err != nil {
+		return err
+	}
+	uid := ""
+	for _, line := range strings.Split(string(status), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) > 1 && fields[0] == "Uid:" {
+			uid = fields[1]
+		}
+	}
+	if uid != strconv.Itoa(os.Getuid()) {
+		return fmt.Errorf("receiver PID belongs to another user")
+	}
+	environ, err := os.ReadFile(filepath.Join(proc, "environ"))
+	if err != nil {
+		return err
+	}
+	foundHome := false
+	for _, item := range strings.Split(string(environ), "\x00") {
+		if item == "OTOHA_HOME="+Home() {
+			foundHome = true
+		}
+	}
+	if !foundHome {
+		return fmt.Errorf("receiver PID does not declare this OTOHA_HOME")
+	}
+	cmdline, err := os.ReadFile(filepath.Join(proc, "cmdline"))
+	if err != nil {
+		return err
+	}
+	args := strings.Split(strings.TrimRight(string(cmdline), "\x00"), "\x00")
+	if len(args) != 2 || args[1] != "receive" {
+		return fmt.Errorf("receiver PID is not an Otoha receive process")
+	}
+	current, err := os.Executable()
+	if err != nil {
+		return err
+	}
+	current, _ = filepath.EvalSymlinks(current)
+	command, err := filepath.Abs(args[0])
+	if err != nil {
+		return err
+	}
+	if command != installed && command != current {
+		return fmt.Errorf("receiver executable differs from this installation")
+	}
+	return nil
+}
 func xmlText(s string) string {
 	var b strings.Builder
 	xml.EscapeText(&b, []byte(s))
@@ -124,12 +257,14 @@ func xmlText(s string) string {
 // User services retain the receiver across logins and restart failed processes.
 // No administrator access, system proxy changes, or cloud scheduler is needed.
 func InstallReceiver() error {
-	if _, e := proxyConfig(); e != nil {
-		return e
-	}
 	fingerprint, e := proxyFingerprint()
 	if e != nil {
 		return e
+	}
+	if _, err := os.Stat(filepath.Join(Home(), "config.json")); err == nil {
+		if _, e = proxyConfig(); e != nil {
+			return e
+		}
 	}
 	previous, _ := Load(filepath.Join(Home(), "receiver-service.json"))
 	routeChanged := S(previous, "proxy_fingerprint") != fingerprint
@@ -185,6 +320,9 @@ func InstallReceiver() error {
 			return fmt.Errorf("receiver startup registration: %w: %s", e, strings.TrimSpace(string(output)))
 		}
 	case "linux":
+		if e = stopUnmanagedLinuxReceiver(previous, executable); e != nil {
+			return e
+		}
 		path := filepath.Join(h, ".config", "systemd", "user", name+".service")
 		if e = os.MkdirAll(filepath.Dir(path), 0700); e != nil {
 			return e

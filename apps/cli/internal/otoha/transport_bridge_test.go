@@ -11,6 +11,34 @@ import (
 	"testing"
 )
 
+func TestChannelBridgeRejectedTargetRouteKeepsCursorAndSendsNothing(t *testing.T) {
+	t.Setenv("OTOHA_HOME", t.TempDir())
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		json.NewEncoder(w).Encode(Object{"events": []Object{{"id": 1, "kind": "message.created", "payload": Object{"id": 1, "channel": "general", "actor": "peer", "payload": Object{"uid": "private-one", "body": "targeted content", "to_sessions": []string{"missing/session"}}}}}, "cursor": 1, "has_more": false})
+	}))
+	defer server.Close()
+	client := NewClient(Object{"url": server.URL, "token": "test"}, nil, false)
+	defer client.Transport.Close()
+	fake := &fakeChannel{}
+	bridge, err := NewChannelBridge(fake, client, Object{"actor": "self", "session": "self-session", "channel": "general"}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	bridge.RecipientChecked = func(message Object) (string, error) {
+		return TelegramRecipient(TelegramConfig{Recipients: map[string]string{"public": "public-chat"}}, message)
+	}
+	if _, err = bridge.ForwardServerEvents(context.Background(), 0); err == nil {
+		t.Fatal("missing targeted route was accepted")
+	}
+	if len(fake.sent) != 0 {
+		t.Fatal("targeted content was sent to the public fallback")
+	}
+	cursor, err := bridge.loadCursor()
+	if err != nil || N(cursor, "cursor") != 0 {
+		t.Fatal("rejected route advanced the durable cursor", cursor, err)
+	}
+}
+
 type fakeChannel struct {
 	mu       sync.Mutex
 	sent     []Outbound

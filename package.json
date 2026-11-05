@@ -17,6 +17,7 @@
     "test:service": "node scripts/test.mjs collaboration",
     "test:mailbox": "python3 -m unittest discover -s integrations/mailbox/skills/otoha-mailbox/tests -v && python3 -m unittest discover -s integrations/mailbox/tests -v",
     "build:cli": "node scripts/build-cli.mjs",
+    "build:release": "node scripts/package-cli.mjs",
     "check:names": "python3 scripts/check-names.py",
     "sync:brand": "node scripts/sync-brand.mjs",
     "check:brand": "node scripts/sync-brand.mjs --check"
