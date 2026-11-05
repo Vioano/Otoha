@@ -1,0 +1,31 @@
+{
+  "date_local": "2026-11-06",
+  "scope": "New private pre-release repository and synthetic limited Gitea identity; no real project checkout changed.",
+  "initial_snapshot": {
+    "commit": "226736a79768168870a25c36d31cbc3142464810",
+    "clone_pass": true,
+    "fetch_pass": true,
+    "native_git_ls_remote_pass": true,
+    "clean_checkout": true,
+    "private_repository_api_pass": true,
+    "permissions": {
+      "admin": false,
+      "push": true,
+      "pull": true
+    },
+    "anonymous_api_status": 403
+  },
+  "credential_safety": {
+    "test_profile_unchanged": true,
+    "profile_mode": "0600",
+    "helper_scope": "exact repository host and path; get only",
+    "credential_in_remote_url": false,
+    "credential_in_git_config": false,
+    "real_admin_identity_copied": false
+  },
+  "candidate_validation": {
+    "state": "waiting_for_frozen_snapshot",
+    "backend_tests": "not_run",
+    "native_package_smoke": "not_run"
+  }
+}

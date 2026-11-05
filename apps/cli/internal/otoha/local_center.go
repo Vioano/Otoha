@@ -114,6 +114,9 @@ func startManagedLocalCenter(ctx context.Context, cfg TeamConfig) (*localCenterP
 	if _, err := exec.LookPath(python); err != nil {
 		return nil, fmt.Errorf("local center Python unavailable: %w", err)
 	}
+	if cfg.ServerLog == "" || !filepath.IsAbs(cfg.ServerLog) {
+		return nil, errors.New("local center server_log must name an absolute log path")
+	}
 	if err := PrivateDir(filepath.Dir(cfg.ServerLog)); err != nil {
 		return nil, err
 	}
@@ -206,7 +209,7 @@ func (m *pageManager) superviseLocalCenter(ctx context.Context, team string) {
 			}
 			reachable, probeErr := probeLocalCenter(ctx, cfg)
 			if reachable && probeErr == nil {
-				state := Object{"state": "ready", "managed": child != nil, "reused": child == nil, "pid": 0}
+				state := Object{"state": "ready", "managed": true, "owned_child": child != nil, "reused": child == nil, "pid": 0}
 				if child != nil {
 					state["pid"] = child.cmd.Process.Pid
 				}

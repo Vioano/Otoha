@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 )
 
@@ -22,6 +23,8 @@ func pagePause(ctx context.Context, delay time.Duration) bool {
 }
 
 func (m *pageManager) discoverTeams(ctx context.Context) {
+	var centers sync.WaitGroup
+	defer centers.Wait()
 	for {
 		paths, _ := filepath.Glob(filepath.Join(m.home, "teams", "*", "team.json"))
 		for _, path := range paths {
@@ -34,7 +37,11 @@ func (m *pageManager) discoverTeams(ctx context.Context) {
 			if !running {
 				worker := &pageWorker{wake: make(chan struct{}, 1)}
 				m.workers[name] = worker
-				go m.superviseLocalCenter(ctx, name)
+				centers.Add(1)
+				go func(team string) {
+					defer centers.Done()
+					m.superviseLocalCenter(ctx, team)
+				}(name)
 				go m.pollTeam(ctx, name)
 				go m.flushTeam(ctx, name, worker.wake)
 			}

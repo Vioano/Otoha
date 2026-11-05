@@ -56,10 +56,12 @@ for (const [goos, goarch] of [['darwin', 'arm64'], ['linux', 'amd64']]) {
     });
     const server = path.join(destination, 'services', 'collaboration');
     fs.mkdirSync(server, { recursive: true });
-    for (const file of fs.readdirSync(path.join(root, 'services', 'collaboration'))) {
-      if (file.endsWith('.py')) fs.copyFileSync(path.join(root, 'services', 'collaboration', file), path.join(server, file));
+    for (const file of ['otoha_server.py', 'otoha_message.py', 'otoha_projection.py', 'otoha_repository.py']) {
+      fs.copyFileSync(path.join(root, 'services', 'collaboration', file), path.join(server, file));
     }
-    for (const file of ['LICENSE', 'NOTICE.md']) fs.copyFileSync(path.join(root, file), path.join(destination, file));
+    fs.mkdirSync(path.join(destination, 'apps', 'cli'), { recursive: true });
+    fs.copyFileSync(path.join(root, 'apps', 'cli', 'LICENSE'), path.join(destination, 'apps', 'cli', 'LICENSE'));
+    fs.copyFileSync(path.join(root, 'NOTICE.md'), path.join(destination, 'NOTICE.md'));
     fs.copyFileSync(path.join(root, 'docs', 'AGENT-ENTRY.md'), path.join(destination, 'START-HERE.md'));
     fs.writeFileSync(path.join(destination, 'release.json'), JSON.stringify({ ...build, goos, goarch }, null, 2) + '\n');
     const archive = path.join(output, name + '.tar.gz');

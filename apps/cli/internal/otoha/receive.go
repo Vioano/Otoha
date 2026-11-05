@@ -170,6 +170,8 @@ func Bind(ctx context.Context, p Object, thread string, allow []string, settings
 // and background token spend. A separate worker keeps one slow channel from
 // delaying another. Persisted cursors survive network and process restarts.
 func Receive(ctx context.Context) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	if err := PrivateDir(Home()); err != nil {
 		return err
 	}
@@ -183,11 +185,16 @@ func Receive(ctx context.Context) error {
 	}
 	// The work page shares this Home's existing receiver lock and lifetime.
 	// Its cache and queue are independent of legacy Agent chat bindings.
+	pageDone := make(chan struct{})
 	go func() {
+		defer close(pageDone)
 		if err := RunPageService(ctx); err != nil && ctx.Err() == nil {
 			Save(filepath.Join(Home(), "page-error.json"), Object{"error": err.Error(), "at": time.Now().UTC().Format(time.RFC3339)})
 		}
 	}()
+	// Keep the receiver lock until the page service has stopped the local
+	// center children it owns. Reused authorities are left running.
+	defer func() { cancel(); <-pageDone }()
 	go func() {
 		if err := GitProxy(ctx); err != nil {
 			Save(filepath.Join(Home(), "git-proxy-status.json"), Object{"error": err.Error(), "at": time.Now().UTC().Format(time.RFC3339)})
@@ -207,6 +214,9 @@ func Receive(ctx context.Context) error {
 		}
 		select {
 		case <-ctx.Done():
+			if errors.Is(ctx.Err(), context.Canceled) {
+				return nil
+			}
 			return ctx.Err()
 		case <-time.After(3 * time.Second):
 		}

@@ -431,6 +431,8 @@ func (m *pageManager) serveHTTP(w http.ResponseWriter, r *http.Request) {
 // RunPageService runs inside the same process as Receive and owns only this
 // OTOHA_HOME's work-page state. It does not register a second receiver.
 func RunPageService(ctx context.Context) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 	m := newPageManager(Home())
 	address := "127.0.0.1:0"
 	old, err := Load(filepath.Join(m.home, "page-runtime.json"))
@@ -456,7 +458,9 @@ func RunPageService(ctx context.Context) error {
 	}
 	server := &http.Server{Handler: http.HandlerFunc(m.serveHTTP), ReadHeaderTimeout: 5 * time.Second, IdleTimeout: 60 * time.Second}
 	go func() { <-ctx.Done(); server.Close() }()
-	go m.discoverTeams(ctx)
+	discoveryDone := make(chan struct{})
+	go func() { defer close(discoveryDone); m.discoverTeams(ctx) }()
+	defer func() { cancel(); <-discoveryDone }()
 	err = server.Serve(listener)
 	if errors.Is(err, http.ErrServerClosed) {
 		return nil

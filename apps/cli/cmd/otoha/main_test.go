@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	a "github.com/Vioano/Otoha/apps/cli/internal/otoha"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -15,17 +14,16 @@ import (
 
 func commandResult(t *testing.T, args ...string) a.Object {
 	t.Helper()
-	read, write, err := os.Pipe()
+	write, err := os.CreateTemp(t.TempDir(), "command-output-")
 	if err != nil {
 		t.Fatal(err)
 	}
 	previous := os.Stdout
+	defer func() { os.Stdout = previous; write.Close() }()
 	os.Stdout = write
 	err = run(args)
-	write.Close()
 	os.Stdout = previous
-	data, readErr := io.ReadAll(read)
-	read.Close()
+	data, readErr := os.ReadFile(write.Name())
 	if err != nil || readErr != nil {
 		t.Fatalf("command %v failed: %v %v", args, err, readErr)
 	}
@@ -48,6 +46,23 @@ func TestNewMemberHelpAndEmptyStatusAreDiscoverable(t *testing.T) {
 	status := commandResult(t, "status")
 	if a.S(status, "state") != "not_joined" || a.S(status, "next") != "otoha join --invite FILE" {
 		t.Fatalf("empty status required legacy setup: %#v", status)
+	}
+}
+
+func TestTelegramHelpNeedsNoTokenAndDoesNotCreateState(t *testing.T) {
+	home := filepath.Join(t.TempDir(), "not-created")
+	t.Setenv("OTOHA_HOME", home)
+	for _, args := range [][]string{{"telegram"}, {"telegram", "help"}, {"telegram", "--help"}, {"telegram", "-h"}, {"telegram", "send", "--token-file", "/nonexistent/private-token", "--help"}} {
+		result := commandResult(t, args...)
+		encoded, _ := json.Marshal(result)
+		for _, word := range []string{"status", "send", "receive", "bridge", "--config", "--token-file"} {
+			if !strings.Contains(string(encoded), word) {
+				t.Fatalf("Telegram help omitted %q: %s", word, encoded)
+			}
+		}
+	}
+	if _, err := os.Stat(home); !os.IsNotExist(err) {
+		t.Fatal("Telegram help read/created private runtime state")
 	}
 }
 

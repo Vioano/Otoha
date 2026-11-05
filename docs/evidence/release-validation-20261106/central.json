@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "date_local": "2026-11-06",
+  "timezone": "Asia/Taipei",
+  "recorded_utc": "2026-11-05T22:23:50.502003+00:00",
+  "status": "intermediate_correctness_verified_with_latency_failure; unified candidate validation pending",
+  "scope": "Isolated existing temporary center and synthetic project identities. Current installed page-only runtimes were left unchanged; message tests used separate pre-candidate Mac/Linux runtimes. No real receiver, project data, login credential or host network configuration was changed.",
+  "test_conditions": {
+    "transport": "LAN over existing pinned authenticated SSH route for Mac; Linux-to-center loopback HTTP",
+    "separate_test_runtimes": true,
+    "mac_executable_identity": "same previously OS-authorized executable; file not updated",
+    "load": "sequential synthetic messages; bounded cache test",
+    "host_agent_browser_memory_excluded": true,
+    "not_voice_or_host_agent_acceptance": true
+  },
+  "intermediate_builds": {
+    "mac": {
+      "version": "otoha loop-20261106-v7",
+      "sha256": "a8a626f15f431efa4762b8f28ece4c8b364785806e47277c4d76ef53ad15c2ec"
+    },
+    "linux": {
+      "version": "otoha loop-20261106-v6",
+      "sha256": "b6bb074909f61cb74d23ad1c9dc8c651d8cad78d31b8e107812559cd648ab6c0"
+    }
+  },
+  "correctness": {
+    "bidirectional_cli": true,
+    "same_request_cli_retry_same_message": true,
+    "central_same_request_duplicate_http_status": 200,
+    "central_same_request_duplicate": true,
+    "different_content_same_id_http_status": 409,
+    "different_content_same_id_error": "idempotency_conflict",
+    "long_utf8_body": {
+      "status": 200,
+      "message_id": 11,
+      "bytes": 13558,
+      "sha256": "2ac9d80b4ba581dd137fbe1804091c02b8afe3a3a21388093bed910961a11e6a",
+      "matches_cli_input": true
+    },
+    "cache_boundary": {
+      "central_messages_total": 107,
+      "central_normal_messages": 101,
+      "mac_cached_messages": 100,
+      "linux_cached_messages": 100,
+      "mac_truncated_flag": true,
+      "linux_truncated_flag": true,
+      "removed_old_message_still_in_authority": true,
+      "history_probe_used": "authorized central history API, not the latest-100 CLI cache"
+    }
+  },
+  "state_layers": {
+    "new_unique_synthetic_submissions": 99,
+    "authority_accepted_unique_messages": 99,
+    "observed_in_both_derived_caches": 99,
+    "application_received_receipt_records": 0,
+    "application_read_receipt_records": 0,
+    "taken_delivered_or_user_accepted_not_inferred": true,
+    "caches_are_not_complete_member_replicas": true
+  },
+  "permissions_live": {
+    "ordinary_member_identity_verified": true,
+    "ordinary_member_other_project_read": {
+      "http_status": 403,
+      "result": {
+        "error": "channel_forbidden"
+      }
+    },
+    "malformed_id_lookup": {
+      "http_status": 400,
+      "result": {
+        "error": "invalid_identifier"
+      }
+    },
+    "other_sender_was_synthetic_authority_owner": true,
+    "private_recipient_acl_and_admin_urgent_not_validated_by_this_shared_channel_test": true
+  },
+  "latency_failure_retained": {
+    "within_15_second_observation_window": false,
+    "failed_sample_was_not_resent_with_new_id": true,
+    "eventually_accepted_effect_count": 1,
+    "original_local_queue_seconds": 41.081699,
+    "original_precise_error": "not captured; successful receipt removed last_error, so root cause remains unknown",
+    "additional_cold_connection_diagnostic": {
+      "samples": 3,
+      "first_two_seconds": [
+        0.337,
+        0.24
+      ],
+      "third_seconds": 3.585,
+      "observed_error": "Post <authority>/v1/messages: EOF",
+      "same_id_eventually_accepted": true
+    },
+    "later_recovery_does_not_convert_timeout_to_pass": true
+  },
+  "prior_page_build_idle_reference": {
+    "kind": "idle-60-second-baseline",
+    "started_utc": "2026-11-05T22:09:46.883627+00:00",
+    "finished_utc": "2026-11-05T22:10:47.185759+00:00",
+    "mac_runtime": {
+      "samples": 7,
+      "wall_seconds": 60.005699,
+      "cpu_seconds_delta": 0.08,
+      "average_percent_one_core": 0.13332,
+      "cpu_time_resolution_seconds": 0.01,
+      "rss_kib_start": 17328,
+      "rss_kib_end": 16656,
+      "rss_kib_min": 16656,
+      "rss_kib_max": 17536,
+      "rss_kib_delta": -672
+    },
+    "linux_runtime": {
+      "samples": 7,
+      "wall_seconds": 60.00018,
+      "cpu_seconds_delta": 0.01,
+      "average_percent_one_core": 0.01667,
+      "cpu_time_resolution_seconds": 0.01,
+      "rss_kib_start": 13072,
+      "rss_kib_end": 13100,
+      "rss_kib_min": 13072,
+      "rss_kib_max": 13100,
+      "rss_kib_delta": 28
+    },
+    "center": {
+      "samples": 7,
+      "wall_seconds": 60.000213,
+      "cpu_seconds_delta": 0.04,
+      "average_percent_one_core": 0.06667,
+      "cpu_time_resolution_seconds": 0.01,
+      "rss_kib_start": 32752,
+      "rss_kib_end": 32752,
+      "rss_kib_min": 32752,
+      "rss_kib_max": 32752,
+      "rss_kib_delta": 0
+    },
+    "message_high_water_start": 8,
+    "message_high_water_end": 8,
+    "no_new_messages": true,
+    "process_identity_stable": true,
+    "scope": "One 60-second idle window, no message contents or credentials; cumulative process CPU time and RSS only, not wakeups or long-run memory stability."
+  },
+  "reused_recovery_evidence": {
+    "source": "../two-host-loop-20261106/summary.json",
+    "kind": "prior shared outbox feedback operation; not a new ordinary-message fault injection",
+    "queued_offline": true,
+    "accepted_response_lost_pending_preserved": true,
+    "queue_survived_daemon_restart": true,
+    "lookup_recovered_original": true,
+    "accepted_effect_count": 1,
+    "identity_unchanged": true
+  },
+  "candidate_performance": {
+    "status": "pending unified release build",
+    "planned_sample": "one new 60-second idle window and 30 sequential bidirectional messages after root freezes the same candidate",
+    "reason": "Do not mix page-only idle baseline, Mac v7 and Linux v6 into a release-performance claim"
+  },
+  "release_gates": [
+    "Freeze and deploy one coherent candidate before reporting release performance.",
+    "Investigate/retest Mac POST EOF and 41-second queue tail; current observations do not establish fast stable delivery.",
+    "Do not advertise full communication-contract completion: summary-first default reads, complete visible local replicas, sent/received private ACL and administrator urgent dispatch remain separate acceptance gates.",
+    "Central acceptance and cache visibility do not prove receiver application acknowledgment, reading, taking ownership or user acceptance."
+  ]
+}

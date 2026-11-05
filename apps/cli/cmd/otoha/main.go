@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	a "github.com/Vioano/Otoha/apps/cli/internal/otoha"
@@ -11,8 +12,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -413,8 +416,15 @@ func run(args []string) error {
 		}
 		return a.Bind(ctx, p, *agent, strings.Split(*allow, ","), s)
 	case "telegram":
-		if len(args) == 0 {
-			return fmt.Errorf("otoha telegram send|receive|status [options]")
+		if len(args) == 0 || args[0] == "help" || hasHelpFlag(args) {
+			output(a.Object{
+				"usage":           "otoha telegram status|send|receive|bridge --config PRIVATE.json",
+				"examples":        []string{"otoha telegram status --config /private/telegram.json", "otoha telegram send --config /private/telegram.json --to RECIPIENT --text TEXT --id UID", "otoha telegram receive --config /private/telegram.json --once", "otoha telegram bridge --config /private/telegram.json"},
+				"private_options": a.Object{"--config FILE": "private JSON containing token_file, state_dir, routes and recipients", "--token-file FILE": "existing private Bot token file (0600); never place the token in arguments", "--state-dir DIR": "private persistent Telegram cursor and queue directory"},
+				"routing_options": []string{"--route CHAT_ID=SESSION", "--chat-id CHAT_ID_OR_USERNAME", "--to CONFIGURED_RECIPIENT"},
+				"bridge_context":  "requires an existing service profile and project channel; a team invitation alone does not configure Telegram",
+			})
+			return nil
 		}
 		action := args[0]
 		f := flags("telegram " + action)
@@ -578,7 +588,7 @@ func run(args []string) error {
 			return fmt.Errorf("unknown inbox action %q", action)
 		}
 	case "receive":
-		return a.Receive(ctx)
+		return runReceiverWithSignals(ctx)
 	case "service":
 		if len(args) == 0 || args[0] == "install" {
 			return a.InstallReceiver()
@@ -590,7 +600,7 @@ func run(args []string) error {
 			if *home != "" {
 				os.Setenv("OTOHA_HOME", *home)
 			}
-			return a.Receive(ctx)
+			return runReceiverWithSignals(ctx)
 		}
 		return fmt.Errorf("otoha service install or otoha service run")
 	case "daemon":
@@ -725,6 +735,16 @@ func run(args []string) error {
 	default:
 		return fmt.Errorf("unknown command %q; run otoha help", command)
 	}
+}
+
+func runReceiverWithSignals(ctx context.Context) error {
+	receiver, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	err := a.Receive(receiver)
+	if errors.Is(err, context.Canceled) && receiver.Err() != nil {
+		return nil
+	}
+	return err
 }
 
 func hasHelpFlag(args []string) bool {
