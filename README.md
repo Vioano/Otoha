@@ -7,11 +7,11 @@
 
 面向复杂项目的人与多 Agent 协作基础设施。
 
-Otoha 面向跨 Session、跨设备、跨成员和跨 Agent 框架的长期工程协作。人通过具体体验持续形成和修正需求，独立执行的 Agent 通过共同工程状态、通信与协作协议推进工作。当前交付聚焦可下载的 CLI，配套 Skill 可选。新的 `0.1.0-alpha.3-rc.1` 候选加入自动初始化和内置 frp 默认中继，支持 macOS Apple Silicon 与 Linux x86_64；原 `0.1.0-alpha.2` 保留其发行范围。
+Otoha 面向跨 Session、跨设备、跨成员和跨 Agent 框架的长期工程协作。人通过具体体验持续形成和修正需求，独立执行的 Agent 通过共同工程状态、通信与协作协议推进工作。当前交付聚焦可下载的 CLI，配套 Skill 可选。新的 `0.1.0-alpha.3-rc.2` 候选加入自动初始化和内置 frp 默认中继，支持 macOS Apple Silicon 与 Linux x86_64；原 `0.1.0-alpha.2` 保留其发行范围。
 
 **把这个链接交给 Agent：** 从[接入与工作入口](docs/AGENT-ENTRY.md)开始。新队长运行 `bin/otoha init`，Agent 根据 CLI 的反馈主动问清情况并继续配置；已有团队使用个人邀请加入。用户无需另配数据库或穿透工具。当前默认由队长电脑或已有机器保存团队数据，协作期间该机器需要在线。
 
-**候选下载：** [macOS Apple Silicon](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.1/otoha-0.1.0-alpha.3-rc.1-darwin-arm64.tar.gz) · [Linux x86_64](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.1/otoha-0.1.0-alpha.3-rc.1-linux-amd64.tar.gz) · [SHA256SUMS](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.1/SHA256SUMS)
+**候选下载：** [macOS Apple Silicon](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.2/otoha-0.1.0-alpha.3-rc.2-darwin-arm64.tar.gz) · [Linux x86_64](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.2/otoha-0.1.0-alpha.3-rc.2-linux-amd64.tar.gz) · [SHA256SUMS](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.2/SHA256SUMS)
 
 校验 SHA-256 后解压，使用 `bin/otoha`。普通成员无需 Go、Node.js 或 Python；当前需要系统 Git，Linux 还需要可用的 user systemd 会话。新中心自动下载固定版本的 Python、SurrealDB 和 frpc，完成网络、通信、仓库与图谱初始化。[候选范围](docs/RELEASE-0.1.0-alpha.3.zh-CN.md)说明依赖、限制及验证边界。
 

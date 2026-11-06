@@ -23,7 +23,7 @@ import (
 
 // InitRuntimeManifestURL is the matching release fallback when a package has no
 // adjacent manifest. Packaging can set it with -ldflags -X.
-var InitRuntimeManifestURL = "https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.1/runtime-manifest.json"
+var InitRuntimeManifestURL = "https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.2/runtime-manifest.json"
 
 var executableForInitRuntime = os.Executable
 
