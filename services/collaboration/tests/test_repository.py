@@ -1,5 +1,6 @@
 """Exercise the authorized repository channel against real git-http-backend."""
 import base64
+import gzip
 import http.client
 import http.server
 import json
@@ -51,6 +52,7 @@ class GitBackendHandler(http.server.BaseHTTPRequestHandler):
                'GIT_HTTP_EXPORT_ALL': '1', 'PATH_INFO': urllib.parse.unquote(parsed.path),
                'QUERY_STRING': parsed.query, 'REQUEST_METHOD': self.command,
                'CONTENT_TYPE': self.headers.get('Content-Type', ''),
+               'HTTP_CONTENT_ENCODING': self.headers.get('Content-Encoding', ''),
                'CONTENT_LENGTH': str(length), 'REMOTE_USER': 'test-git',
                'REMOTE_ADDR': '127.0.0.1', 'SERVER_PROTOCOL': 'HTTP/1.1',
                'GIT_CONFIG_NOSYSTEM': '1', 'GIT_CONFIG_GLOBAL': os.devnull}
@@ -226,6 +228,18 @@ class RepositoryTest(unittest.TestCase):
         self.call('GET', '/v1/git/team/test-owner/test-repo.git/info/refs?service=git-upload-pack',
                   token=self.owner, status=502)
         self.assertEqual(len(self.upstream.authorizations), 1)
+
+    def test_gzip_upload_pack_is_forwarded_with_encoding(self):
+        reader = self.enroll('reader', 'reader')
+        head = self.git('--git-dir=' + str(self.bare), 'rev-parse', 'HEAD').stdout.decode().strip()
+        want = ('want ' + head + ' multi_ack_detailed side-band-64k ofs-delta\n').encode()
+        packet = ('%04x' % (len(want) + 4)).encode() + want + b'0000' + b'0009done\n'
+        request = urllib.request.Request(self.url + '/v1/git/team/test-owner/test-repo.git/git-upload-pack',
+                    data=gzip.compress(packet), headers={'Authorization': 'Bearer ' + reader,
+                    'Content-Type': 'application/x-git-upload-pack-request', 'Content-Encoding': 'gzip'})
+        with self.opener.open(request, timeout=10) as response:
+            self.assertEqual(200, response.status)
+            self.assertIn(b'PACK', response.read())
 
     def test_oversized_post_and_reader_direct_write_are_rejected_before_reading_body(self):
         reader = self.enroll('reader', 'reader')

@@ -94,9 +94,13 @@ func finishManagedTeamJoin(ctx context.Context, cfg TeamConfig, binding Object, 
 		result["next"] = "inspect otoha team status, then repeat the same join command"
 		return result, fmt.Errorf("collaboration joined; repository is not ready: %w", err)
 	}
+	if err = ensureJoinedRepositoryIdentity(ctx, directory, cfg.Profile); err != nil {
+		readiness["repository"] = "error"
+		return result, err
+	}
 	readiness["repository"], result["checkout"], result["ready"] = "ready", directory, B(page, "ready")
 	result["next"] = S(O(result, "commands"), "page")
-	if B(page, "ready") {
+	if B(page, "ready") && cfg.Mode != "local" {
 		cfg.State = "ready"
 	}
 	if err = saveTeamConfig(cfg); err != nil {

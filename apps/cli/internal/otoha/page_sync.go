@@ -42,6 +42,11 @@ func (m *pageManager) discoverTeams(ctx context.Context) {
 					defer centers.Done()
 					m.superviseLocalCenter(ctx, team)
 				}(name)
+				centers.Add(1)
+				go func(team string) {
+					defer centers.Done()
+					m.superviseInitRuntime(ctx, team)
+				}(name)
 				go m.pollTeam(ctx, name)
 				go m.flushTeam(ctx, name, worker.wake)
 			}

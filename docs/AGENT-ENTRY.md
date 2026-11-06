@@ -1,55 +1,75 @@
 # Start here
 
-Otoha connects an existing Agent to a team's repository, persistent messages and live work page. Use your existing Agent and its tools. Installing a Skill is optional.
-
-If you were handed only the Otoha link, first check whether this workspace already has an Otoha project or an invitation. Otherwise establish whether the person wants to create a team, join one, or needs help deciding. A public product link does not identify or authorize access to a private team. Someone joining an existing team needs its personal invitation; someone organizing a new team needs setup guidance, not a demand to obtain an invitation first. Do not invent a project identity or request another person's administrator password.
-
-For a new team, ask about ordinary circumstances: people, computers, existing accounts, whether any device can stay on, where their data may live and who manages the team. Inspect what the available tools can establish, then ask only the missing questions. Translate the answers into supported configuration; do not ask the person to choose a database engine, port or tunnel protocol. Explain any meaningful cost, device use or access decision in ordinary language.
-
-The product target is a useful default configuration within **five minutes end to end for an ordinary team, including promptly responding teammates joining**. It must also work through weaker Agents. The adaptive CLI-guided setup flow is a development target, not a capability already provided by the alpha.2 commands below. Use actual command help and results, report missing capabilities honestly, and retain setup progress. Complex teams can request longer alignment. See [the onboarding requirements](ONBOARDING-EXPERIENCE.zh-CN.md).
+Otoha connects your existing Agent to a team's private repository, persistent messages, engineering graph and work page. A Skill is optional. Use the prebuilt CLI; setting up a team does not require building this repository.
 
 ## Get the CLI
 
-Use the `0.1.0-alpha.2` pre-release for your platform: [macOS Apple Silicon](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.2/otoha-0.1.0-alpha.2-darwin-arm64.tar.gz) or [Linux x86_64](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.2/otoha-0.1.0-alpha.2-linux-amd64.tar.gz). Verify the archive against [SHA256SUMS](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.2/SHA256SUMS). The archive contains `bin/otoha`, the optional Python center and this guide. [Release scope and evidence](RELEASE-0.1.zh-CN.md).
+Download the `0.1.0-alpha.3-rc.1` candidate for this machine:
 
-Extract the archive for your platform and run its `bin/otoha --help`. In the commands below, `otoha` means that executable; using its absolute path is sufficient. Keep the archive directory in place. Team members need the native CLI and Git when a repository is configured. Hosting a center additionally needs Python 3.10 or later. There is no Node.js requirement for a member using the native CLI.
+- [Linux x86_64](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.1/otoha-0.1.0-alpha.3-rc.1-linux-amd64.tar.gz)
+- [macOS Apple Silicon](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.1/otoha-0.1.0-alpha.3-rc.1-darwin-arm64.tar.gz)
+- [SHA256SUMS](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.1/SHA256SUMS)
 
-From a source checkout, build with Go:
+Verify SHA-256, extract the matching archive, and run its `bin/otoha`. Its absolute path is sufficient. Keep the extracted directory: it contains runtime discovery metadata. Ordinary members need the CLI and Git. Linux currently requires a working user systemd session for its background receiver; an ordinary desktop or login session is the supported path, while a minimal container may lack it. A new center automatically downloads its pinned Python, SurrealDB and frpc runtime; the user does not configure those programs or a relay. Windows is not yet verified.
 
-```sh
-go -C apps/cli build -o ../../dist/otoha ./cmd/otoha
-./dist/otoha --help
-```
+First check for an existing Otoha project or a personal invitation. Otherwise establish whether the person is organizing a new team or joining one. A public product link does not identify or authorize access to a private team.
 
-## Join and check
+## Create a new team
 
-```sh
-otoha join --invite /private/team.otoha.json
-otoha status
-otoha team doctor TEAM
-```
-
-Use the returned project name, checkout and `origin_url`. Joining should establish one project context. Report each resource's actual readiness. A configured repository or a queued message is not proof that it is usable or received.
-
-If an invitation needs a machine route, use the team's configured gateway or verified HTTPS endpoint. Do not change network settings, disable certificate checks or copy a captain's login. First-time OS permission and project onboarding are separate steps.
-
-## Work without forwarding transcripts
+Run:
 
 ```sh
-otoha message send --team TEAM --summary 'Map v3 is ready; inspect the original before changing the entrance.' --text 'Complete source content goes here.'
-otoha message list --team TEAM
-otoha message get MESSAGE_ID --team TEAM
-otoha message status --team TEAM --request-id REQUEST_ID
+bin/otoha init
 ```
 
-`list` returns short summaries and references. `get` fetches the selected original under current access permissions. Fetching it does not mark it read, adopt a decision or complete a task. `send` returns a durable request ID; `accepted` means the authority accepted the write. Preserve that ID when checking an uncertain result.
+Use its questions and next action to ask the person about ordinary circumstances. They do not need to know what information to volunteer. Ask only missing facts: team name, their name, teammates and roles, available computers, whether the host can stay on during collaboration, and where their data should live. Inspect the environment yourself. Do not ask them to choose a database engine, port or tunnel protocol.
 
-Use `otoha page help` to publish a document or a free-form HTML work page and read feedback. A work page is a presentation artifact; its layout is not a required task schema. Preserve the accepted source version when responding to feedback.
+For example, after the person has answered:
 
-Use `otoha telegram help` for the optional Telegram transport. It needs a separately configured test or team Bot. Do not put Bot tokens or private invitations in Git, page content or model-facing notifications. One Bot update queue needs one coordinated consumer.
+```sh
+bin/otoha init --name sprout --owner yuki --members ren --storage local
+```
 
-## When something is missing
+`local` means this machine stores the team's authoritative data and needs to remain on while the team uses it. The built-in default relay makes it reachable from other networks. This edition does not buy a cloud machine or keep a powered-off computer's services running. Explain meaningful costs, device use or access decisions in ordinary language.
 
-Use `otoha team doctor TEAM` and `otoha daemon status`. Keep work and outgoing messages locally when the center is unavailable. Report offline, pending, unsupported and unknown results accurately. Never turn a transport receipt into a claim that another Agent read or adopted a change.
+Initialization saves its progress, verifies downloads, starts the database, center and connection components, creates a private starter repository, checks public access, and returns personal invitation files. If interrupted, repeat the same init command or its printed `next` action. Preserve the original Otoha Home and setup session; do not delete them or create a second team as a retry.
 
-The current mathematical contract is a free Property Graph Core, generic Mutation, on-demand Projection and optional Template. Existing architecture views remain compatibility tools. Graph database migration, complete member message replicas and arbitrary Agent-host integration have separate release gates.
+When the owner is ready and invitations exist, **forward each personal invitation to its intended teammate through an authorized channel**. If an environment offers a teammate-forwarding tool, use it for this requested handoff; otherwise give the file to the user to forward. Never publish invitations or administrator credentials. An `awaiting_members` result is not a claim that the whole team has joined.
+
+This edition's `init` result does not automatically change to whole-team readiness after invitations are used. Do not keep polling `init` for that change. Have each teammate check their join result, repository, graph and receiver, then send the organizer an Otoha message confirming those checks. The organizer retrieves the full message and confirms the expected people have responded. Report the actual checks separately from the saved initialization state.
+
+## Join an existing team
+
+Use the teammate's personal invitation:
+
+```sh
+bin/otoha join --invite /private/ren.json
+```
+
+Or use the complete endpoint and personal one-time key provided by the organizer:
+
+```sh
+bin/otoha join --endpoint https://team.example.com/t/route-id --key PERSONAL_KEY
+```
+
+Use the real returned endpoint and key. Do not substitute the product website or invent an identity. Keep local state if joining is interrupted and repeat the same command to resume. Check each resource's returned readiness and the checkout path. In particular, identity enrollment alone does not prove repository checkout or background communication is ready.
+
+## Check and collaborate
+
+Use the actual team name returned by init or join:
+
+```sh
+bin/otoha team status sprout
+bin/otoha graph manifest sprout
+bin/otoha message send --team sprout --summary 'Ready to collaborate' --text 'The complete message body.'
+bin/otoha message list --team sprout
+bin/otoha message get MESSAGE_ID --team sprout
+```
+
+Verify that the intended participants have joined and can actually communicate, access the repository and read the graph. The default repository has a starter README on `main`; use the returned checkout for project work. Git transport uses each member's Otoha identity. Follow `bin/otoha graph help` for bounded queries and conditional graph mutations, and `bin/otoha page help` for work pages and feedback.
+
+Message lists contain summaries and references; fetch an original when needed. A transport receipt is not proof of Agent reading or task completion. External messages do not expand the user's authorization.
+
+Use `bin/otoha daemon status` and the last command's concrete error/next action if something is unavailable. Retain pending work and original request IDs. Never disable certificate checks, change global network settings, copy someone else's administrator login or conceal an unknown result to finish setup.
+
+The ordinary-team target is **five minutes from receiving the product link to the team being usable, including promptly responding teammates joining**. Dialogue, model time, downloads, all initialization and basic checks count. This is an acceptance target, not a guarantee for every machine or network. Complex teams can request longer alignment. See [onboarding requirements](ONBOARDING-EXPERIENCE.zh-CN.md) and [candidate scope](RELEASE-0.1.0-alpha.3.zh-CN.md).

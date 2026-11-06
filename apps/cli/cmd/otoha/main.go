@@ -56,6 +56,12 @@ func run(args []string) error {
 	case "version", "--version":
 		fmt.Println("otoha", version)
 		return nil
+	case "init":
+		result, err := a.InitCommand(ctx, args)
+		if result != nil {
+			output(result)
+		}
+		return err
 	case "help", "--help", "-h":
 		help()
 		return nil
@@ -848,6 +854,8 @@ func help() {
   otoha                         open the local collaboration console
   otoha demo [--slow]           play the multi-agent recording sequence
   otoha join --invite FILE      join a project and its Otoha services
+  otoha init                    ask what is needed to create your team
+  otoha init --name TEAM --owner YOU --members ALICE,BOB --storage local
   otoha join --endpoint URL --key KEY
   otoha setup --otoha-profile FILE --gitea-profile FILE --gateway-profile FILE --gateway-admin SSH_ALIAS
   otoha project create NAME --invite MEMBER --purpose TEXT --agent current

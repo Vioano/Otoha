@@ -1,0 +1,27 @@
+{
+  "schema": "otoha-runtime-assets/1",
+  "components": {
+    "surreal": {
+      "version": "3.3.5",
+      "darwin-arm64": {"url": "https://github.com/surrealdb/surrealdb/releases/download/v3.3.5/surreal-v3.3.5.darwin-arm64.tgz", "sha256": "534140236e7246d86969015ba9ae8dd2f7f8f277ed1412cb17f3d397f95a1090", "bytes": 91945266},
+      "linux-amd64": {"url": "https://github.com/surrealdb/surrealdb/releases/download/v3.3.5/surreal-v3.3.5.linux-amd64.tgz", "sha256": "8f3bc163405085343fc6db9746a8e0cd55503c939802ad2b35a466675a9c09cf", "bytes": 105509109}
+    },
+    "frpc": {
+      "version": "0.72.0",
+      "darwin-arm64": {"url": "https://github.com/fatedier/frp/releases/download/v0.72.0/frp_0.72.0_darwin_arm64.tar.gz", "sha256": "6e8576c5b6b9914a86850f6ff4fb81c5a09e706f91f70f64d5f398558bdc9db8", "bytes": 13217943},
+      "linux-amd64": {"url": "https://github.com/fatedier/frp/releases/download/v0.72.0/frp_0.72.0_linux_amd64.tar.gz", "sha256": "daf719b32ca2778770bb92955e231a07414d754378b9af328aa2642862479804", "bytes": 14564595}
+    },
+    "python": {
+      "version": "3.12.12+20251014",
+      "darwin-arm64": {"url": "https://github.com/astral-sh/python-build-standalone/releases/download/20251014/cpython-3.12.12%2B20251014-aarch64-apple-darwin-install_only_stripped.tar.gz", "sha256": "84cb7acbf75264982c8bdd818bfa1ff0f1eb76007b48a5f3e01d28633b46afdf", "bytes": 16472869},
+      "linux-amd64": {"url": "https://github.com/astral-sh/python-build-standalone/releases/download/20251014/cpython-3.12.12%2B20251014-x86_64-unknown-linux-gnu-install_only_stripped.tar.gz", "sha256": "c74addcd1b033a6e4d60ead3ab47fcc995569027e01d3061c4a934f363c4a0cf", "bytes": 32587947}
+    }
+  },
+  "common": {
+    "ca-bundle.pem": {"url": "https://curl.se/ca/cacert-2026-11-05.pem", "sha256": "427c064216761a1e72a8b30f0d954d08cb6e4435a82091fb865afd20c8497285", "bytes": 200116},
+    "licenses/surreal-LICENSE": {"url": "https://raw.githubusercontent.com/surrealdb/surrealdb/v3.3.5/LICENSE", "sha256": "98a94ac615f88370865016487b436fa404560910bd329794ed7502277a94b805", "bytes": 4633},
+    "licenses/python-build-standalone-LICENSE": {"url": "https://raw.githubusercontent.com/astral-sh/python-build-standalone/20251014/LICENSE", "sha256": "1f256ecad192880510e84ad60474eab7589218784b9a50bc7ceee34c2b91f1d5", "bytes": 16725},
+    "licenses/python-LICENSE": {"url": "https://raw.githubusercontent.com/python/cpython/v3.12.12/LICENSE", "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf", "bytes": 13936},
+    "licenses/MPL-2.0.txt": {"url": "https://www.mozilla.org/media/MPL/2.0/index.txt", "sha256": "3f3d9e0024b1921b067d6f7f88deb4a60cbe7a78e76c64e3f1d7fc3b779b9d04", "bytes": 16726}
+  }
+}

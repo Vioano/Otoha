@@ -19,6 +19,17 @@ type localCenterProcess struct {
 	started time.Time
 }
 
+func localTeamPID(cfg TeamConfig) int {
+	if cfg.Mode == "local" {
+		if state, err := Load(filepath.Join(Home(), "pages", "state", cfg.Name+".json")); err == nil {
+			if managed := O(state, "local_center"); B(managed, "managed") && N(managed, "pid") > 0 {
+				return N(managed, "pid")
+			}
+		}
+	}
+	return cfg.ServerPID
+}
+
 func (p *localCenterProcess) stop() {
 	if p == nil {
 		return
@@ -42,7 +53,11 @@ func (p *localCenterProcess) stop() {
 }
 
 func localCenterOrigin(cfg TeamConfig) (*url.URL, error) {
-	u, err := url.Parse(cfg.URL)
+	endpoint := cfg.URL
+	if cfg.LocalURL != "" {
+		endpoint = cfg.LocalURL
+	}
+	u, err := url.Parse(endpoint)
 	if err != nil || u.Scheme != "http" || u.Port() == "" || u.Path != "" || u.RawQuery != "" || u.Fragment != "" || u.User != nil {
 		return nil, errors.New("managed local center requires an HTTP loopback origin with a port")
 	}
@@ -58,7 +73,11 @@ func localCenterOrigin(cfg TeamConfig) (*url.URL, error) {
 func probeLocalCenter(ctx context.Context, cfg TeamConfig) (reachable bool, err error) {
 	probe, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
-	request, err := http.NewRequestWithContext(probe, http.MethodGet, cfg.URL+"/health", nil)
+	origin, err := localCenterOrigin(cfg)
+	if err != nil {
+		return false, err
+	}
+	request, err := http.NewRequestWithContext(probe, http.MethodGet, origin.String()+"/health", nil)
 	if err != nil {
 		return false, err
 	}
@@ -76,10 +95,17 @@ func probeLocalCenter(ctx context.Context, cfg TeamConfig) (reachable bool, err 
 	if err != nil {
 		return true, err
 	}
-	defer authority.Transport.Close()
 	if S(profile, "url") != cfg.URL {
+		authority.Transport.Close()
 		return true, errors.New("local center profile does not match its configured origin")
 	}
+	if cfg.LocalURL != "" {
+		authority.Transport.Close()
+		profile = Clone(profile)
+		profile["url"] = cfg.LocalURL
+		authority = NewClient(profile, nil, false)
+	}
+	defer authority.Transport.Close()
 	manifest, err := authority.Call(probe, http.MethodGet, "/v1/manifest", nil)
 	if err != nil {
 		return true, fmt.Errorf("local center saved identity was not accepted: %w", err)

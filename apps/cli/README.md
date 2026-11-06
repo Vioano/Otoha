@@ -1,10 +1,10 @@
 # Otoha CLI
 
-原生 Go 客户端：项目接入、身份导入、消息、持续接收、Git 代理与 Codex 会话适配。需要 Go 1.26+。
+原生客户端：自动初始化、项目接入、身份导入、消息、持续接收、Git 代理与 Codex 会话适配。使用从[Agent 接入入口](../../docs/AGENT-ENTRY.md)下载的 `0.1.0-alpha.3-rc.1`，无需构建源码。新团队运行 `bin/otoha init`；已有团队使用个人邀请 `bin/otoha join --invite FILE`。当前需要系统 Git，Linux 后台接收需要可用的 user systemd 会话。
 
 直接运行 `otoha` 会进入人类可读的本地协作控制台；显式子命令仍保持 JSON 输出，便于 Agent 调用。`otoha demo --slow` 播放不需要凭据的多 Agent 录屏序列。
 
-从仓库根目录：
+以下是开发者从源码构建的方法，需要 Go 1.26+。从仓库根目录：
 
 ```sh
 npm run build:cli
@@ -12,11 +12,29 @@ node bin/otoha.mjs client version
 node bin/otoha.mjs client help
 ```
 
-产物位于 `dist/otoha`，Windows 为 `dist/otoha.exe`。也可在本目录运行 `go build ./cmd/otoha`。正式二进制发行版尚未发布，邀请安装地址已切换到本仓库，不复用历史产品发布包。
+产物位于 `dist/otoha`，Windows 为 `dist/otoha.exe`。也可在本目录运行 `go build ./cmd/otoha`。当前[候选范围](../../docs/RELEASE-0.1.0-alpha.3.zh-CN.md)与历史 [alpha.2 发行说明](../../docs/RELEASE-0.1.zh-CN.md)分别保留。
+
+## 本机中心的运行时发行包
+
+`0.1.0-alpha.3-rc.1` 候选采用小客户端包与按需下载的 `center-runtime` 平台包。后者包含固定版本的 Python 3.12.12、SurrealDB 3.3.5、frpc 0.72.0、公共 CA 和同版中心后端；普通使用者无需分别安装或配置这些依赖。系统 Python 不满足条件时，包内独立 Python 提供运行环境。组件由软件发现，实际启动不依赖开发 checkout 或当前工作目录。
+
+目录约定为 `runtimes/frpc`、`runtimes/surreal`、`runtimes/python/bin/python3`、`runtimes/ca-bundle.pem` 和 `services/collaboration/`。公开 `runtime-manifest.json` 记录平台包的固定 URL、完整字节数、SHA-256、解包根与路径；客户端包内带同一清单。运行时包保留 Python 原有符号链接，以及 frp、SurrealDB、Python/依赖和 CA 的来源、许可与 NOTICE。SurrealDB 当前适用上游 BSL 条款，不因被本项目打包而改成 MIT。
+
+维护者构建：
+
+```sh
+node scripts/package-cli.mjs --version 0.1.0-alpha.3-rc.1 \
+  --with-center-runtime --relay-dial-ip PUBLIC_RELAY_IP \
+  --out /private/fresh-release-output
+```
+
+脚本从 [`runtime-assets.json`](../../scripts/runtime-assets.json) 的固定官方来源下载并校验组件，缓存仅供构建复用；输出目录已有 manifest 或同名包时拒绝覆盖。`--runtime-cache DIR` 指定构建缓存，`--runtime-only` 仅用于先制作运行时包。上例地址参数由部署者确认，不能填写猜测的中继 IP。
+
+初次打包测量约为 Mac 109 MiB、Linux 138 MiB，最终字节数以冻结清单为准。这只是压缩体积；五分钟内完成首次下载和初始化，必须从公开入口、空缓存实际测量。构建机缓存、系统已有 Python 或上游组件下载速度不能代替该验收。
 
 `OTOHA_HOME` 指定独立私有客户端目录，默认是用户目录下 `.config/otoha`。`otoha1_` 邀请前缀、`otoha-api`/`otoha-git` 路由、环境变量与后台服务使用 Otoha 名称。旧邀请、旧后台服务和旧状态没有自动接管；生产迁移需明确匹配服务端与客户端。
 
-协作服务在 [services/collaboration](../../services/collaboration/README.md)。项目创建还需要可访问的 Gitea、配置好的接入通道与相应管理员授权；源码存在不代表这些真实资源已经部署。
+协作服务在 [services/collaboration](../../services/collaboration/README.md)。新的 `init` 默认使用本机私有 Git 与内置中继，不要求用户提供 Gitea 或服务器账号。旧 server/Gitea 模式仍需相应资源和管理员授权，源码存在不代表外部资源已经部署。
 
 本目录运行 `go test ./...` 和 `go vet ./...`。忙时投递、空闲唤醒和 Windows 原生宿主行为仍需对应机器的实际验收。
 

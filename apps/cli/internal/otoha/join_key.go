@@ -9,17 +9,24 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 )
 
 func joinEndpoint(raw string) (string, error) {
 	u, err := url.Parse(raw)
-	if err != nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || (u.Path != "" && u.Path != "/") || u.RawQuery != "" || u.Fragment != "" {
-		return "", errors.New("--endpoint must be an HTTPS origin, such as https://team.example.com")
+	if err != nil || u.Scheme != "https" || u.Hostname() == "" || u.User != nil || u.RawPath != "" || u.RawQuery != "" || u.Fragment != "" {
+		return "", errors.New("--endpoint must be an HTTPS origin or service base URL, such as https://team.example.com/t/TEAM")
 	}
 	u.Host = strings.ToLower(u.Host)
-	u.Path = ""
+	if strings.Contains(u.Path, "//") {
+		return "", errors.New("--endpoint has an invalid repeated slash in its service base path")
+	}
+	u.Path = strings.TrimRight(u.Path, "/")
+	if u.Path != "" && (path.Clean(u.Path) != u.Path || strings.ContainsAny(u.Path, "\\\x00\r\n")) {
+		return "", errors.New("--endpoint has an invalid service base path")
+	}
 	u.RawPath = ""
 	return u.String(), nil
 }

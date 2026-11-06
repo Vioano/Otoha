@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 """Otoha Collaboration: a private, repository-independent message service (stdlib)."""
 import argparse
+import contextlib
 import hashlib
 import http.server
+import ipaddress
+import io
 import json
 import os
 import pathlib
@@ -13,6 +16,8 @@ import socket
 import sqlite3
 import ssl
 import threading
+import subprocess
+import tempfile
 import time
 import urllib.parse
 
@@ -56,6 +61,37 @@ def name(value):
 
 def encoded(value):
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+
+
+def public_prefix(public_url):
+    parsed = urllib.parse.urlsplit(public_url)
+    if (parsed.scheme not in ('http', 'https') or not parsed.hostname or parsed.username
+            or parsed.password or parsed.query or parsed.fragment):
+        raise Error(400, 'invalid_public_url')
+    prefix = parsed.path.rstrip('/')
+    if ('%' in prefix or '//' in prefix or '\\' in prefix
+            or any(part in ('.', '..') for part in prefix.split('/'))):
+        raise Error(400, 'invalid_public_url')
+    return prefix
+
+
+def normalize_api_path(raw_path, public_url, peer_host):
+    """Strip only the configured literal prefix; never decode route segments."""
+    if (not raw_path.startswith('/') or '%' in raw_path or '//' in raw_path or '\\' in raw_path
+            or any(part in ('.', '..') for part in raw_path.split('/'))):
+        raise Error(404, 'api_route_not_found')
+    prefix = public_prefix(public_url)
+    if not prefix:
+        return raw_path
+    if raw_path == prefix or raw_path.startswith(prefix + '/'):
+        return raw_path[len(prefix):] or '/'
+    try:
+        local = ipaddress.ip_address(peer_host).is_loopback
+    except ValueError:
+        local = False
+    if local and (raw_path == '/health' or raw_path.startswith('/v1/')):
+        return raw_path
+    raise Error(404, 'api_route_not_found')
 
 def private_write(path, value):
     path = pathlib.Path(path)
@@ -290,7 +326,7 @@ class Store:
             actor = self.authenticate(token)
             aid = actor['id']
             if method == 'GET' and path == '/v1/manifest':
-                return {'protocol': 'otoha-collaboration/1', 'version': VERSION, 'actor': {k: actor[k] for k in ('id', 'name', 'owner', 'device')}, 'grants': self.rows('SELECT project,role FROM grants WHERE actor=?', (aid,)), 'capabilities': ['channels', 'messages', 'sessions', 'history', 'events', 'sse', 'receipts', 'message_receipts', 'invitations', 'invitation_info', 'git_refs', 'projections', 'message_origin', 'project_graph'], 'read_presets': list(PRESETS), 'projection_tables': ['projects','channels','messages','sessions','receipts'], 'repository_required': False, 'max_message_bytes': 65536}
+                return {'protocol': 'otoha-collaboration/1', 'url': self.config['public_url'], 'version': VERSION, 'actor': {k: actor[k] for k in ('id', 'name', 'owner', 'device')}, 'grants': self.rows('SELECT project,role FROM grants WHERE actor=?', (aid,)), 'capabilities': ['channels', 'messages', 'sessions', 'history', 'events', 'sse', 'receipts', 'message_receipts', 'invitations', 'invitation_info', 'git_refs', 'projections', 'message_origin', 'project_graph'], 'read_presets': list(PRESETS), 'projection_tables': ['projects','channels','messages','sessions','receipts'], 'repository_required': False, 'max_message_bytes': 65536}
             if method == 'POST' and path == '/v1/query':
                 return self.projection(actor, body)
             if method == 'GET' and path == '/v1/repository':
@@ -600,6 +636,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 if expected.netloc != self.headers.get('Host') or expected.scheme not in ('http', 'https'):
                     raise Error(403, 'cross_origin_forbidden')
             u = urllib.parse.urlsplit(self.path)
+            u = u._replace(path=normalize_api_path(u.path, self.server.store.config['public_url'],
+                                                  self.client_address[0]))
             query = urllib.parse.parse_qs(u.query)
             if method == 'GET' and u.path == '/health':
                 self.server.store.guard()
@@ -687,6 +725,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 raise
 
 def initialize(args):
+    public_prefix(args.url)
     state = pathlib.Path(args.state).resolve()
     if state.exists() and (state / 'server.json').exists():
         raise SystemExit('Already initialized; refusing to replace authority or credentials')
@@ -711,12 +750,114 @@ def initialize(args):
     with store.db:
         store.db.execute('INSERT INTO actors(id,name,owner) VALUES(?,?,1)', (name(args.owner), args.owner))
         store.db.execute('INSERT INTO credentials(hash,actor,device,created) VALUES(?,?,?,?)', (digest(token), args.owner, 'owner', time.time()))
-        store.db.execute('INSERT INTO projects VALUES(?,?)', ('team', 'Team'))
-        store.db.execute('INSERT INTO channels VALUES(?,?,?,NULL)', ('general', 'team', 'General'))
+        project = name(getattr(args, 'project', 'team'))
+        channel = name(getattr(args, 'channel', 'general'))
+        store.db.execute('INSERT INTO projects VALUES(?,?)', (project, 'Team' if project == 'team' else project))
+        store.db.execute('INSERT INTO channels VALUES(?,?,?,NULL)', (channel, project, 'General' if channel == 'general' else channel))
         store.emit('server.initialized', {'owner': args.owner})
     private_write(args.credentials, {'protocol': 'otoha-collaboration/1', 'url': config['public_url'], 'actor': args.owner, 'device': 'owner', 'token': token})
     store.db.close()
     print(encoded({'initialized': True, 'state': str(state), 'credentials_file': str(pathlib.Path(args.credentials).resolve())}))
+
+
+def bootstrap(args):
+    """Create one new self-hosted team; matching retries reuse its identity."""
+    public_prefix(args.url)
+    state = pathlib.Path(args.state).resolve()
+    credentials = pathlib.Path(args.credentials).resolve()
+    owner, project, channel = name(args.owner), name(args.project), name(args.channel)
+    repository_name = name(args.repository_name or project)
+    for value in (args.graph_namespace, args.graph_database, args.graph_id):
+        name(value)
+    graph_url = urllib.parse.urlsplit(args.graph_url)
+    if (graph_url.scheme != 'http' or graph_url.hostname not in ('127.0.0.1', 'localhost', '::1')
+            or not graph_url.port or graph_url.username or graph_url.password or graph_url.query
+            or graph_url.fragment or graph_url.path not in ('', '/')):
+        raise SystemExit('Graph backend must be a private loopback HTTP endpoint')
+    graph_credentials_file = pathlib.Path(args.graph_credentials).resolve()
+    if os.name != 'nt' and graph_credentials_file.stat().st_mode & 0o077:
+        raise SystemExit('Graph credentials file must be private (0600)')
+    graph_credentials = json.loads(graph_credentials_file.read_text())
+    if (not isinstance(graph_credentials, dict)
+            or not all(isinstance(graph_credentials.get(k), str) and graph_credentials[k]
+                       for k in ('username', 'password'))):
+        raise SystemExit('Graph credentials require username and password strings')
+    plan = {'schema': 1, 'url': args.url.rstrip('/'), 'owner': owner, 'project': project,
+            'channel': channel, 'repository': project + '/' + repository_name,
+            'graph_url': args.graph_url.rstrip('/'), 'graph_namespace': args.graph_namespace,
+            'graph_database': args.graph_database, 'graph_id': args.graph_id,
+            'min_free_bytes': args.min_free_bytes,
+            'graph_credentials_sha256': hashlib.sha256(encoded(graph_credentials).encode()).hexdigest()}
+    resumed = False
+    marker = state / 'bootstrap.json'
+    if marker.exists():
+        if json.loads(marker.read_text()) != plan:
+            raise SystemExit('Existing bootstrap settings differ; original state and credentials preserved')
+        resumed = True
+    else:
+        if state.exists() and any(state.iterdir()):
+            raise SystemExit('State is not a new empty directory; refusing to replace an authority')
+        binary = shutil.which('git')
+        if not binary:
+            raise SystemExit('Git is required to initialize the local repository')
+        state.parent.mkdir(parents=True, exist_ok=True)
+        staging = pathlib.Path(tempfile.mkdtemp(prefix='.' + state.name + '.bootstrap-', dir=state.parent))
+        staging.chmod(0o700)
+        try:
+            with contextlib.redirect_stdout(io.StringIO()):
+                initialize(argparse.Namespace(state=str(staging), url=plan['url'],
+                           credentials=str(staging / 'owner.json'), owner=owner, mount=None,
+                           min_free_bytes=args.min_free_bytes, project=project, channel=channel))
+            profile = json.loads((staging / 'owner.json').read_text())
+            profile.update(project=project, channel=channel, mode='owner')
+            (staging / 'owner.json').write_text(encoded(profile) + '\n')
+            bare = staging / 'repositories' / (project + '.git')
+            bare.parent.mkdir(mode=0o700)
+            env = {k: v for k, v in os.environ.items() if not k.startswith('GIT_')}
+            env.update(GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull, GIT_TERMINAL_PROMPT='0')
+
+            def git(*arguments, input=None):
+                result = subprocess.run([binary, '-c', 'core.hooksPath=' + os.devnull,
+                                         '-c', 'core.fsmonitor=false', *arguments],
+                                        env=env, input=input, capture_output=True, timeout=15)
+                if result.returncode:
+                    raise SystemExit('Local Git repository initialization failed; no existing state replaced')
+                return result.stdout.decode().strip()
+
+            git('init', '--bare', '--initial-branch=main', str(bare))
+            blob = git('--git-dir=' + str(bare), 'hash-object', '-w', '--stdin',
+                       input=('# ' + project + '\n\nRepository initialized by Otoha.\n').encode())
+            tree = git('--git-dir=' + str(bare), 'mktree', input=('100644 blob ' + blob + '\tREADME.md\n').encode())
+            commit = git('--git-dir=' + str(bare), '-c', 'user.name=Otoha',
+                         '-c', 'user.email=otoha@example.invalid', 'commit-tree', tree,
+                         '-m', 'Initialize Otoha local repository')
+            git('--git-dir=' + str(bare), 'update-ref', 'refs/heads/main', commit)
+            private_write(staging / 'repositories.json', {'projects': {project: {
+                'kind': 'local', 'repository': plan['repository'],
+                'path': str(state / 'repositories' / (project + '.git'))}}})
+            private_write(staging / 'graph.json', {'url': plan['graph_url'],
+                          'username': graph_credentials['username'], 'password': graph_credentials['password'],
+                          'namespace': args.graph_namespace, 'projects': {project: {
+                              'database': args.graph_database, 'graph_id': args.graph_id}}})
+            private_write(staging / 'bootstrap.json', plan)
+            if state.exists():
+                state.rmdir()  # only the caller's confirmed empty target
+            staging.rename(state)
+        finally:
+            if staging.exists():
+                shutil.rmtree(staging)
+    canonical_profile = state / 'owner.json'
+    profile_bytes = canonical_profile.read_bytes()
+    if credentials.exists():
+        if json.loads(credentials.read_text()) != json.loads(profile_bytes):
+            raise SystemExit('Credentials target differs; original credentials and initialized state preserved')
+    else:
+        private_write(credentials, json.loads(profile_bytes))
+    print(encoded({'initialized': True, 'resumed': resumed, 'state': str(state),
+                   'credentials_file': str(credentials), 'project': project, 'channel': channel,
+                   'repository': {'kind': 'local', 'repository': plan['repository'],
+                                  'path': str(state / 'repositories' / (project + '.git'))},
+                   'graph_configured': True}))
 
 def main():
     os.umask(0o077)
@@ -726,6 +867,15 @@ def main():
     init.add_argument('--state', required=True); init.add_argument('--owner', default='owner')
     init.add_argument('--url', required=True); init.add_argument('--credentials', required=True)
     init.add_argument('--mount'); init.add_argument('--min-free-bytes', type=int, default=2*1024**3)
+    init.add_argument('--project', default='team'); init.add_argument('--channel', default='general')
+    boot = sub.add_parser('bootstrap')
+    boot.add_argument('--state', required=True); boot.add_argument('--url', required=True)
+    boot.add_argument('--credentials', required=True); boot.add_argument('--owner', default='owner')
+    boot.add_argument('--project', required=True); boot.add_argument('--channel', required=True)
+    boot.add_argument('--repository-name'); boot.add_argument('--min-free-bytes', type=int, default=2*1024**3)
+    boot.add_argument('--graph-url', required=True); boot.add_argument('--graph-namespace', default='otoha')
+    boot.add_argument('--graph-database', required=True); boot.add_argument('--graph-id', required=True)
+    boot.add_argument('--graph-credentials', required=True)
     serve = sub.add_parser('serve')
     serve.add_argument('--state', required=True); serve.add_argument('--host', default='127.0.0.1')
     serve.add_argument('--port', type=int, default=8788); serve.add_argument('--cert'); serve.add_argument('--key')
@@ -737,6 +887,9 @@ def main():
     args = p.parse_args()
     if args.command == 'init':
         initialize(args)
+        return
+    if args.command == 'bootstrap':
+        bootstrap(args)
         return
     if args.command in ('backup', 'check'):
         store = Store(args.state)

@@ -25,6 +25,7 @@ type TeamConfig struct {
 	Name             string `json:"name"`
 	Mode             string `json:"mode"`
 	URL              string `json:"url"`
+	LocalURL         string `json:"local_url,omitempty"`
 	Project          string `json:"project"`
 	Channel          string `json:"channel"`
 	State            string `json:"state"`
@@ -60,7 +61,8 @@ func saveTeamConfig(cfg TeamConfig) error {
 	return Save(teamConfigPath(cfg.Name), Object{
 		"protocol": cfg.Protocol, "name": cfg.Name, "mode": cfg.Mode,
 		"url": cfg.URL, "project": cfg.Project, "channel": cfg.Channel,
-		"state": cfg.State, "profile": cfg.Profile, "server_pid": cfg.ServerPID,
+		"local_url": cfg.LocalURL,
+		"state":     cfg.State, "profile": cfg.Profile, "server_pid": cfg.ServerPID,
 		"server_log": cfg.ServerLog, "created_at": cfg.CreatedAt, "started_by": cfg.StartedBy,
 		"repository_url": cfg.RepositoryURL, "repository_branch": cfg.RepositoryBranch, "checkout": cfg.Checkout,
 		"gitea_profile": cfg.GiteaProfile,
@@ -78,7 +80,8 @@ func loadTeamConfig(name string) (TeamConfig, error) {
 	cfg := TeamConfig{
 		Protocol: S(o, "protocol"), Name: S(o, "name"), Mode: S(o, "mode"),
 		URL: S(o, "url"), Project: S(o, "project"), Channel: S(o, "channel"),
-		State: S(o, "state"), Profile: S(o, "profile"), ServerPID: N(o, "server_pid"),
+		LocalURL: S(o, "local_url"),
+		State:    S(o, "state"), Profile: S(o, "profile"), ServerPID: N(o, "server_pid"),
 		ServerLog: S(o, "server_log"), CreatedAt: S(o, "created_at"), StartedBy: S(o, "started_by"),
 		RepositoryURL: S(o, "repository_url"), RepositoryBranch: S(o, "repository_branch"), Checkout: S(o, "checkout"),
 		GiteaProfile: S(o, "gitea_profile"),
@@ -229,7 +232,11 @@ func startLocalTeamServer(ctx context.Context, cfg TeamConfig, minFreeBytes int6
 	if err != nil {
 		return 0, err
 	}
-	cmd := exec.Command(python, script, "serve", "--state", cfg.State, "--host", "127.0.0.1", "--port", portFromURL(cfg.URL))
+	endpoint := cfg.URL
+	if cfg.LocalURL != "" {
+		endpoint = cfg.LocalURL
+	}
+	cmd := exec.Command(python, script, "serve", "--state", cfg.State, "--host", "127.0.0.1", "--port", portFromURL(endpoint))
 	cmd.Stdout, cmd.Stderr = log, log
 	cmd.Stdin = nil
 	if err = cmd.Start(); err != nil {
@@ -239,7 +246,7 @@ func startLocalTeamServer(ctx context.Context, cfg TeamConfig, minFreeBytes int6
 	pid := cmd.Process.Pid
 	_ = cmd.Process.Release()
 	_ = log.Close()
-	if err = waitHealth(ctx, cfg.URL); err != nil {
+	if err = waitHealth(ctx, endpoint); err != nil {
 		return pid, fmt.Errorf("local collaboration service did not become healthy: %w", err)
 	}
 	return pid, nil
@@ -463,8 +470,9 @@ func teamDoctor(ctx context.Context, name string) (Object, error) {
 		add("owner_profile", true, cfg.Profile)
 	}
 	if cfg.Mode == "local" {
-		if cfg.ServerPID > 0 && processAlive(cfg.ServerPID) {
-			add("server_process", true, strconv.Itoa(cfg.ServerPID))
+		serverPID := localTeamPID(cfg)
+		if serverPID > 0 && processAlive(serverPID) {
+			add("server_process", true, strconv.Itoa(serverPID))
 		} else {
 			add("server_process", false, "server process is not alive")
 		}
@@ -1046,6 +1054,10 @@ func teamJoinCommand(ctx context.Context, args []string) (Object, error) {
 		result["next"] = "check repository access, then repeat the same team join command"
 		return result, fmt.Errorf("identity joined; repository is not ready: %w", err)
 	}
+	if err = ensureJoinedRepositoryIdentity(ctx, checkout, cfg.Profile); err != nil {
+		readiness["repository"] = "error"
+		return result, err
+	}
 	cfg.Checkout = checkout
 	readiness["repository"], result["checkout"] = "ready", checkout
 	if err = saveTeamConfig(cfg); err != nil {
@@ -1095,11 +1107,12 @@ func teamStatusCommand(ctx context.Context, args []string) (Object, error) {
 		return nil, err
 	}
 	defer client.Transport.Close()
+	serverPID := localTeamPID(cfg)
 	var processAliveValue any
 	if cfg.Mode == "local" {
-		processAliveValue = processAlive(cfg.ServerPID)
+		processAliveValue = processAlive(serverPID)
 	}
-	alive := cfg.Mode != "local" || processAlive(cfg.ServerPID)
+	alive := cfg.Mode != "local" || processAlive(serverPID)
 	state := cfg.State
 	if cfg.Mode == "local" {
 		if alive {
@@ -1108,7 +1121,7 @@ func teamStatusCommand(ctx context.Context, args []string) (Object, error) {
 			state = "stopped"
 		}
 	}
-	result := Object{"team": name, "mode": cfg.Mode, "url": cfg.URL, "project": cfg.Project, "channel": cfg.Channel, "state": state, "profile": cfg.Profile, "server_pid": cfg.ServerPID, "process_alive": processAliveValue}
+	result := Object{"team": name, "mode": cfg.Mode, "url": cfg.URL, "project": cfg.Project, "channel": cfg.Channel, "state": state, "profile": cfg.Profile, "server_pid": serverPID, "process_alive": processAliveValue}
 	teamClientContext(result, cfg)
 	if cfg.ServerLog != "" {
 		result["server_log"] = cfg.ServerLog

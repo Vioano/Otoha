@@ -182,6 +182,10 @@ class GraphDatabaseTest(unittest.TestCase):
         fixture = ServiceTest('runTest')
         fixture.setUp()
         try:
+            # The public route prefix is stripped before the same authenticated
+            # graph API; this uses the real database, not the auth substitute.
+            fixture.url += '/t/graph-fixture'
+            fixture.store.config['public_url'] = fixture.url
             config = {key: self.binding[key] for key in ('url', 'username', 'password', 'namespace')}
             config['projects'] = {'team': {key: self.binding[key] for key in ('database', 'graph_id')}}
             config_file = fixture.root / 'state' / 'graph.json'

@@ -266,7 +266,11 @@ func NewClient(p Object, t *Transport, git bool) *Client {
 			t = NewTransport(O(p, "gateway"))
 		}
 	}
-	return &Client{p, t, git}
+	client := &Client{p, t, git}
+	if !git {
+		configureDefaultRelayTransport(client)
+	}
+	return client
 }
 func (c *Client) Request(ctx context.Context, method, path string, body any) (*http.Response, error) {
 	u, err := url.Parse(S(c.Profile, "url"))
@@ -320,6 +324,9 @@ func (c *Client) Call(ctx context.Context, method, path string, body any) (Objec
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		var d Object
 		json.Unmarshal(b, &d)
+		if defaultRelayTeamUnavailable(c.Profile, resp.StatusCode, d) {
+			return nil, &APIError{Status: http.StatusServiceUnavailable, Code: "relay_center_unavailable"}
+		}
 		code := S(d, "error")
 		if code == "" {
 			code = S(d, "message")

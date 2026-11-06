@@ -1,0 +1,20 @@
+[Unit]
+Description=Otoha relay route registry and frps authorization
+After=network.target
+
+[Service]
+User=otoha-relay
+Group=otoha-relay
+WorkingDirectory=/var/lib/otoha-relay
+ExecStart=/usr/bin/python3 -B /opt/otoha-relay/bootstrap/otoha_relay.py serve --state /var/lib/otoha-relay --host 127.0.0.1 --port 28882
+Restart=on-failure
+RestartSec=3
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/otoha-relay
+
+[Install]
+WantedBy=multi-user.target
