@@ -17,7 +17,7 @@ Otoha 面向跨 Session、跨设备、跨成员和跨 Agent 框架的长期工�
 
 校验 SHA-256 后解压，使用 `bin/otoha`。普通成员无需 Go、Node.js 或 Python；当前需要系统 Git，Linux 还需要可用的 user systemd 会话。新中心自动下载固定版本的 Python、SurrealDB 和 frpc，完成网络、通信、仓库与图谱初始化。[候选范围](docs/RELEASE-0.1.0-alpha.3.zh-CN.md)说明依赖、限制及验证边界。
 
-普通团队的目标是从交给 Agent 产品链接到及时响应的队友全员可用，端到端五分钟以内；模型对话、冷下载及实际检查都计入。具体计时与较弱模型盲测要求见[接入体验](docs/ONBOARDING-EXPERIENCE.zh-CN.md)，实现存在不代表该目标已达标。
+普通团队的目标是从交给 Agent 产品链接到及时响应的队友全员可用，端到端五分钟以内；模型对话、冷下载及实际检查都计入。具体计时与较弱模型盲测要求见[接入体验](docs/ONBOARDING-EXPERIENCE.zh-CN.md)，RC3 的一次 Linux 双人冷测用 DeepSeek Flash 在 219.36 秒内完成，含 19 项独立检查；前两轮失败及范围限制保留在[验证记录](docs/ONBOARDING-VALIDATION.zh-CN.md)，不外推为所有环境的保证。
 
 ## 五项核心哲学
 

@@ -1,0 +1,279 @@
+{
+  "schema": "otoha-public-onboarding-validation/1",
+  "date": "2026-11-07",
+  "candidate": "0.1.0-alpha.3-rc.3",
+  "source_commit": "c038081eb702e3a486575b269976f3dad13bedfc",
+  "result": "PASS",
+  "scope": {
+    "hosts": "Two Linux x86_64 hosts; leader on private host, peer as separate unprivileged account on the default relay VM.",
+    "preconditions": [
+      "Git",
+      "curl",
+      "tar",
+      "working user systemd"
+    ],
+    "fresh_product_homes": true,
+    "fresh_model_sessions": true,
+    "simulated_prompt_user": true,
+    "simulated_prompt_teammate": true,
+    "peer_is_third_independent_network": false,
+    "all_platforms_or_models_proven": false
+  },
+  "clock": {
+    "t0": "2026-11-06T20:45:20.793154+00:00",
+    "t1": "2026-11-06T20:49:00.153331+00:00",
+    "elapsed_seconds": 219.35952729199926,
+    "deadline_seconds": 300.0,
+    "timed_out": false
+  },
+  "models": {
+    "owner": {
+      "startup_model": {
+        "provider": "deepseek",
+        "id": "deepseek-flash",
+        "api": "openai-completions",
+        "name": "DeepSeek V4.1 Flash"
+      },
+      "thinking": "off",
+      "observed": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "api": "openai-completions",
+          "stopReason": "toolUse"
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "api": "openai-completions",
+          "stopReason": "stop"
+        }
+      ],
+      "aborted": false
+    },
+    "peer": {
+      "startup_model": {
+        "provider": "deepseek",
+        "id": "deepseek-flash",
+        "api": "openai-completions",
+        "name": "DeepSeek V4.1 Flash"
+      },
+      "thinking": "off",
+      "observed": [
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "api": "openai-completions",
+          "stopReason": "toolUse"
+        },
+        {
+          "provider": "deepseek",
+          "model": "deepseek-flash",
+          "api": "openai-completions",
+          "stopReason": "stop"
+        }
+      ],
+      "aborted": false
+    }
+  },
+  "harness_source_sha256": {},
+  "independent_verifier": {
+    "started_at": "2026-11-06T20:48:36.179156+00:00",
+    "finished_at": "2026-11-06T20:49:00.139305+00:00",
+    "elapsed_seconds": 23.9602,
+    "observations_complete": true,
+    "checks_observed": 19,
+    "failed_checks": [],
+    "missing_checks": [],
+    "probe_errors": [],
+    "checks": [
+      {
+        "check": "team_status_and_role",
+        "role": "peer",
+        "ok": true,
+        "healthy": true,
+        "actual_role": "member",
+        "state": "ready"
+      },
+      {
+        "check": "managed_daemon_running",
+        "role": "peer",
+        "ok": true,
+        "managed": true,
+        "manager": "systemd-user",
+        "manager_state": "active",
+        "receiver_alive": true,
+        "page_alive": true
+      },
+      {
+        "check": "public_prefixed_endpoint",
+        "role": "peer",
+        "ok": true,
+        "http_status": 200,
+        "method": "system_curl_strict_tls_natural_dns"
+      },
+      {
+        "check": "git_checkout_exists",
+        "role": "peer",
+        "ok": true
+      },
+      {
+        "check": "team_status_and_role",
+        "role": "owner",
+        "ok": true,
+        "healthy": true,
+        "actual_role": "owner",
+        "state": "running"
+      },
+      {
+        "check": "managed_daemon_running",
+        "role": "owner",
+        "ok": true,
+        "managed": true,
+        "manager": "systemd-user",
+        "manager_state": "active",
+        "receiver_alive": true,
+        "page_alive": true
+      },
+      {
+        "check": "public_prefixed_endpoint",
+        "role": "owner",
+        "ok": true,
+        "http_status": 200,
+        "method": "system_curl_strict_tls_natural_dns"
+      },
+      {
+        "check": "git_checkout_exists",
+        "role": "owner",
+        "ok": true
+      },
+      {
+        "check": "same_project_and_public_authority",
+        "role": "both",
+        "ok": true
+      },
+      {
+        "check": "graph_manifest",
+        "role": "owner",
+        "ok": true,
+        "source_version": 0
+      },
+      {
+        "check": "owner_graph_node_add",
+        "role": "owner",
+        "ok": true,
+        "state": "accepted",
+        "source_version": 1
+      },
+      {
+        "check": "owner_message_authority_accepted",
+        "role": "owner",
+        "ok": true,
+        "state": "accepted",
+        "body_sha256": "edf1f42d6cf8d3b5c25a190830d82849c5a7003dc254e8d611651a6259b815b4"
+      },
+      {
+        "check": "member_graph_inspect",
+        "role": "peer",
+        "ok": true
+      },
+      {
+        "check": "member_graph_prop_set",
+        "role": "peer",
+        "ok": true,
+        "state": "accepted",
+        "source_version": 2
+      },
+      {
+        "check": "member_full_message_get",
+        "role": "peer",
+        "ok": true,
+        "body_matches": true,
+        "body_sha256": "edf1f42d6cf8d3b5c25a190830d82849c5a7003dc254e8d611651a6259b815b4",
+        "source": "authority",
+        "read_receipt_recorded": false
+      },
+      {
+        "check": "member_admin_invite_denied_403",
+        "role": "peer",
+        "ok": true,
+        "http_status": 403,
+        "owner_required": true,
+        "invitation_file_created": false
+      },
+      {
+        "check": "member_git_commit_push",
+        "role": "peer",
+        "ok": true,
+        "commit": "64d20213c332fb2d4a6372501c3fccab7c15afd7"
+      },
+      {
+        "check": "owner_graph_member_property_readback",
+        "role": "owner",
+        "ok": true,
+        "source_version": 2
+      },
+      {
+        "check": "owner_git_fetch_content_readback",
+        "role": "owner",
+        "ok": true,
+        "commit": "64d20213c332fb2d4a6372501c3fccab7c15afd7"
+      }
+    ]
+  },
+  "previous_trials": [
+    {
+      "trial": "A",
+      "candidate": "0.1.0-alpha.3-rc.1",
+      "result": "FAIL",
+      "elapsed_seconds": 299.8696141250002,
+      "timed_out": false,
+      "verifier_executed": true,
+      "checks_observed": 9,
+      "missing_independent_checks": 10,
+      "oracle_and_fixture_limitations_retained": true
+    },
+    {
+      "trial": "B",
+      "candidate": "0.1.0-alpha.3-rc.2",
+      "result": "FAIL",
+      "elapsed_seconds": 300.00742849999733,
+      "timed_out": true,
+      "verifier_executed": false,
+      "checks_observed": 0,
+      "missing_independent_checks": 19,
+      "oracle_and_fixture_limitations_retained": true
+    }
+  ],
+  "published_artifacts": [
+    {
+      "file": "otoha-center-runtime-0.1.0-alpha.3-rc.3-darwin-arm64.tar.gz",
+      "role": "center-runtime",
+      "platform": "darwin/arm64",
+      "bytes": 114699752,
+      "sha256": "d2a93d96cdd269fa337efb577dfd807449b2ff812f83fb990ed21f6bf650b5b0"
+    },
+    {
+      "file": "otoha-center-runtime-0.1.0-alpha.3-rc.3-linux-amd64.tar.gz",
+      "role": "center-runtime",
+      "platform": "linux/amd64",
+      "bytes": 144983877,
+      "sha256": "9647ab67545764c75d5595675f14b0cabb978f1d2bd750afb627e5c65d0b5c41"
+    },
+    {
+      "file": "otoha-0.1.0-alpha.3-rc.3-darwin-arm64.tar.gz",
+      "role": "client",
+      "platform": "darwin/arm64",
+      "bytes": 3894887,
+      "sha256": "3e44f3ec675c5efe45b738363887e5ae2d9e2b982ff25dc06dc2191f3c43d394"
+    },
+    {
+      "file": "otoha-0.1.0-alpha.3-rc.3-linux-amd64.tar.gz",
+      "role": "client",
+      "platform": "linux/amd64",
+      "bytes": 4204771,
+      "sha256": "106113c2f652dadd13c32948fc9f8d5b905933a84b2440b280817fadd3fc64fa"
+    }
+  ],
+  "acceptance_boundary": "Technical test result only; setup self reports and transport receipts are not human acceptance or proof of ongoing agent activity."
+}
