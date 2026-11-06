@@ -275,6 +275,12 @@ func run(args []string) error {
 			output(result)
 		}
 		return err
+	case "graph":
+		result, err := a.GraphCommand(ctx, args)
+		if result != nil {
+			output(result)
+		}
+		return err
 	case "join":
 		if len(args) == 0 || args[0] == "help" || hasHelpFlag(args) {
 			output(a.JoinCommandHelp())
@@ -283,7 +289,7 @@ func run(args []string) error {
 		// A collaboration invite is the primary project join entry point.
 		// Keep historical packed keys on their existing compatibility path.
 		for _, arg := range args {
-			if arg == "--invite" || strings.HasPrefix(arg, "--invite=") {
+			if arg == "--invite" || strings.HasPrefix(arg, "--invite=") || arg == "--endpoint" || strings.HasPrefix(arg, "--endpoint=") || arg == "--key" || strings.HasPrefix(arg, "--key=") {
 				result, err := a.TeamCommand(ctx, append([]string{"join"}, args...))
 				if result != nil {
 					output(result)
@@ -842,6 +848,7 @@ func help() {
   otoha                         open the local collaboration console
   otoha demo [--slow]           play the multi-agent recording sequence
   otoha join --invite FILE      join a project and its Otoha services
+  otoha join --endpoint URL --key KEY
   otoha setup --otoha-profile FILE --gitea-profile FILE --gateway-profile FILE --gateway-admin SSH_ALIAS
   otoha project create NAME --invite MEMBER --purpose TEXT --agent current
   otoha project grant NAME --member MEMBER
@@ -856,6 +863,10 @@ func help() {
   otoha page operation --team TEAM --request-id REQUEST_ID
   otoha message send --team TEAM --text TEXT [--request-id ID]
   otoha message list|status --team TEAM
+  otoha graph manifest TEAM
+  otoha graph query TEAM --file QUERY.json
+  otoha graph mutate TEAM --file MUTATION.json
+  otoha graph result TEAM REQUEST_ID
   otoha daemon install|uninstall|start|stop|restart|status|logs [--follow]
   otoha join KEY --agent current
   otoha import EXISTING_IDENTITY.json

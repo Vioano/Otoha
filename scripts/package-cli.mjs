@@ -14,6 +14,7 @@ const option = (name, fallback) => {
   return args[i + 1];
 };
 const version = option('--version', '0.1.0-alpha.2');
+const entry = path.resolve(option('--entry', path.join(root, 'docs', 'AGENT-ENTRY.md')));
 if (!/^[A-Za-z0-9][A-Za-z0-9.+-]{0,70}$/.test(version)) throw new Error('Invalid release version');
 const output = path.resolve(option('--out', path.join(root, 'dist', 'releases')));
 fs.mkdirSync(output, { recursive: true });
@@ -56,13 +57,18 @@ for (const [goos, goarch] of [['darwin', 'arm64'], ['linux', 'amd64']]) {
     });
     const server = path.join(destination, 'services', 'collaboration');
     fs.mkdirSync(server, { recursive: true });
-    for (const file of ['otoha_server.py', 'otoha_message.py', 'otoha_projection.py', 'otoha_repository.py']) {
+    for (const file of ['otoha_server.py', 'otoha_message.py', 'otoha_projection.py', 'otoha_repository.py', 'otoha_graph.py']) {
       fs.copyFileSync(path.join(root, 'services', 'collaboration', file), path.join(server, file));
     }
     fs.mkdirSync(path.join(destination, 'apps', 'cli'), { recursive: true });
     fs.copyFileSync(path.join(root, 'apps', 'cli', 'LICENSE'), path.join(destination, 'apps', 'cli', 'LICENSE'));
     fs.copyFileSync(path.join(root, 'NOTICE.md'), path.join(destination, 'NOTICE.md'));
-    fs.copyFileSync(path.join(root, 'docs', 'AGENT-ENTRY.md'), path.join(destination, 'START-HERE.md'));
+    fs.copyFileSync(entry, path.join(destination, 'START-HERE.md'));
+    if (path.basename(entry) === 'TEAM-AGENT-ENTRY.md') {
+      for (const name of ['TEAM-GRAPH-API.md', 'PRIVATE-TEAM.zh-CN.md']) {
+        fs.copyFileSync(path.join(root, 'docs', name), path.join(destination, name));
+      }
+    }
     fs.writeFileSync(path.join(destination, 'release.json'), JSON.stringify({ ...build, goos, goarch }, null, 2) + '\n');
     const archive = path.join(output, name + '.tar.gz');
     run('tar', ['-czf', archive, '-C', temporary, name], { env: { ...process.env, COPYFILE_DISABLE: '1' } });

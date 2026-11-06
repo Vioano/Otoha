@@ -898,6 +898,9 @@ func teamInviteCommand(ctx context.Context, args []string) (Object, error) {
 func teamJoinCommand(ctx context.Context, args []string) (Object, error) {
 	f := teamFlagSet("team join")
 	invite := f.String("invite", "", "private invitation JSON file")
+	endpoint := f.String("endpoint", "", "public HTTPS team endpoint")
+	key := f.String("key", "", "personal one-time invitation key")
+	caFile := f.String("ca-file", "", "explicit CA certificate for --endpoint")
 	device := f.String("device", "", "local device name")
 	directory := f.String("directory", "", "local repository checkout directory")
 	gatewayPath := f.String("gateway-profile", os.Getenv("OTOHA_GATEWAY_PROFILE"), "machine-preconfigured private SSH profile (or OTOHA_GATEWAY_PROFILE); relative key/known_hosts paths resolve from this file's directory")
@@ -905,8 +908,23 @@ func teamJoinCommand(ctx context.Context, args []string) (Object, error) {
 	if err := f.Parse(args); err != nil {
 		return nil, err
 	}
-	if *invite == "" {
-		return nil, errors.New("otoha team join --invite FILE")
+	keyMode := *endpoint != "" || *key != ""
+	if f.NArg() != 0 || (*invite != "" && keyMode) || (*invite == "" && !keyMode) || (keyMode && (*endpoint == "" || *key == "")) || (!keyMode && *caFile != "") {
+		return nil, errors.New("otoha join --invite FILE, or otoha join --endpoint HTTPS_URL --key KEY")
+	}
+	if keyMode {
+		gatewayExplicit := false
+		f.Visit(func(flag *flag.Flag) { gatewayExplicit = gatewayExplicit || flag.Name == "gateway-profile" })
+		if gatewayExplicit {
+			return nil, errors.New("--endpoint uses direct HTTPS; --gateway-profile applies only to loopback invitations")
+		}
+		// A public endpoint does not inherit an unrelated local SSH route.
+		*gatewayPath = ""
+		path, resolveErr := resolveJoinKey(ctx, *endpoint, *key, *caFile)
+		if resolveErr != nil {
+			return nil, resolveErr
+		}
+		*invite = path
 	}
 	inv, err := Load(*invite)
 	if err != nil {
@@ -1172,9 +1190,9 @@ func TeamCommand(ctx context.Context, args []string) (Object, error) {
 }
 
 func teamCommandHelp() Object {
-	return Object{"usage": "otoha team init|invite|join|status|doctor", "examples": []string{"otoha join --invite FILE", "otoha team init NAME", "otoha team invite TEAM MEMBER --out INVITE.json", "otoha team status TEAM", "otoha team doctor TEAM"}, "join_options": Object{"--directory DIR": "checkout target; defaults to this team's private checkout", "--gateway-profile FILE": "optional machine-preconfigured route; OTOHA_GATEWAY_PROFILE is also supported", "--gitea-profile FILE": "advanced direct repository access only; not required for an Otoha-bound repository"}}
+	return Object{"usage": "otoha team init|invite|join|status|doctor", "examples": []string{"otoha join --endpoint https://team.example.com --key KEY", "otoha join --invite FILE", "otoha team init NAME", "otoha team invite TEAM MEMBER --out INVITE.json", "otoha team status TEAM", "otoha team doctor TEAM"}, "join_options": Object{"--endpoint HTTPS_URL --key KEY": "join directly with a personal one-time key", "--directory DIR": "checkout target; defaults to this team's private checkout", "--gateway-profile FILE": "optional machine-preconfigured route for a loopback invitation; OTOHA_GATEWAY_PROFILE is also supported", "--gitea-profile FILE": "advanced direct repository access only; not required for an Otoha-bound repository"}}
 }
 
 func JoinCommandHelp() Object {
-	return Object{"usage": "otoha join --invite FILE [--directory DIR]", "example": "otoha join --invite /private/project-invite.json", "result": "joins the project, starts the local service and checks out its bound repository; status and commands are returned as JSON", "deployment": "HTTPS is direct; OTOHA_GATEWAY_PROFILE or --gateway-profile FILE selects an already configured machine route", "advanced": []string{"--gitea-profile FILE for an explicitly configured direct repository", "otoha join KEY --agent current for historical packed invitations"}}
+	return Object{"usage": "otoha join --endpoint HTTPS_URL --key KEY [--directory DIR], or otoha join --invite FILE", "example": "otoha join --endpoint https://team.example.com --key KEY", "result": "joins the project, starts the local service and checks out its bound repository; status and commands are returned as JSON", "deployment": "HTTPS is direct; loopback invitation files can use OTOHA_GATEWAY_PROFILE or --gateway-profile FILE", "advanced": []string{"--ca-file FILE for an explicitly trusted HTTPS CA", "--gitea-profile FILE for an explicitly configured direct repository", "otoha join KEY --agent current for historical packed invitations"}}
 }

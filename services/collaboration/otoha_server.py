@@ -19,6 +19,7 @@ import urllib.parse
 from otoha_message import normalize
 from otoha_projection import MAX_SNAPSHOT_BYTES, PRESETS, ProjectionError, query as project_query
 from otoha_repository import RepositoryError, proxy_git_request, repository_info
+from otoha_graph import GraphError, handle_graph
 
 VERSION = '0.2.0'
 NAME = re.compile(r'^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$')
@@ -232,7 +233,34 @@ class Store:
         return result
 
     def handle(self, method, path, query, body, token):
+        if path.startswith('/v1/graph/'):
+            return handle_graph(self, method, path, query, body, token)
         with self.lock, self.db:
+            if method == 'POST' and path == '/v1/invitation-info':
+                self.guard()
+                code = body.get('invitation')
+                if not isinstance(code, str) or not code or len(code) > 200:
+                    raise Error(403, 'invitation_invalid_or_expired')
+                invite = self.row('SELECT * FROM invites WHERE hash=?', (digest(code),))
+                if not invite or invite['revoked'] or invite['expires'] < time.time():
+                    raise Error(403, 'invitation_invalid_or_expired')
+                if invite['claimed']:
+                    raise Error(409, 'invitation_already_used')
+                grants = json.loads(invite['grants'])
+                if not isinstance(grants, dict) or len(grants) != 1:
+                    raise Error(400, 'ambiguous_single_project')
+                project = next(iter(grants))
+                if not self.row('SELECT 1 FROM projects WHERE id=?', (project,)):
+                    raise Error(404, 'project_not_found')
+                channels = [c for c in self.rows('SELECT * FROM channels WHERE project=? ORDER BY id', (project,))
+                            if not c['members'] or invite['actor'] in json.loads(c['members'])]
+                preferred = [c for c in channels if c['id'] == project + '-general']
+                if not preferred and len(channels) != 1:
+                    raise Error(400, 'ambiguous_project_channel')
+                channel = (preferred or channels)[0]['id']
+                return {'protocol': 'otoha-collaboration/1', 'url': self.config['public_url'],
+                        'actor': invite['actor'], 'project': project, 'channel': channel,
+                        'grants': grants, 'expires': invite['expires']}
             if method == 'POST' and path == '/v1/enroll':
                 self.guard()
                 code = body.get('invitation', '')
@@ -262,7 +290,7 @@ class Store:
             actor = self.authenticate(token)
             aid = actor['id']
             if method == 'GET' and path == '/v1/manifest':
-                return {'protocol': 'otoha-collaboration/1', 'version': VERSION, 'actor': {k: actor[k] for k in ('id', 'name', 'owner', 'device')}, 'grants': self.rows('SELECT project,role FROM grants WHERE actor=?', (aid,)), 'capabilities': ['channels', 'messages', 'sessions', 'history', 'events', 'sse', 'receipts', 'message_receipts', 'invitations', 'git_refs', 'projections', 'message_origin'], 'read_presets': list(PRESETS), 'projection_tables': ['projects','channels','messages','sessions','receipts'], 'repository_required': False, 'max_message_bytes': 65536}
+                return {'protocol': 'otoha-collaboration/1', 'version': VERSION, 'actor': {k: actor[k] for k in ('id', 'name', 'owner', 'device')}, 'grants': self.rows('SELECT project,role FROM grants WHERE actor=?', (aid,)), 'capabilities': ['channels', 'messages', 'sessions', 'history', 'events', 'sse', 'receipts', 'message_receipts', 'invitations', 'invitation_info', 'git_refs', 'projections', 'message_origin', 'project_graph'], 'read_presets': list(PRESETS), 'projection_tables': ['projects','channels','messages','sessions','receipts'], 'repository_required': False, 'max_message_bytes': 65536}
             if method == 'POST' and path == '/v1/query':
                 return self.projection(actor, body)
             if method == 'GET' and path == '/v1/repository':
@@ -600,7 +628,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 with self.server.store.changed:
                     self.server.store.changed.notify_all()
             self.send_json(200, result)
-        except (Error, RepositoryError) as e:
+        except (Error, RepositoryError, GraphError) as e:
             self.close_connection = True
             self.send_json(e.status, {'error': e.code})
         except (ValueError, TypeError, KeyError, OverflowError):
