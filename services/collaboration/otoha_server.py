@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS messages(id INTEGER PRIMARY KEY AUTOINCREMENT, channe
 CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, project TEXT, channel TEXT, payload TEXT NOT NULL, created REAL NOT NULL);
 CREATE TABLE IF NOT EXISTS receipts(actor TEXT REFERENCES actors(id), session TEXT, channel TEXT REFERENCES channels(id), received INTEGER NOT NULL DEFAULT 0, read INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(actor,session,channel));
 CREATE TABLE IF NOT EXISTS message_receipts(actor TEXT REFERENCES actors(id), session TEXT, channel TEXT REFERENCES channels(id), message_id INTEGER REFERENCES messages(id), received REAL, read REAL, PRIMARY KEY(actor,session,message_id));
+CREATE TABLE IF NOT EXISTS setup_readiness(project TEXT NOT NULL REFERENCES projects(id), actor TEXT NOT NULL REFERENCES actors(id), device TEXT NOT NULL, credential_hash TEXT NOT NULL REFERENCES credentials(hash), checks TEXT NOT NULL, reported REAL NOT NULL, PRIMARY KEY(project,actor,device));
 CREATE INDEX IF NOT EXISTS message_channel ON messages(channel,id);
 CREATE INDEX IF NOT EXISTS event_channel ON events(channel,id);
 CREATE INDEX IF NOT EXISTS message_receipt_channel ON message_receipts(channel,message_id);
@@ -170,6 +171,76 @@ class Store:
     def emit(self, kind, payload, project=None, channel=None):
         cur = self.db.execute('INSERT INTO events(kind,project,channel,payload,created) VALUES(?,?,?,?,?)', (kind, project, channel, encoded(payload), time.time()))
         return cur.lastrowid
+
+    def setup_ready(self, actor, method, project, body):
+        """Finite, authenticated local setup reports; never messages or acceptance."""
+        if not self.row('SELECT 1 FROM projects WHERE id=?', (project,)):
+            raise Error(404, 'project_not_found')
+        role = self.role(actor, project)
+        if not role:
+            raise Error(403, 'project_forbidden')
+
+        def receipt(row):
+            checks = json.loads(row['checks'])
+            ready = all(checks.values())
+            return {'actor': row['actor'], 'device': row['device'], 'checks': checks,
+                    'ready': ready, 'state': 'self_report', 'reported_at': row['reported'],
+                    'ready_at': row['reported'] if ready else None, 'user_accepted': False}
+
+        result = {'schema': 'otoha-setup-ready/1', 'project': project}
+        if method == 'POST':
+            if not isinstance(body, dict) or set(body) - {'device', 'checks'}:
+                raise Error(400, 'invalid_setup_report')
+            checks = body.get('checks')
+            if (not isinstance(checks, dict)
+                    or set(checks) != {'repository', 'service', 'graph', 'communication'}
+                    or any(type(value) is not bool for value in checks.values())):
+                raise Error(400, 'invalid_setup_checks')
+            if 'device' in body and body['device'] != actor['device']:
+                raise Error(400, 'setup_device_mismatch')
+            reported = time.time()
+            self.db.execute('INSERT INTO setup_readiness VALUES(?,?,?,?,?,?) '
+                            'ON CONFLICT(project,actor,device) DO UPDATE SET '
+                            'credential_hash=excluded.credential_hash,checks=excluded.checks,reported=excluded.reported',
+                            (project, actor['id'], actor['device'], actor['credential_hash'], encoded(checks), reported))
+            result['receipt'] = receipt({'actor': actor['id'], 'device': actor['device'],
+                                         'checks': encoded(checks), 'reported': reported})
+            return result
+        if method != 'GET':
+            raise Error(405, 'method_not_allowed')
+
+        project_scope = role in ('owner', 'admin')
+        # Current project grants and current credentials are checked at read time.
+        # Receipts from disabled actors or revoked credentials cannot satisfy wait.
+        rows = self.rows('SELECT s.* FROM setup_readiness s '
+                         'JOIN actors a ON a.id=s.actor JOIN credentials c ON c.hash=s.credential_hash '
+                         'WHERE s.project=? AND a.disabled=0 AND c.revoked=0 '
+                         'AND ((a.owner=1 AND s.actor=?) OR (a.owner=0 AND EXISTS(SELECT 1 FROM grants g WHERE g.actor=s.actor AND g.project=s.project))) '
+                         'AND (? OR s.actor=?) ORDER BY s.reported DESC,s.actor,s.device LIMIT 501',
+                         (project, actor['id'], int(project_scope), actor['id']))
+        if project_scope:
+            # encoded(grants) is canonical JSON; project identifiers cannot contain
+            # quotes. Filter pending invitations to this project before returning
+            # any member metadata, without exposing invitation secrets or hashes.
+            expected = [row['actor'] for row in self.rows(
+                'SELECT g.actor FROM grants g JOIN actors a ON a.id=g.actor '
+                'WHERE g.project=? AND a.disabled=0 AND a.owner=0 '
+                'UNION SELECT i.actor FROM invites i WHERE i.revoked=0 AND i.claimed IS NULL '
+                'AND i.expires>? AND instr(i.grants,?)>0 ORDER BY actor LIMIT 501',
+                (project, time.time(), '"' + project + '":'))]
+        else:
+            expected = [actor['id']]
+        truncated = len(rows) > 500 or len(expected) > 500
+        public_rows = [receipt(row) for row in rows[:500]]
+        latest = {}
+        for row in public_rows:
+            latest.setdefault(row['actor'], row)
+        result.update(scope='project' if project_scope else 'self', receipts=public_rows,
+                      expected_members=expected[:500], complete=not truncated, truncated=truncated,
+                      team_ready=bool(project_scope and expected and not truncated
+                                      and latest.get(actor['id'], {}).get('ready', False)
+                                      and all(latest.get(member, {}).get('ready', False) for member in expected)))
+        return result
 
     def event_visible(self, actor, event):
         if event['channel']:
@@ -325,8 +396,10 @@ class Store:
                 return {'actor': invite['actor'], 'device': device, 'recovered': False}
             actor = self.authenticate(token)
             aid = actor['id']
+            if path == '/v1/setup-ready':
+                return self.setup_ready(actor, method, name(query.get('project', [None])[0]), body)
             if method == 'GET' and path == '/v1/manifest':
-                return {'protocol': 'otoha-collaboration/1', 'url': self.config['public_url'], 'version': VERSION, 'actor': {k: actor[k] for k in ('id', 'name', 'owner', 'device')}, 'grants': self.rows('SELECT project,role FROM grants WHERE actor=?', (aid,)), 'capabilities': ['channels', 'messages', 'sessions', 'history', 'events', 'sse', 'receipts', 'message_receipts', 'invitations', 'invitation_info', 'git_refs', 'projections', 'message_origin', 'project_graph'], 'read_presets': list(PRESETS), 'projection_tables': ['projects','channels','messages','sessions','receipts'], 'repository_required': False, 'max_message_bytes': 65536}
+                return {'protocol': 'otoha-collaboration/1', 'url': self.config['public_url'], 'version': VERSION, 'actor': {k: actor[k] for k in ('id', 'name', 'owner', 'device')}, 'grants': self.rows('SELECT project,role FROM grants WHERE actor=?', (aid,)), 'capabilities': ['channels', 'messages', 'sessions', 'history', 'events', 'sse', 'receipts', 'message_receipts', 'invitations', 'invitation_info', 'git_refs', 'projections', 'message_origin', 'project_graph', 'setup_ready'], 'read_presets': list(PRESETS), 'projection_tables': ['projects','channels','messages','sessions','receipts'], 'repository_required': False, 'max_message_bytes': 65536}
             if method == 'POST' and path == '/v1/query':
                 return self.projection(actor, body)
             if method == 'GET' and path == '/v1/repository':

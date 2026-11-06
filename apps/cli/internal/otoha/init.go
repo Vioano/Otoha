@@ -543,6 +543,9 @@ func InitCommand(ctx context.Context, args []string) (Object, error) {
 	if !B(ownerResult, "ready") {
 		return initFailure(record, errors.New("local collaboration service is still connecting; resume initialization"))
 	}
+	if !B(ownerResult, "setup_ready_reported") {
+		return initFailure(record, errors.New("this new initialization requires a setup_ready-capable authority; restore its matching center runtime and resume"))
+	}
 	ready["repository"], ready["service"] = "ready", "ready"
 	record["state"], record["readiness"] = "owner_ready", ready
 	if len(invitations) > 0 {
@@ -555,6 +558,24 @@ func InitCommand(ctx context.Context, args []string) (Object, error) {
 	result := initSummary(record)
 	result["ready"], result["owner_ready"], result["team_ready"] = false, true, false
 	result["owner"], result["invitations"], result["graph"], result["checkout"], result["page"] = record["owner"], invitations, graph, ownerResult["checkout"], ownerResult["page"]
-	result["next"] = "Share each personal invitation privately with its teammate, then verify their join and first reply."
+	result["setup_ready_receipt"], result["checks_source"], result["user_accepted"] = ownerResult["setup_ready_receipt"], "self_report", false
+	result["waiting_for"] = "Expected teammates must enroll and report their actual local setup checks."
+	result["next"] = "otoha team wait " + team + " --timeout 60"
+	result["invitation_next"] = "Share each personal invitation privately with its teammate; their successful join automatically reports setup checks."
+	setup, setupErr := teamWaitCommand(ctx, []string{team, "--timeout", "0"})
+	if setup != nil {
+		result["team_setup"] = setup
+	}
+	if setupErr == nil && B(setup, "team_ready") {
+		record["state"] = "ready"
+		if err = initPhase(record, "ready"); err != nil {
+			return nil, err
+		}
+		result["state"], result["ready"], result["team_ready"] = "ready", true, true
+		delete(result, "waiting_for")
+		result["next"] = "Team setup is complete. Begin the team's work; no extra setup message or Git round trip is required."
+	} else if setupErr != nil {
+		result["team_setup_error"] = setupErr.Error()
+	}
 	return result, nil
 }

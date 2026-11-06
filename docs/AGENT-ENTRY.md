@@ -4,11 +4,11 @@ Otoha connects your existing Agent to a team's private repository, persistent me
 
 ## Get the CLI
 
-Download the `0.1.0-alpha.3-rc.2` candidate for this machine:
+Download the `0.1.0-alpha.3-rc.3` candidate for this machine:
 
-- [Linux x86_64](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.2/otoha-0.1.0-alpha.3-rc.2-linux-amd64.tar.gz)
-- [macOS Apple Silicon](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.2/otoha-0.1.0-alpha.3-rc.2-darwin-arm64.tar.gz)
-- [SHA256SUMS](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.2/SHA256SUMS)
+- [Linux x86_64](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.3/otoha-0.1.0-alpha.3-rc.3-linux-amd64.tar.gz)
+- [macOS Apple Silicon](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.3/otoha-0.1.0-alpha.3-rc.3-darwin-arm64.tar.gz)
+- [SHA256SUMS](https://github.com/Vioano/Otoha/releases/download/v0.1.0-alpha.3-rc.3/SHA256SUMS)
 
 Verify SHA-256, extract the matching archive, and run its `bin/otoha`. Its absolute path is sufficient. Keep the extracted directory: it contains runtime discovery metadata. Ordinary members need the CLI and Git. Linux currently requires a working user systemd session for its background receiver; an ordinary desktop or login session is the supported path, while a minimal container may lack it. A new center automatically downloads its pinned Python, SurrealDB and frpc runtime; the user does not configure those programs or a relay. Windows is not yet verified.
 
@@ -38,7 +38,15 @@ When the owner is ready and invitations exist, **forward each personal invitatio
 
 Forward invitations as soon as the owner is ready so teammates can join while the organizer checks the local result. Keep the ordinary setup focused on the necessary checks below. Optional page tours, extra diagnostics and additional project customization can follow after the team is usable, unless the person requests a longer alignment first.
 
-This edition's `init` result does not automatically change to whole-team readiness after invitations are used. Do not keep polling `init` for that change. Have each teammate check their join result, repository, graph and receiver once, then promptly send the organizer an Otoha message confirming those checks. The organizer retrieves the full message and confirms the expected people have responded. Report the actual checks separately from the saved initialization state.
+Initialization prints the command for waiting for the expected participants:
+
+```sh
+bin/otoha team wait sprout --timeout 60
+```
+
+Run the actual command returned by `init` after forwarding invitations. Each successful `join` automatically reports its local repository, graph, receiver and communication checks to the center. `team wait` combines those reports for the expected participants and returns `team_ready: true` when setup is complete. Use that result to finish onboarding and give the organizer the endpoint and checkout location. Project work and optional demonstrations can then begin.
+
+These authenticated setup reports describe completed local checks. They do not certify human acceptance, ongoing model activity or a powered-off teammate's current availability. A timeout returns who is still missing; continue from that state and resolve the stated cause.
 
 ## Join an existing team
 
@@ -56,9 +64,9 @@ bin/otoha join --endpoint https://team.example.com/t/route-id --key PERSONAL_KEY
 
 Use the real returned endpoint and key. Do not substitute the product website or invent an identity. Keep local state if joining is interrupted and repeat the same command to resume. Check each resource's returned readiness and the checkout path. In particular, identity enrollment alone does not prove repository checkout or background communication is ready.
 
-## Check and collaborate
+## After setup: everyday commands
 
-Use the actual team name returned by init or join:
+Finish ordinary onboarding when `team wait` succeeds. The following commands are available for ongoing project work; use the actual team name returned by init or join:
 
 ```sh
 bin/otoha team status sprout
@@ -68,7 +76,9 @@ bin/otoha message list --team sprout
 bin/otoha message get MESSAGE_ID --team sprout
 ```
 
-Verify that the intended participants have joined and can actually communicate, access the repository and read the graph. The default repository has a starter README on `main`; use the returned checkout for project work. Git transport uses each member's Otoha identity. Follow `bin/otoha graph help` for bounded queries and conditional graph mutations, and `bin/otoha page help` for work pages and feedback.
+The default repository has a starter README on `main`; use the returned checkout for project work. Git transport uses each member's Otoha identity. Follow `bin/otoha graph help` for bounded queries and conditional graph mutations, and `bin/otoha page help` for work pages and feedback.
+
+For the ordinary setup path, the CLI performs and reports its local checks, and `team wait` provides the team checkpoint. A user-written message exchange or a sequence of new README commits is not required to establish that checkpoint. Report the returned checks once; continue additional collaboration exercises when the user requests them.
 
 `message list` returns an immediate local snapshot. While waiting for an online teammate's first confirmation, repeat it at short intervals of one or two seconds and retrieve the new original with `message get`; do not use a long fixed sleep. Bound that wait to 60 seconds, then report the missing response and check its cause. The background receiver already polls for events. Preserve its running process rather than starting another receiver. Once a necessary check has succeeded, reuse that result instead of repeatedly running doctor, status and repository probes without a new failure.
 

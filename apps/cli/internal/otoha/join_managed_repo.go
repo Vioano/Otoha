@@ -106,5 +106,9 @@ func finishManagedTeamJoin(ctx context.Context, cfg TeamConfig, binding Object, 
 	if err = saveTeamConfig(cfg); err != nil {
 		return result, err
 	}
+	if err = reportJoinedSetup(ctx, cfg, result, readiness); err != nil {
+		result["ready"] = false
+		return result, err
+	}
 	return result, nil
 }

@@ -13,7 +13,7 @@ const option = (name, fallback) => {
   if (!args[i + 1] || args[i + 1].startsWith('--')) throw new Error(`${name} requires a value`);
   return args[i + 1];
 };
-const version = option('--version', '0.1.0-alpha.3-rc.2');
+const version = option('--version', '0.1.0-alpha.3-rc.3');
 const runtimeManifestURL = `https://github.com/Vioano/Otoha/releases/download/v${version}/runtime-manifest.json`;
 const entry = path.resolve(option('--entry', path.join(root, 'docs', 'AGENT-ENTRY.md')));
 const withCenterRuntime = args.includes('--with-center-runtime');

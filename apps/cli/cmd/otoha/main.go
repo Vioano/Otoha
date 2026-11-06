@@ -865,6 +865,7 @@ func help() {
   otoha team join --invite FILE
   otoha team status [TEAM]
   otoha team doctor [TEAM]
+  otoha team wait TEAM [--timeout 60] [--members ACTOR,ACTOR]
   otoha page open|status --team TEAM
   otoha page publish --team TEAM --file FILE [--request-id ID]
   otoha page feedback --team TEAM [--text TEXT --page REQUEST_ID --page-message-id N]
