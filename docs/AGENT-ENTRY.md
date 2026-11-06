@@ -2,7 +2,11 @@
 
 Otoha connects an existing Agent to a team's repository, persistent messages and live work page. Use your existing Agent and its tools. Installing a Skill is optional.
 
-If you were handed only the Otoha link, first check whether this workspace already has an Otoha project or an invitation. A public product link does not identify a private team. If neither exists, ask for the team's short invitation; do not invent a project identity or request an administrator password.
+If you were handed only the Otoha link, first check whether this workspace already has an Otoha project or an invitation. Otherwise establish whether the person wants to create a team, join one, or needs help deciding. A public product link does not identify or authorize access to a private team. Someone joining an existing team needs its personal invitation; someone organizing a new team needs setup guidance, not a demand to obtain an invitation first. Do not invent a project identity or request another person's administrator password.
+
+For a new team, ask about ordinary circumstances: people, computers, existing accounts, whether any device can stay on, where their data may live and who manages the team. Inspect what the available tools can establish, then ask only the missing questions. Translate the answers into supported configuration; do not ask the person to choose a database engine, port or tunnel protocol. Explain any meaningful cost, device use or access decision in ordinary language.
+
+The product target is a useful default configuration within **five minutes end to end for an ordinary team, including promptly responding teammates joining**. It must also work through weaker Agents. The adaptive CLI-guided setup flow is a development target, not a capability already provided by the alpha.2 commands below. Use actual command help and results, report missing capabilities honestly, and retain setup progress. Complex teams can request longer alignment. See [the onboarding requirements](ONBOARDING-EXPERIENCE.zh-CN.md).
 
 ## Get the CLI
 
