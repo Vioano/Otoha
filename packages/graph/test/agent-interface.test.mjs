@@ -18,6 +18,29 @@ const get=async(s,route)=>{const r=await fetch(s.url+route);return {status:r.sta
 const write=f=>fs.writeFileSync(f.input,JSON.stringify(f.model));
 const cli=(...args)=>new Promise((resolve,reject)=>{const p=spawn(process.execPath,[fileURLToPath(new URL('../bin/otoha-graph.mjs',import.meta.url)),...args]);let out='',err='';p.stdout.on('data',x=>out+=x);p.stderr.on('data',x=>err+=x);p.on('error',reject);p.on('close',code=>code?reject(Error(err)):resolve(JSON.parse(out)));});
 
+async function readRevision(reader) {
+  const decoder=new TextDecoder();let pending='';
+  for(;;){
+    const {done,value}=await reader.read();
+    assert.equal(done,false,'SSE stream ended before a complete revision event');
+    pending+=decoder.decode(value,{stream:true});
+    let end;
+    while((end=pending.indexOf('\n\n'))!==-1){
+      const frame=pending.slice(0,end);pending=pending.slice(end+2);
+      const data=frame.split('\n').filter(line=>line.startsWith('data:')).map(line=>line.slice(5).trimStart()).join('\n');
+      if(data)return JSON.parse(data);
+    }
+  }
+}
+
+test('event reader waits for a complete data frame across comment and network chunks',async()=>{
+  const encoder=new TextEncoder(),chunks=[': connected\n\n','id: 2\nevent: revision\ndata: {"cursor":','2}\n','\n'];
+  const reader=new ReadableStream({start(controller){for(const chunk of chunks)controller.enqueue(encoder.encode(chunk));controller.close();}}).getReader();
+  assert.deepEqual(await readRevision(reader),{cursor:2});
+  const incomplete=new ReadableStream({start(controller){controller.enqueue(encoder.encode('data: {"cursor":2}'));controller.close();}}).getReader();
+  await assert.rejects(readRevision(incomplete),/before a complete revision event/);
+});
+
 test('queries: local boundaries, explicit containment depth, reach and path keep different semantics',()=>{
   const f=fixture(),s=snapshot(f);
   const local=queryGraph(s,{mode:'local',target:'parser',hops:0,depth:1});
@@ -124,14 +147,15 @@ test('authority: custom storage is discovered for live and durable offline reads
 
 test('authority: event resume, evidence-only versions and partial writes never become published graphs',async()=>{
   const f=fixture(),s=await startDesignPreview({...f.options,pollMs:60000}),controller=new AbortController();
+  const deadline=setTimeout(()=>controller.abort(new Error('Timed out waiting for the resumed SSE revision')),10000);
   try{
     const response=await fetch(s.url+'api/events?after=1',{signal:controller.signal}),reader=response.body.getReader();await reader.read();
     fs.writeFileSync(path.join(f.root,'implementation.mjs'),'changed');s.authority.refresh({forceEvidence:true});
     assert.equal(s.authority.current.cursor,2);assert.equal(s.authority.snapshot().revision,f.revision);
-    const resumed=await fetch(s.url+'api/events?after=1',{signal:controller.signal}),secondReader=resumed.body.getReader();const chunk=await secondReader.read();assert.match(new TextDecoder().decode(chunk.value),/"cursor":2/);
+    const resumed=await fetch(s.url+'api/events?after=1',{signal:controller.signal}),secondReader=resumed.body.getReader();assert.equal((await readRevision(secondReader)).cursor,2);
     assert.equal(s.authority.snapshot().model.entities.find(e=>e.id==='decode').maturity.verification.effective,'unknown');
     const before=s.authority.current.cursor;fs.writeFileSync(f.input,'{');s.authority.refresh();assert.equal(s.authority.current.cursor,before);
     write(f);s.authority.refresh();assert.equal(s.authority.failure,null);
     assert.equal(topologyHash(s.authority.snapshot().model),topologyHash(f.model));
-  }finally{controller.abort();await s.stop();}
+  }finally{clearTimeout(deadline);controller.abort();await s.stop();}
 });
