@@ -33,6 +33,39 @@ const run = (command, argv, options = {}) => {
   return result.stdout.trim();
 };
 const sourceFiles = [];
+const supportingFiles = [
+  'packages/review-gate/otoha_review.py', 'scripts/review-gate.py', 'scripts/sync-review-core.py',
+  'examples/review-gate/artifact-review.json', 'docs/REVIEW-PROTOCOL.zh-CN.md',
+];
+const supportingDirectories = ['skills/otoha-content-review', 'skills/otoha-visualize'];
+const trackedFiles = new Set(run('git', ['ls-files', '-z']).split('\0'));
+const excludedResource = name => name === '__pycache__' || name === '.DS_Store'
+  || name === '__MACOSX' || name.startsWith('._') || /\.py[co]$/.test(name);
+const noSymlinkParents = relative => relative.split('/').every((_, index, parts) =>
+  !fs.lstatSync(path.join(root, ...parts.slice(0, index + 1))).isSymbolicLink());
+function resourceFiles(directory) {
+  const result = [];
+  for (const item of fs.readdirSync(path.join(root, directory), { withFileTypes: true })) {
+    if (excludedResource(item.name) || item.isSymbolicLink()) continue;
+    const relative = path.posix.join(directory, item.name);
+    if (item.isDirectory()) result.push(...resourceFiles(relative));
+    else if (item.isFile() && trackedFiles.has(relative)) result.push(relative);
+  }
+  return result;
+}
+const resources = supportingFiles.filter(file => {
+  const original = path.join(root, file);
+  return fs.existsSync(original) && noSymlinkParents(file) && fs.lstatSync(original).isFile();
+});
+for (const directory of supportingDirectories) {
+  const original = path.join(root, directory);
+  if (fs.existsSync(original) && !fs.lstatSync(original).isSymbolicLink() && fs.statSync(original).isDirectory()) {
+    resources.push(...resourceFiles(directory));
+  }
+}
+if (resources.includes('scripts/review-gate.py') && !resources.includes('packages/review-gate/otoha_review.py')) {
+  throw new Error('Review CLI requires its shared core in the same package');
+}
 function collect(directory) {
   for (const item of fs.readdirSync(path.join(root, directory), { withFileTypes: true })) {
     const relative = path.posix.join(directory, item.name);
@@ -43,6 +76,7 @@ function collect(directory) {
 collect('apps/cli');
 collect('services/collaboration');
 sourceFiles.push('scripts/package-cli.mjs', 'scripts/runtime-prepare.py', 'scripts/runtime-assets.json');
+sourceFiles.push(...resources);
 const inputHash = crypto.createHash('sha256');
 for (const file of sourceFiles.sort()) inputHash.update(file).update('\0').update(fs.readFileSync(path.join(root, file))).update('\0');
 const build = {
@@ -61,6 +95,13 @@ function copyBackend(destination) {
   const server = path.join(destination, 'services', 'collaboration');
   fs.mkdirSync(server, { recursive: true });
   for (const file of backendFiles) fs.copyFileSync(path.join(root, 'services', 'collaboration', file), path.join(server, file));
+}
+function copySupportingResources(destination) {
+  for (const relative of resources) {
+    const target = path.join(destination, relative);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(path.join(root, relative), target);
+  }
 }
 function archiveTree(name, temporary, role, platform) {
   const archive = path.join(output, name + '.tar.gz');
@@ -111,6 +152,7 @@ for (const [goos, goarch] of runtimeOnly ? [] : platforms) {
       cwd: path.join(root, 'apps', 'cli'), env: { ...process.env, CGO_ENABLED: '0', GOOS: goos, GOARCH: goarch },
     });
     copyBackend(destination);
+    copySupportingResources(destination);
     if (runtimeManifest) {
       const contents = JSON.stringify(runtimeManifest, null, 2) + '\n';
       fs.writeFileSync(path.join(destination, 'runtime-manifest.json'), contents);

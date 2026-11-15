@@ -1,5 +1,7 @@
 # 开发计划与起点
 
+可复用审查、分层推导与循环打样的当前方法见 [Skills 开发计划](SKILLS-DEVELOPMENT.zh-CN.md)。通用评分通过器与单份 JSON 题包已形成源码入口，见 [审查协议](REVIEW-PROTOCOL.zh-CN.md)；方法有效性与每个项目的实际验收分别验证。
+
 后续开发在 Otoha 仓库进行，参考基线见[已有基础](FOUNDATIONS.zh-CN.md)。下文区分用户已确定的计划、实施建议与实际验证范围。
 
 2026-11-06 调整当前执行顺序：先按[需求演化记录](REQUIREMENTS-STATE.zh-CN.md)核对有效需求，再用[通信需求实例](communication-requirement-instance.html)模拟[通信契约](COMMUNICATION-CONTRACT.zh-CN.md)。该实例只使用虚构数据。新反馈先回到共同需求，再决定真实代码；现有实现不能反向规定用户需求。尚未取得的长聊天前文和旧决定原话明确保留为取证缺口。

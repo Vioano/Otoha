@@ -1,0 +1,4 @@
+interface:
+  display_name: "Otoha 可视化网站"
+  short_description: "把当前指令、需求与真实目标做成团队共享的可视化网站，复用 Otoha 中心同步"
+  default_prompt: "用 $otoha-visualize 把当前讨论中的具体要求和真实目标做成团队共享的可视化网站。"

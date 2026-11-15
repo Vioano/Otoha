@@ -97,6 +97,7 @@ node bin/otoha.mjs inbox read MESSAGE_UID --channel PROJECT-general --session SE
 | 图谱、查询、看板与交互视图 | [Otoha Graph](packages/graph/README.md) |
 | 协作服务、身份、查询、回执与 MCP | [Otoha Collaboration](services/collaboration/README.md) |
 | 原生客户端、项目接入与后台接收 | [Otoha CLI](apps/cli/README.md) |
+| 通用评分通过器、JSON 题包与前端适配 | [审查协议](docs/REVIEW-PROTOCOL.zh-CN.md)（Python 源码入口） |
 | GitHub 收信与操作指引 | [Otoha Mailbox](integrations/mailbox/README.md) |
 | 图标方向打样，尚未定稿 | [图标探索](assets/brand/README.md) |
 
@@ -112,8 +113,10 @@ node bin/otoha.mjs inbox read MESSAGE_UID --channel PROJECT-general --session SE
 
 ```sh
 npm test
-npm run check:names
+npm run check
 ```
+
+人工反馈和纠错中可自动检查的部分，落实为项目已有 lint 或回归测试；[接入方式与当前实例](docs/FEEDBACK-TO-CHECKS.zh-CN.md)说明原话、检查实现、修订和工程结果怎样关联。
 
 通用实现已经迁入并统一命名，组件组合不等于五项哲学已经完整落地。已有中心共享频道、摘要/原件分离、指定 Codex 宿主的 queue/steer、工作页反馈与离线续投的限定验证。新候选的自助初始化、默认中继与基础图接口分别做功能和端到端验收。完整成员副本、逐消息私发权限、通用图谱画布、Template 和自适应调度仍待开发；Windows 实机及其他宿主另行验证。
 

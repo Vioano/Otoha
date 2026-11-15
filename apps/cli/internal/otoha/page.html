@@ -70,7 +70,9 @@
     let team = params.get('team') || new URL(location.href).searchParams.get('team') || safeGet(sessionStorage,'otoha-page-team') || '';
     let state = null, authenticated = false, submitting = false, timer = null, teamVersion = 0, pollRunning = false, pollAgain = false;
     let selected = '', itemFingerprint = '', feedbackFingerprint = '', lastAttempt = null, draftTarget = '', draftMessageID = 0, draftNeedsReview = false, awaitingFeedback = null;
-    let artifactView = null;
+    let artifactView = null, artifactGeneration = 0;
+    const artifactStates = new Map();
+    const viewStateCaptureTimeout = 200;
     const nodeCache = new Map();
     const draftKey = () => 'otoha-page-draft:' + team;
     const selectionKey = () => 'otoha-page-selection:' + team;
@@ -120,18 +122,63 @@
       } finally {clearTimeout(timeout);}
     }
     function clearArtifact() {
+      artifactGeneration++;
       if(artifactView){artifactView.dispose();artifactView=null;}
       ui.artifact.replaceChildren();
     }
-    function renderArtifact(page,doc,data) {
+    function viewStateScope(activeTeam,doc) {
+      const option=doc.view_state;
+      return option && option.version===1 && typeof option.topic==='string' && option.topic.trim() && option.topic.length<=256
+        ? JSON.stringify([activeTeam,option.topic]) : null;
+    }
+    function normalizeViewState(value) {
+      const validID=id=>typeof id==='string' && id.length>0 && id.length<=256;
+      if(!value || typeof value!=='object' || Array.isArray(value) || !['light','dark'].includes(value.theme))return null;
+      if(!Array.isArray(value.details) || value.details.length>1000 || !value.scroll || !Number.isFinite(value.scroll.x) || !Number.isFinite(value.scroll.y) || value.scroll.x<0 || value.scroll.y<0)return null;
+      if(value.focus_id!==null && !validID(value.focus_id))return null;
+      if(value.view_id!==undefined && value.view_id!==null && !validID(value.view_id))return null;
+      const ids=new Set(), details=[];
+      for(const item of value.details){
+        if(!item || !validID(item.id) || typeof item.open!=='boolean' || ids.has(item.id))return null;
+        ids.add(item.id);details.push({id:item.id,open:item.open});
+      }
+      // Only view coordinates and stable IDs survive this boundary, never
+      // arbitrary child properties, form values, labels or text content.
+      const saved={theme:value.theme,details,scroll:{x:value.scroll.x,y:value.scroll.y},focus_id:value.focus_id};
+      if(value.view_id!==undefined)saved.view_id=value.view_id;
+      return saved;
+    }
+    async function renderArtifact(page,doc,data) {
+      const generation=++artifactGeneration, activeTeam=team, version=teamVersion;
       const key=JSON.stringify([team,page.request_id,page.message_id]);
-      if(artifactView && artifactView.key===key){artifactView.update(data);return;}
+      if(artifactView && artifactView.key===key){artifactView.update(data);return artifactGeneration;}
+      const previous=artifactView;
+      if(previous && previous.scope){
+        const captured=await previous.capture();
+        if(generation!==artifactGeneration || activeTeam!==team || version!==teamVersion)return false;
+        if(captured)artifactStates.set(previous.scope,captured);else artifactStates.delete(previous.scope);
+      }
+      if(generation!==artifactGeneration || activeTeam!==team || version!==teamVersion)return false;
       clearArtifact();
       const source={team,page_request_id:page.request_id,page_message_id:page.message_id};
+      const scope=viewStateScope(team,doc);
       const frame=document.createElement('iframe');frame.className='artifact-frame';
       frame.setAttribute('sandbox','allow-scripts allow-forms');frame.setAttribute('title',doc.title || 'Agent 工作页');
       frame.setAttribute('referrerpolicy','no-referrer');frame.dataset.pageMessageId=String(page.message_id);
-      const requests=new Map();let alive=true;
+      const requests=new Map();let alive=true, capturePending=null, restoreSent=false;
+      function finishCapture(value) {
+        const pending=capturePending;if(!pending)return;
+        capturePending=null;clearTimeout(pending.timer);pending.resolve(value);
+      }
+      function capture() {
+        if(!alive || !scope || !frame.isConnected || !frame.contentWindow)return Promise.resolve(null);
+        if(capturePending)return capturePending.promise;
+        let resolve;const promise=new Promise(done=>{resolve=done;});
+        const pending={id:requestID(),resolve,promise,timer:null};capturePending=pending;
+        pending.timer=setTimeout(()=>finishCapture(null),viewStateCaptureTimeout);
+        frame.contentWindow.postMessage({type:'otoha:view-state:capture',version:1,request_id:pending.id},'*');
+        return promise;
+      }
       function reply(id,stage,error) {
         if(!alive || !frame.isConnected || !frame.contentWindow)return;
         frame.contentWindow.postMessage({type:'otoha:feedback-result',request_id:id,state:stage,...(error?{error:String(error)}:{})},'*');
@@ -139,7 +186,19 @@
       async function onMessage(event) {
         if(!alive || event.source!==frame.contentWindow)return;
         const input=event.data;
-        if(!input || typeof input!=='object' || Array.isArray(input) || input.type!=='otoha:feedback')return;
+        if(!input || typeof input!=='object' || Array.isArray(input))return;
+        if(input.type==='otoha:view-state:snapshot'){
+          if(scope && input.version===1 && capturePending && input.request_id===capturePending.id)finishCapture(normalizeViewState(input.state));
+          return;
+        }
+        if(input.type==='otoha:view-state:ready'){
+          if(scope && input.version===1 && !restoreSent){
+            restoreSent=true;const saved=artifactStates.get(scope);
+            if(saved)frame.contentWindow.postMessage({type:'otoha:view-state:restore',version:1,state:saved},'*');
+          }
+          return;
+        }
+        if(input.type!=='otoha:feedback')return;
         const id=input.request_id===undefined?requestID():input.request_id;
         if(typeof id!=='string' || !/^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$/.test(id)){reply(null,'rejected','request_id 格式无效');return;}
         if(typeof input.text!=='string' || !input.text.trim() || input.text.length>10000){reply(id,'rejected','反馈须为 1–10000 字符的文本');return;}
@@ -168,8 +227,9 @@
         }
       };
       window.addEventListener('message',onMessage);
-      artifactView={key,frame,update,dispose:()=>{alive=false;window.removeEventListener('message',onMessage);requests.clear();}};
+      artifactView={key,scope,frame,update,capture,dispose:()=>{alive=false;finishCapture(null);window.removeEventListener('message',onMessage);requests.clear();}};
       ui.artifact.append(frame);frame.srcdoc=doc.html;update(data);
+      return artifactGeneration;
     }
     function authRequired() { authenticated=false;connect('offline','尚未连接本地服务');notice('请通过 otoha page open 打开这张工作页。');formState(); }
     async function initSession() {
@@ -238,13 +298,16 @@
       }
       ui.feedbackEmpty.hidden=values.length>0;setText(ui.feedbackCount,values.length?String(values.length):'');
     }
-    function render(data) {
-      state=data;const page=data.page || {};const doc=page.document || {};
+    async function render(data) {
+      const version=teamVersion, activeTeam=team;
+      const page=data.page || {};const doc=page.document || {};
       connect(data.connection || 'connecting');
       const hasPage=Boolean(page.request_id && validMessageID(page.message_id));
       const htmlMode=hasPage && doc.format==='html' && typeof doc.html==='string';
       ui.shell.classList.toggle('artifact-mode',htmlMode);ui.workLayout.hidden=htmlMode;ui.artifact.hidden=!htmlMode;
-      if(htmlMode)renderArtifact(page,doc,data);else if(artifactView)clearArtifact();
+      if(htmlMode){const shown=await renderArtifact(page,doc,data);if(!shown || shown!==artifactGeneration)return;}else if(artifactView)clearArtifact();
+      if(version!==teamVersion || activeTeam!==team)return;
+      state=data;
       ui.workHeader.classList.toggle('empty-work',!hasPage);
       setText(ui.workTitle,hasPage?doc.title || '工作页':'等待 Agent 发布工作页');
       setText(ui.summary,hasPage?doc.summary || '':'接入已保留。Agent 发布的工作会出现在这里。');
@@ -269,7 +332,7 @@
       clearTimeout(timer);const version=teamVersion;
       try {
         if(!authenticated) { await initSession(); if(version!==teamVersion)return; }
-        if(team) { const data=await api('/api/state?team='+encodeURIComponent(team));if(version===teamVersion)render(data); }
+        if(team) { const data=await api('/api/state?team='+encodeURIComponent(team));if(version===teamVersion)await render(data); }
         else { setText(ui.workTitle,'尚未接入项目');setText(ui.summary,'完成 otoha team join 后，工作页会出现在这里。');connect('connecting','等待项目');formState(); }
       } catch(error) {
         if(version!==teamVersion)return;

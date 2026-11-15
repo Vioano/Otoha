@@ -110,6 +110,20 @@ otoha team init demo --mode server \
 
 SSH 只用于远端初始化和启动，成员通过 HTTPS/TLS 接入；邀请包可以携带公开 CA 证书，但不会携带 SSH 私钥。远端 systemd/launchd 服务注册和真实服务器验收仍需单独完成。
 
+## 在已有中心登记另一个项目
+
+已接入中心的 owner 可以为新项目登记自己的团队和频道：
+
+```sh
+otoha team create project-b --from-team existing-team
+otoha team status project-b
+otoha page open --team project-b
+```
+
+`--project ID` 默认为新团队名，`--channel ID` 默认为 `PROJECT-general`。命令使用源团队的身份文件引用与现有传输，核对服务端认证的 owner 后，按 ID 查询、补建并回读项目和频道，最后登记新团队配置。不会调用仓库初始化；本机后台工作页沿现有服务发现该团队。
+
+重复相同登记会保留既有配置；别名已用于不同绑定，或频道属于另一项目时会拒绝。网络响应不确定时先按原 ID 回读；部分创建保留在中心，重跑同一命令补齐。项目登记、工作页发布接受和成员实际查看分别核验。
+
 ## Doctor and daemon
 
 `otoha doctor` 是统一的只读检查入口：它检查本机私有目录、Go CLI、Python/Node 运行时、协作服务源文件、本机团队服务、SQLite 完整性、受管 receiver 和旧版 profile。它只报告问题，不自动修复或接管旧服务。

@@ -25,6 +25,33 @@ BACKENDS = ('otoha_server.py', 'otoha_message.py', 'otoha_projection.py',
 VERSION = re.compile(r'[A-Za-z0-9][A-Za-z0-9.+-]{0,70}')
 IDENTIFIER = re.compile(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,79}')
 LOCAL_HTTP = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+SUPPORTING_FILES = ('packages/review-gate/otoha_review.py', 'scripts/review-gate.py',
+                    'scripts/sync-review-core.py', 'examples/review-gate/artifact-review.json',
+                    'docs/REVIEW-PROTOCOL.zh-CN.md')
+SUPPORTING_DIRECTORIES = ('skills/otoha-content-review', 'skills/otoha-visualize')
+
+
+def supporting_inputs(source):
+    """Allowlisted optional source resources; never copy runtime/private state."""
+    def eligible(path):
+        parts = path.relative_to(source).parts
+        return not any((source / Path(*parts[:index + 1])).is_symlink() for index in range(len(parts))) and not any(
+            part in ('.git', '__pycache__', '.DS_Store', '__MACOSX') or part.startswith('._')
+            for part in parts) and path.suffix not in ('.pyc', '.pyo')
+    files = [Path(name) for name in SUPPORTING_FILES
+             if eligible(source / name) and (source / name).is_file()]
+    for name in SUPPORTING_DIRECTORIES:
+        directory = source / name
+        if directory.is_symlink() or not directory.is_dir():
+            continue
+        for parent, directories, names in os.walk(directory, followlinks=False):
+            parent = Path(parent)
+            directories[:] = [name for name in directories if eligible(parent / name)]
+            files.extend((parent / name).relative_to(source) for name in names
+                         if eligible(parent / name) and (parent / name).is_file())
+    if Path('scripts/review-gate.py') in files and Path('packages/review-gate/otoha_review.py') not in files:
+        raise ValueError('Review CLI requires its shared core in the same release')
+    return [(source / relative, relative) for relative in sorted(files)]
 
 
 def run(*args, **kwargs):
@@ -104,6 +131,7 @@ class Deployment:
         for optional in ('release.json', 'NOTICE.md', 'apps/cli/LICENSE'):
             if (source / optional).is_file():
                 inputs.append((source / optional, Path(optional)))
+        inputs += supporting_inputs(source)
         for original, _ in inputs:
             if not original.is_file():
                 raise ValueError('Missing release input: ' + str(original))

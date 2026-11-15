@@ -19,6 +19,11 @@
     "build:cli": "node scripts/build-cli.mjs",
     "build:release": "node scripts/package-cli.mjs",
     "check:names": "python3 scripts/check-names.py",
+    "check": "npm run check:names",
+    "test:feedback-lint": "node scripts/test.mjs \"feedback lint\"",
+    "test:review-gate": "node scripts/test.mjs \"review gate\"",
+    "test:content-review": "node scripts/test.mjs \"content review\"",
+    "test:view-state": "node scripts/test.mjs \"view state\"",
     "sync:brand": "node scripts/sync-brand.mjs",
     "check:brand": "node scripts/sync-brand.mjs --check"
   },

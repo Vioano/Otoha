@@ -4,6 +4,10 @@ import { spawnSync } from 'node:child_process';
 const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 const python = process.env.OTOHA_PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
 const suites = [
+  ['review gate', python, ['-m', 'unittest', 'discover', '-s', 'test', '-p', 'test_review_gate*.py', '-v'], '.'],
+  ['feedback lint', python, ['-m', 'unittest', 'discover', '-s', 'test', '-p', 'test_feedback_lint.py', '-v'], '.'],
+  ['content review', python, ['-m', 'unittest', 'discover', '-s', 'test', '-p', 'test_content_*.py', '-v'], '.'],
+  ['view state', process.execPath, ['--test', 'test/test_view_state_adapter.mjs'], '.'],
   ['graph', process.execPath, ['--test', 'test/system-design.test.mjs', 'test/v1-compatibility.test.mjs', 'test/preview.test.mjs', 'test/output-path.test.mjs', 'test/delivery-contract.test.mjs', 'test/nested-layout.test.mjs', 'test/agent-interface.test.mjs', 'test/team.test.mjs', 'test/reader-ui.test.mjs', 'test/task-board.test.mjs', 'test/atomic-write.test.mjs'], 'packages/graph'],
   ['collaboration', python, ['-m', 'unittest', 'discover', '-s', 'tests', '-v'], 'services/collaboration'],
   ['relay', python, ['-m', 'unittest', 'discover', '-s', 'tests', '-v'], 'services/relay'],

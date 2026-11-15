@@ -1189,6 +1189,8 @@ func TeamCommand(ctx context.Context, args []string) (Object, error) {
 	switch args[0] {
 	case "init":
 		return teamInitCommand(ctx, args[1:])
+	case "create":
+		return teamCreateCommand(ctx, args[1:])
 	case "invite":
 		return teamInviteCommand(ctx, args[1:])
 	case "join":
@@ -1205,7 +1207,7 @@ func TeamCommand(ctx context.Context, args []string) (Object, error) {
 }
 
 func teamCommandHelp() Object {
-	return Object{"usage": "otoha team init|invite|join|status|doctor|wait", "examples": []string{"otoha join --endpoint https://team.example.com --key KEY", "otoha join --invite FILE", "otoha team init NAME", "otoha team invite TEAM MEMBER --out INVITE.json", "otoha team status TEAM", "otoha team doctor TEAM", "otoha team wait TEAM --timeout 60"}, "join_options": Object{"--endpoint HTTPS_URL --key KEY": "join directly with a personal one-time key", "--directory DIR": "checkout target; defaults to this team's private checkout", "--gateway-profile FILE": "optional machine-preconfigured route for a loopback invitation; OTOHA_GATEWAY_PROFILE is also supported", "--gitea-profile FILE": "advanced direct repository access only; not required for an Otoha-bound repository"}}
+	return Object{"usage": "otoha team init|create|invite|join|status|doctor|wait", "examples": []string{"otoha join --endpoint https://team.example.com --key KEY", "otoha join --invite FILE", "otoha team init NAME", "otoha team create PROJECT --from-team EXISTING", "otoha team invite TEAM MEMBER --out INVITE.json", "otoha team status TEAM", "otoha team doctor TEAM", "otoha team wait TEAM --timeout 60"}, "create_options": Object{"--from-team EXISTING": "reuse an authenticated center owner and transport; create/register this project's own team without another identity or center", "--project ID": "project ID; defaults to NAME", "--channel ID": "channel ID; defaults to PROJECT-general"}, "join_options": Object{"--endpoint HTTPS_URL --key KEY": "join directly with a personal one-time key", "--directory DIR": "checkout target; defaults to this team's private checkout", "--gateway-profile FILE": "optional machine-preconfigured route for a loopback invitation; OTOHA_GATEWAY_PROFILE is also supported", "--gitea-profile FILE": "advanced direct repository access only; not required for an Otoha-bound repository"}}
 }
 
 func JoinCommandHelp() Object {

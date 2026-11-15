@@ -87,3 +87,7 @@ Message lists contain summaries and references; fetch an original when needed. A
 Use `bin/otoha daemon status` and the last command's concrete error/next action if something is unavailable. Retain pending work and original request IDs. Never disable certificate checks, change global network settings, copy someone else's administrator login or conceal an unknown result to finish setup.
 
 The ordinary-team target is **five minutes from receiving the product link to the team being usable, including promptly responding teammates joining**. Dialogue, model time, downloads, all initialization and basic checks count. This is an acceptance target, not a guarantee for every machine or network. Complex teams can request longer alignment. See [onboarding requirements](ONBOARDING-EXPERIENCE.zh-CN.md) and [candidate scope](RELEASE-0.1.0-alpha.3.zh-CN.md).
+
+## Optional review tools in the source tree
+
+The source tree includes a [deterministic review gate and JSON question packs](REVIEW-PROTOCOL.zh-CN.md), [content review](../skills/otoha-content-review/SKILL.md), and [shared work-page visualization](../skills/otoha-visualize/SKILL.md). These remain optional; observation truth and human acceptance are separate from a computed pass. Current public RC3 downloads retain their documented scope.

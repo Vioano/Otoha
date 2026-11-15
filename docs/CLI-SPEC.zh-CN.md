@@ -125,6 +125,7 @@ otoha project remove-channel CHANNEL
 
 # 当前 Go CLI 已实现的本机团队编排入口
 otoha team init NAME --mode local [--data DIR] [--port PORT]
+otoha team create NAME --from-team EXISTING [--project ID] [--channel ID]
 otoha team invite TEAM MEMBER --role member|admin|reader --out FILE
 otoha team join --invite FILE
 otoha team status [TEAM]
@@ -133,6 +134,8 @@ otoha daemon install|uninstall|start|stop|restart|status|logs [--follow]
 ```
 
 当前实现：`team --mode local` 在队长电脑启动本机协作服务；`team --mode server` 通过固定 HostKey 的 SSH 执行远端初始化/启动，并要求以 HTTPS/TLS 作为成员和 CLI 的访问端点。远端服务管理器注册、真实服务器证书和跨机器验收仍单独记录，不由模拟 SSH 测试代替。
+
+`team create --from-team` 复用已登记中心的原 owner 身份与传输，仅查询、补建目标项目／频道并登记其本机团队。新配置引用原身份文件；源团队的中心管理状态不进入新配置。同绑定的重复登记保留目标配置，冲突不覆盖；频道全局 ID 必须回读确认属于目标项目。它不等于初始化新中心、加入新身份或初始化仓库。注册及工作页隔离由临时服务集成测试核验，真实项目采用另外记录。
 
 接入包（【建议】，与旧邀请包不同）：
 

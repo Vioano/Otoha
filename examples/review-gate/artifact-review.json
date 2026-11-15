@@ -1,0 +1,35 @@
+{
+  "protocol": "otoha.review/v1",
+  "id": "content-artifact-example",
+  "version": 1,
+  "title": "内容成品观察示例",
+  "description": "协议演示，使用虚构事实；不是现有讲座或全部内容质量的验收标准。静态交付的条件豁免不证明原生媒体播放。",
+  "areas": [{"id": "artifact", "name": "成品"}],
+  "questions": [
+    {"id": "delivery", "area": "artifact", "prompt": "本轮交付要求中写明的载体是什么？", "choices": [
+      {"id": "static", "label": "静态预览"}, {"id": "native", "label": "含媒体的原生演示"},
+      {"id": "unknown", "label": "未取得要求原文", "unknown": true}
+    ]},
+    {"id": "ratio_error", "area": "artifact", "type": "number", "prompt": "几何检查器报告的图片宽高比最大相对误差是多少？无图片记 0，并引用报告。"},
+    {"id": "covered", "area": "artifact", "type": "boolean", "prompt": "逐页报告中记录的页码集合是否与当前文件全部页码相同？"},
+    {"id": "has_media", "area": "artifact", "type": "boolean", "prompt": "当前文件是否包含音频或视频对象？"},
+    {"id": "played", "area": "artifact", "type": "boolean", "required_when": {"question": "has_media", "op": "eq", "value": true}, "prompt": "本轮是否在目标软件中实际播放了这些媒体，并留下播放记录？"},
+    {"id": "conflict", "area": "artifact", "type": "boolean", "prompt": "同一版本的两份观察记录是否对同一个对象给出了互斥事实？"}
+  ],
+  "rules": [
+    {"id": "image.distortion", "area": "artifact", "when": {"question": "ratio_error", "op": "gt", "value": 0.02}, "outcome": "blocked", "reason": "图片几何误差超过此题包的 2% 门槛。"},
+    {"id": "coverage.missing", "area": "artifact", "when": {"question": "covered", "op": "eq", "value": false}, "outcome": "unverified", "reason": "逐页观察未覆盖当前文件。"},
+    {"id": "media.pending", "area": "artifact", "when": {"all": [
+      {"question": "has_media", "op": "eq", "value": true},
+      {"question": "played", "op": "eq", "value": false}
+    ]}, "outcome": "on_hold", "waivable": true, "reason": "媒体存在，目标软件实际播放尚未完成。"},
+    {"id": "observations.conflict", "area": "artifact", "when": {"question": "conflict", "op": "eq", "value": true}, "outcome": "needs_arbitration", "reason": "互斥事实需要查原件或独立复查。"}
+  ],
+  "scoring": {"minimum": 100, "items": [
+    {"id": "ratio", "when": {"question": "ratio_error", "op": "lte", "value": 0.02}, "points": 50},
+    {"id": "coverage", "when": {"question": "covered", "op": "eq", "value": true}, "points": 50}
+  ]},
+  "waivers": [
+    {"id": "static-media-exception", "rule_id": "media.pending", "when": {"delivery": ["static"]}, "reason": "此题包预先允许仅交付静态预览时豁免原生媒体播放；该豁免必须随结果保留。"}
+  ]
+}

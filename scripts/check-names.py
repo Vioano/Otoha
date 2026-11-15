@@ -3,8 +3,12 @@ from pathlib import Path
 import re
 
 root = Path(__file__).resolve().parents[1]
+rule_id = 'otoha/product-name'
 ignored = {'.git', 'node_modules', 'dist', '__pycache__', '.archify-design', '.otoha'}
 pattern = re.compile(r'atlas(?!sian)', re.I)
+# This installed external skill retains its own identifier. Match the entire
+# identifier, not a file, directory or line containing a third-party reference.
+external_identifiers = re.compile(r'(?<![\w-])system-atlas(?![\w-])')
 failures = []
 for path in root.rglob('*'):
     relative = path.relative_to(root)
@@ -22,16 +26,18 @@ for path in root.rglob('*'):
         continue
     if relative.parts[:2] == ('docs', 'provenance') or path.name in {'LICENSE', 'NOTICE.md', 'check-names.py'}:
         continue
-    if pattern.search(str(relative)):
+    if pattern.search(external_identifiers.sub('', str(relative))):
         failures.append(str(relative) + ': filename')
     try:
         content = path.read_text()
     except (UnicodeDecodeError, OSError):
         continue
     for number, line in enumerate(content.splitlines(), 1):
-        if pattern.search(line):
+        if pattern.search(external_identifiers.sub('', line)):
             failures.append(f'{relative}:{number}')
 if failures:
-    print('\n'.join(failures))
+    print(f'{rule_id}: use Otoha in active product sources; preserve historical provenance and licenses.')
+    print('Rule and scope: docs/FEEDBACK-TO-CHECKS.zh-CN.md#existing-rule')
+    print('\n'.join(f'{failure} [{rule_id}]' for failure in failures))
     raise SystemExit(1)
 print('Otoha naming check passed; provenance, licenses and unrelated third-party brands are preserved.')

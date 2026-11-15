@@ -1,0 +1,1281 @@
+{
+  "version": 2,
+  "title": "记录观察，由程序推导验收状态",
+  "areas": [
+    {
+      "id": "layout",
+      "name": "布局与辅助文案"
+    },
+    {
+      "id": "interaction",
+      "name": "真实交互与状态"
+    },
+    {
+      "id": "prototype",
+      "name": "界面打样与落实"
+    },
+    {
+      "id": "reference",
+      "name": "参考作品"
+    },
+    {
+      "id": "theme",
+      "name": "主题与可读性"
+    },
+    {
+      "id": "authorship",
+      "name": "文案分工"
+    },
+    {
+      "id": "request",
+      "name": "请求的实际交付载体"
+    }
+  ],
+  "questions": [
+    {
+      "id": "layout.coverage@first",
+      "area": "layout",
+      "prompt": "实际查看了哪些页面模板、章节或本次改动的主要状态？证据中列出具体名称，不用“整体清楚”代替。",
+      "choices": [
+        {
+          "id": "named_surfaces",
+          "label": "已逐个查看并列出这些页面／状态"
+        },
+        {
+          "id": "first_screen_only",
+          "label": "只查看首屏或少量抽样"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.coverage",
+      "surface": "first",
+      "surface_name": "First public screen",
+      "surface_entry": "/demo#first"
+    },
+    {
+      "id": "layout.editorial@first",
+      "area": "layout",
+      "prompt": "逐个查看标题下、卡片下、图旁和页首的辅助文字，证据摘录原文与位置。是否出现介绍本页如何讲、逐步推进、沿哪里展开或如何操作本页的编排／界面自述？短语与口号同样检查，不能仅以“它是事实／教学内容”排除。具体概念、定义、必要限制另按对应对象判断。",
+      "choices": [
+        {
+          "id": "present",
+          "label": "看到了这类文字"
+        },
+        {
+          "id": "absent",
+          "label": "没有看到这类文字"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.editorial",
+      "surface": "first",
+      "surface_name": "First public screen",
+      "surface_entry": "/demo#first"
+    },
+    {
+      "id": "layout.guide_requested@first",
+      "area": "layout",
+      "prompt": "用户是否明确要求在成品中常驻展示操作教程或讲解编排说明？证据引用该要求；“要讲解知识”不等于要求介绍本页如何编排。",
+      "choices": [
+        {
+          "id": "yes",
+          "label": "用户明确要求了这类常驻说明"
+        },
+        {
+          "id": "no",
+          "label": "用户没有提出这类要求"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.guide_requested",
+      "surface": "first",
+      "surface_name": "First public screen",
+      "surface_entry": "/demo#first"
+    },
+    {
+      "id": "layout.duplicate@first",
+      "area": "layout",
+      "prompt": "是否看到了由旁边标题、按钮、分组、图形或状态已经表达的同一信息，又在辅助句中重复？包含各章节标题下的固定 intro。",
+      "choices": [
+        {
+          "id": "present",
+          "label": "看到了具体重复项"
+        },
+        {
+          "id": "absent",
+          "label": "没有看到重复项"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.duplicate",
+      "surface": "first",
+      "surface_name": "First public screen",
+      "surface_entry": "/demo#first"
+    },
+    {
+      "id": "layout.necessary@first",
+      "area": "layout",
+      "prompt": "实际界面中的对象名、图中符号、控件标签、单位、错误原因或操作后果，出现了哪些？",
+      "choices": [
+        {
+          "id": "present",
+          "label": "适用的必要信息在相应对象或操作旁可见"
+        },
+        {
+          "id": "no_such_elements",
+          "label": "本次成品不存在需要这些标注的对象或操作"
+        },
+        {
+          "id": "missing",
+          "label": "存在相应对象或操作，但对应必要信息未显示"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.necessary",
+      "surface": "first",
+      "surface_name": "First public screen",
+      "surface_entry": "/demo#first"
+    },
+    {
+      "id": "layout.relation_carrier@first",
+      "area": "layout",
+      "prompt": "先列出本任务要求用户通过界面辨认、比较、追踪或操作的目标关系，再逐项记录“对象A可见名称—对象B可见名称—表达联系的实际分组／位置／连线／次序／前后状态”。相关卡片仅仅同屏不等于因果或方向已表达；none也要写明任务为何没有目标关系。正文、定义、必要限制、品牌叙事不按关系词或p标签一律判错；承担目标关系的句子也不能仅因叫“正文事实”豁免。",
+      "choices": [
+        {
+          "id": "arranged_objects",
+          "label": "这些关系都能在对应对象的分组、位置、连线、顺序或状态中定位"
+        },
+        {
+          "id": "sentences_only",
+          "label": "至少一项只在说明句中，界面没有对应的对象安排"
+        },
+        {
+          "id": "none",
+          "label": "本次界面没有这类需要表达的关系"
+        },
+        {
+          "id": "unknown",
+          "label": "未实际执行／无法确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.relation_carrier",
+      "surface": "first",
+      "surface_name": "First public screen",
+      "surface_entry": "/demo#first"
+    },
+    {
+      "id": "layout.without_supporting_copy@first",
+      "area": "layout",
+      "prompt": "在检查用的实际页面中，临时隐藏复述界面安排的辅助文字并保留原占位，实际还看到了什么？不要按p标签批量隐藏；保留对象名、单位、控件、公式、定义、必要限定、操作后果、错误、原文／引文与正文／品牌叙事。证据摘录实际隐藏的文字，逐项列出仍可见的两端对象名称、位置／分组和方向／次序／状态编码；检查后恢复。无此类辅助文字时如实选无。若关系只剩空位或方向不明，重做布局，不能补解释。",
+      "required_when": {
+        "layout.relation_carrier@first": [
+          "arranged_objects"
+        ]
+      },
+      "choices": [
+        {
+          "id": "objects_located",
+          "label": "实际隐藏后，仍逐项定位到了对应对象及关系"
+        },
+        {
+          "id": "no_supporting_copy",
+          "label": "实看没有这类可隐藏的辅助句；已逐项定位并列出对应对象与关系"
+        },
+        {
+          "id": "missing_or_ambiguous",
+          "label": "实际隐藏后，至少一项对象、次序、方向或状态无法定位"
+        },
+        {
+          "id": "not_performed",
+          "label": "未执行隐藏辅助文案后的实际查看",
+          "unknown": true
+        },
+        {
+          "id": "unknown",
+          "label": "未实际执行／无法确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.without_supporting_copy",
+      "surface": "first",
+      "surface_name": "First public screen",
+      "surface_entry": "/demo#first"
+    },
+    {
+      "id": "layout.coverage@second",
+      "area": "layout",
+      "prompt": "实际查看了哪些页面模板、章节或本次改动的主要状态？证据中列出具体名称，不用“整体清楚”代替。",
+      "choices": [
+        {
+          "id": "named_surfaces",
+          "label": "已逐个查看并列出这些页面／状态"
+        },
+        {
+          "id": "first_screen_only",
+          "label": "只查看首屏或少量抽样"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.coverage",
+      "surface": "second",
+      "surface_name": "Second public screen",
+      "surface_entry": "/demo#second"
+    },
+    {
+      "id": "layout.editorial@second",
+      "area": "layout",
+      "prompt": "逐个查看标题下、卡片下、图旁和页首的辅助文字，证据摘录原文与位置。是否出现介绍本页如何讲、逐步推进、沿哪里展开或如何操作本页的编排／界面自述？短语与口号同样检查，不能仅以“它是事实／教学内容”排除。具体概念、定义、必要限制另按对应对象判断。",
+      "choices": [
+        {
+          "id": "present",
+          "label": "看到了这类文字"
+        },
+        {
+          "id": "absent",
+          "label": "没有看到这类文字"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.editorial",
+      "surface": "second",
+      "surface_name": "Second public screen",
+      "surface_entry": "/demo#second"
+    },
+    {
+      "id": "layout.guide_requested@second",
+      "area": "layout",
+      "prompt": "用户是否明确要求在成品中常驻展示操作教程或讲解编排说明？证据引用该要求；“要讲解知识”不等于要求介绍本页如何编排。",
+      "choices": [
+        {
+          "id": "yes",
+          "label": "用户明确要求了这类常驻说明"
+        },
+        {
+          "id": "no",
+          "label": "用户没有提出这类要求"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.guide_requested",
+      "surface": "second",
+      "surface_name": "Second public screen",
+      "surface_entry": "/demo#second"
+    },
+    {
+      "id": "layout.duplicate@second",
+      "area": "layout",
+      "prompt": "是否看到了由旁边标题、按钮、分组、图形或状态已经表达的同一信息，又在辅助句中重复？包含各章节标题下的固定 intro。",
+      "choices": [
+        {
+          "id": "present",
+          "label": "看到了具体重复项"
+        },
+        {
+          "id": "absent",
+          "label": "没有看到重复项"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.duplicate",
+      "surface": "second",
+      "surface_name": "Second public screen",
+      "surface_entry": "/demo#second"
+    },
+    {
+      "id": "layout.necessary@second",
+      "area": "layout",
+      "prompt": "实际界面中的对象名、图中符号、控件标签、单位、错误原因或操作后果，出现了哪些？",
+      "choices": [
+        {
+          "id": "present",
+          "label": "适用的必要信息在相应对象或操作旁可见"
+        },
+        {
+          "id": "no_such_elements",
+          "label": "本次成品不存在需要这些标注的对象或操作"
+        },
+        {
+          "id": "missing",
+          "label": "存在相应对象或操作，但对应必要信息未显示"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.necessary",
+      "surface": "second",
+      "surface_name": "Second public screen",
+      "surface_entry": "/demo#second"
+    },
+    {
+      "id": "layout.relation_carrier@second",
+      "area": "layout",
+      "prompt": "先列出本任务要求用户通过界面辨认、比较、追踪或操作的目标关系，再逐项记录“对象A可见名称—对象B可见名称—表达联系的实际分组／位置／连线／次序／前后状态”。相关卡片仅仅同屏不等于因果或方向已表达；none也要写明任务为何没有目标关系。正文、定义、必要限制、品牌叙事不按关系词或p标签一律判错；承担目标关系的句子也不能仅因叫“正文事实”豁免。",
+      "choices": [
+        {
+          "id": "arranged_objects",
+          "label": "这些关系都能在对应对象的分组、位置、连线、顺序或状态中定位"
+        },
+        {
+          "id": "sentences_only",
+          "label": "至少一项只在说明句中，界面没有对应的对象安排"
+        },
+        {
+          "id": "none",
+          "label": "本次界面没有这类需要表达的关系"
+        },
+        {
+          "id": "unknown",
+          "label": "未实际执行／无法确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.relation_carrier",
+      "surface": "second",
+      "surface_name": "Second public screen",
+      "surface_entry": "/demo#second"
+    },
+    {
+      "id": "layout.without_supporting_copy@second",
+      "area": "layout",
+      "prompt": "在检查用的实际页面中，临时隐藏复述界面安排的辅助文字并保留原占位，实际还看到了什么？不要按p标签批量隐藏；保留对象名、单位、控件、公式、定义、必要限定、操作后果、错误、原文／引文与正文／品牌叙事。证据摘录实际隐藏的文字，逐项列出仍可见的两端对象名称、位置／分组和方向／次序／状态编码；检查后恢复。无此类辅助文字时如实选无。若关系只剩空位或方向不明，重做布局，不能补解释。",
+      "required_when": {
+        "layout.relation_carrier@second": [
+          "arranged_objects"
+        ]
+      },
+      "choices": [
+        {
+          "id": "objects_located",
+          "label": "实际隐藏后，仍逐项定位到了对应对象及关系"
+        },
+        {
+          "id": "no_supporting_copy",
+          "label": "实看没有这类可隐藏的辅助句；已逐项定位并列出对应对象与关系"
+        },
+        {
+          "id": "missing_or_ambiguous",
+          "label": "实际隐藏后，至少一项对象、次序、方向或状态无法定位"
+        },
+        {
+          "id": "not_performed",
+          "label": "未执行隐藏辅助文案后的实际查看",
+          "unknown": true
+        },
+        {
+          "id": "unknown",
+          "label": "未实际执行／无法确定",
+          "unknown": true
+        }
+      ],
+      "base_question_id": "layout.without_supporting_copy",
+      "surface": "second",
+      "surface_name": "Second public screen",
+      "surface_entry": "/demo#second"
+    },
+    {
+      "id": "interaction.controls",
+      "area": "interaction",
+      "prompt": "本次成品是否包含可操作控件、导航、选择、展开或输入？",
+      "choices": [
+        {
+          "id": "present",
+          "label": "存在这些操作"
+        },
+        {
+          "id": "none",
+          "label": "仅静态内容，不含这些操作"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ]
+    },
+    {
+      "id": "interaction.ran",
+      "area": "interaction",
+      "prompt": "实际执行过哪些操作？证据写出动作及操作前后状态。",
+      "choices": [
+        {
+          "id": "executed",
+          "label": "实际执行过本次涉及的操作"
+        },
+        {
+          "id": "visual_only",
+          "label": "只看了截图／源码，没有执行操作"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "required_when": {
+        "interaction.controls": [
+          "present"
+        ]
+      }
+    },
+    {
+      "id": "interaction.observed",
+      "area": "interaction",
+      "prompt": "执行时看到了哪类现象？证据给出实际对象、数值或焦点位置，覆盖可见反馈和无障碍播报。",
+      "choices": [
+        {
+          "id": "none_listed",
+          "label": "未观察到下面列出的异常"
+        },
+        {
+          "id": "no_response",
+          "label": "操作后没有预期的状态变化"
+        },
+        {
+          "id": "wrong_object",
+          "label": "改变了错误对象或丢失原上下文"
+        },
+        {
+          "id": "stale_feedback",
+          "label": "可见状态／无障碍播报残留旧对象、数量或金额"
+        },
+        {
+          "id": "keyboard_lost",
+          "label": "键盘操作后焦点无故丢失，或控件不可达"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "required_when": {
+        "interaction.controls": [
+          "present"
+        ],
+        "interaction.ran": [
+          "executed"
+        ]
+      }
+    },
+    {
+      "id": "prototype.scope",
+      "area": "prototype",
+      "prompt": "本次用户要求及实际改动属于哪类？",
+      "choices": [
+        {
+          "id": "new",
+          "label": "新界面"
+        },
+        {
+          "id": "major",
+          "label": "重要视觉改版"
+        },
+        {
+          "id": "minor",
+          "label": "小型明确修改"
+        },
+        {
+          "id": "approved",
+          "label": "沿用用户已选定的界面方案"
+        },
+        {
+          "id": "study",
+          "label": "仅研究／展示视觉方案"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ]
+    },
+    {
+      "id": "prototype.artifact",
+      "area": "prototype",
+      "prompt": "实际生成并查看的打样是什么？证据引用真实文件及其内容。",
+      "choices": [
+        {
+          "id": "ui_mockup",
+          "label": "能看到布局、层级与组件的界面稿"
+        },
+        {
+          "id": "product_asset",
+          "label": "只有照片／插图等产品素材"
+        },
+        {
+          "id": "none",
+          "label": "没有界面打样"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "required_when": {
+        "prototype.scope": [
+          "new",
+          "major"
+        ]
+      }
+    },
+    {
+      "id": "prototype.implemented",
+      "area": "prototype",
+      "prompt": "运行界面中，能否看到已采用方案的主要分组、层级和组件关系？",
+      "choices": [
+        {
+          "id": "same_structure",
+          "label": "能在运行界面定位这些对应结构"
+        },
+        {
+          "id": "different_structure",
+          "label": "运行界面没有这些对应结构"
+        },
+        {
+          "id": "static_only",
+          "label": "只有效果图，没有运行界面"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "required_when": {
+        "prototype.scope": [
+          "new",
+          "major",
+          "approved"
+        ]
+      }
+    },
+    {
+      "id": "reference.observed",
+      "area": "reference",
+      "prompt": "本次实际查看过的设计参考来自哪里？证据给出页面／片段／本项目同类界面，以及采用的具体安排。",
+      "choices": [
+        {
+          "id": "external",
+          "label": "实际查看过同题材外部作品"
+        },
+        {
+          "id": "project",
+          "label": "实际查看过本项目已有或用户提供的选定界面"
+        },
+        {
+          "id": "name_only",
+          "label": "只提到品牌／作品名称，没有查看"
+        },
+        {
+          "id": "none",
+          "label": "没有查看任何对应作品"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ]
+    },
+    {
+      "id": "theme.requirement",
+      "area": "theme",
+      "prompt": "用户或项目对主题的明确约定是什么？证据指出约定来源。",
+      "choices": [
+        {
+          "id": "both",
+          "label": "新界面／重要改版，且没有例外：深浅主题、默认深色并记忆"
+        },
+        {
+          "id": "existing",
+          "label": "已有明确主题约定，本次沿用"
+        },
+        {
+          "id": "not_applicable",
+          "label": "成品不是需要主题切换的界面，例如固定视觉稿"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ]
+    },
+    {
+      "id": "theme.observed",
+      "area": "theme",
+      "prompt": "实际打开后看到了哪些主题与显示现象？证据包含视口和相关状态。",
+      "choices": [
+        {
+          "id": "two_readable",
+          "label": "实际查看深浅两种，文字与状态可读"
+        },
+        {
+          "id": "one_readable",
+          "label": "实际只看到一种主题，文字与状态可读"
+        },
+        {
+          "id": "overflow_or_unreadable",
+          "label": "看到遮挡、横向溢出或文字／状态不可读"
+        },
+        {
+          "id": "not_opened",
+          "label": "未打开成品查看"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "required_when": {
+        "theme.requirement": [
+          "both",
+          "existing"
+        ]
+      }
+    },
+    {
+      "id": "theme.initial",
+      "area": "theme",
+      "prompt": "清除本页手动主题偏好后首次打开，实际显示什么主题？",
+      "choices": [
+        {
+          "id": "dark",
+          "label": "深色"
+        },
+        {
+          "id": "light",
+          "label": "浅色"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法确定",
+          "unknown": true
+        }
+      ],
+      "required_when": {
+        "theme.requirement": [
+          "both"
+        ]
+      }
+    },
+    {
+      "id": "theme.remembered",
+      "area": "theme",
+      "prompt": "手动切换主题后刷新，实际显示什么？",
+      "choices": [
+        {
+          "id": "restored",
+          "label": "仍显示刚才手动选择的主题"
+        },
+        {
+          "id": "reset",
+          "label": "重置为其他主题"
+        },
+        {
+          "id": "unknown",
+          "label": "未执行／无法确定",
+          "unknown": true
+        }
+      ],
+      "required_when": {
+        "theme.requirement": [
+          "both"
+        ]
+      }
+    },
+    {
+      "id": "authorship.assigned",
+      "area": "authorship",
+      "prompt": "用户是否指定了负责可见文案的作者？",
+      "choices": [
+        {
+          "id": "named",
+          "label": "指定了作者"
+        },
+        {
+          "id": "none",
+          "label": "没有指定作者"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ]
+    },
+    {
+      "id": "authorship.actual",
+      "area": "authorship",
+      "prompt": "正文、导航、按钮、状态及错误文案的实际来源是什么？",
+      "choices": [
+        {
+          "id": "assigned",
+          "label": "均来自指定作者，或由其确认"
+        },
+        {
+          "id": "implementer",
+          "label": "制作侧自行写入"
+        },
+        {
+          "id": "mixed",
+          "label": "存在未由指定作者确认的混合来源"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "required_when": {
+        "authorship.assigned": [
+          "named"
+        ]
+      }
+    },
+    {
+      "id": "request.expected",
+      "area": "request",
+      "prompt": "用户本次明确要求的主要交付载体是什么？",
+      "choices": [
+        {
+          "id": "working_ui",
+          "label": "可操作的网站／应用界面"
+        },
+        {
+          "id": "playable",
+          "label": "可播放的动画／演示"
+        },
+        {
+          "id": "still",
+          "label": "静态视觉稿或方案研究"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ]
+    },
+    {
+      "id": "request.actual",
+      "area": "request",
+      "prompt": "目前实际能打开或操作的交付物是什么？证据给出真实入口和观察结果。",
+      "choices": [
+        {
+          "id": "working_ui",
+          "label": "只有可操作界面，没有可播放作品"
+        },
+        {
+          "id": "playable",
+          "label": "只有可播放作品，没有可操作界面"
+        },
+        {
+          "id": "both",
+          "label": "同时有可操作界面与可播放作品"
+        },
+        {
+          "id": "still",
+          "label": "只有静态图"
+        },
+        {
+          "id": "source",
+          "label": "只有源码或描述"
+        },
+        {
+          "id": "absent",
+          "label": "没有可打开的成品"
+        },
+        {
+          "id": "unknown",
+          "label": "未查看／无法从实际成品确定",
+          "unknown": true
+        }
+      ]
+    },
+    {
+      "id": "interaction.selection_detail",
+      "area": "interaction",
+      "prompt": "若列表／图块把选择与“查看详情”分为独立入口，单击一条行正文（避开详情按钮）实际发生了什么？证据写出被点对象、选中态及详情区／弹窗前后状态。只有用户需求、项目约定或已确认设计明确采用选择即联动预览，才能作为该联动的例外依据；不能仅凭现存代码同时触发两种动作，就把它当作已获批准。合法 master-detail 或没有独立选择场景仍按实际任务说明依据。",
+      "choices": [
+        {
+          "id": "select_only",
+          "label": "只改变选择，未同时打开详情"
+        },
+        {
+          "id": "opens_detail_too",
+          "label": "存在独立详情入口，但单击行正文同时打开了详情"
+        },
+        {
+          "id": "linked_or_no_separate_selection",
+          "label": "用户需求／项目约定／已确认设计明确采用选择联动预览，或没有独立选择场景（证据说明依据）"
+        },
+        {
+          "id": "unknown",
+          "label": "未执行／无法从实际成品确定",
+          "unknown": true
+        }
+      ],
+      "required_when": {
+        "interaction.controls": [
+          "present"
+        ]
+      }
+    },
+    {
+      "id": "interaction.keyboard_focus_target",
+      "area": "interaction",
+      "prompt": "在适用的 Web 同页主动作中，用键盘触发提交／确认等动作后，立即检查焦点实际落在哪里（先不要再按 Tab）。证据写出按键、动作，以及 document.activeElement 的标签名和可识别名称／区域；不适用时说明实际原因。",
+      "choices": [
+        {
+          "id": "named_control_or_region",
+          "label": "焦点落在具名控件或区域（证据写出具体对象）"
+        },
+        {
+          "id": "body_or_html",
+          "label": "焦点落在 BODY 或 HTML"
+        },
+        {
+          "id": "not_applicable",
+          "label": "非 Web、已进入新文档或没有适用的同页主动作（证据说明原因）"
+        },
+        {
+          "id": "unknown",
+          "label": "未执行／未读取实际焦点／无法判断",
+          "unknown": true
+        }
+      ],
+      "required_when": {
+        "interaction.controls": [
+          "present"
+        ]
+      }
+    }
+  ],
+  "rules": [
+    {
+      "id": "layout.not-fully-viewed@first",
+      "area": "layout",
+      "when": {
+        "layout.coverage@first": [
+          "first_screen_only"
+        ]
+      },
+      "outcome": "unverified",
+      "reason": "只查看首屏或抽样，尚未覆盖本次涉及的页面／章节／主要状态。",
+      "surface": "first"
+    },
+    {
+      "id": "layout.not-fully-viewed@second",
+      "area": "layout",
+      "when": {
+        "layout.coverage@second": [
+          "first_screen_only"
+        ]
+      },
+      "outcome": "unverified",
+      "reason": "只查看首屏或抽样，尚未覆盖本次涉及的页面／章节／主要状态。",
+      "surface": "second"
+    },
+    {
+      "id": "layout.unsolicited-editorial@first",
+      "area": "layout",
+      "when": {
+        "layout.editorial@first": [
+          "present"
+        ],
+        "layout.guide_requested@first": [
+          "no"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "观察到未经要求的编排／界面说明；应改成实际图形、布局、演示，或移除该句后再查看。",
+      "surface": "first"
+    },
+    {
+      "id": "layout.unsolicited-editorial@second",
+      "area": "layout",
+      "when": {
+        "layout.editorial@second": [
+          "present"
+        ],
+        "layout.guide_requested@second": [
+          "no"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "观察到未经要求的编排／界面说明；应改成实际图形、布局、演示，或移除该句后再查看。",
+      "surface": "second"
+    },
+    {
+      "id": "layout.restatement@first",
+      "area": "layout",
+      "when": {
+        "layout.duplicate@first": [
+          "present"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "观察到与已有标题、图形、按钮或状态重复的辅助文案。",
+      "surface": "first"
+    },
+    {
+      "id": "layout.restatement@second",
+      "area": "layout",
+      "when": {
+        "layout.duplicate@second": [
+          "present"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "观察到与已有标题、图形、按钮或状态重复的辅助文案。",
+      "surface": "second"
+    },
+    {
+      "id": "layout.missing-essential@first",
+      "area": "layout",
+      "when": {
+        "layout.necessary@first": [
+          "missing"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "相应对象或操作缺少必要标签、单位、原因或后果，不能靠一并删字处理。",
+      "surface": "first"
+    },
+    {
+      "id": "layout.missing-essential@second",
+      "area": "layout",
+      "when": {
+        "layout.necessary@second": [
+          "missing"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "相应对象或操作缺少必要标签、单位、原因或后果，不能靠一并删字处理。",
+      "surface": "second"
+    },
+    {
+      "id": "interaction.not-operated",
+      "area": "interaction",
+      "when": {
+        "interaction.ran": [
+          "visual_only"
+        ]
+      },
+      "outcome": "unverified",
+      "reason": "只看截图或源码，实际操作结果仍未验证。"
+    },
+    {
+      "id": "interaction.observed-failure",
+      "area": "interaction",
+      "when": {
+        "interaction.observed": [
+          "no_response",
+          "wrong_object",
+          "stale_feedback",
+          "keyboard_lost"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "观察到具体交互／状态异常；程序不会因其他项正常而抵消它。"
+    },
+    {
+      "id": "prototype.asset-not-ui",
+      "area": "prototype",
+      "when": {
+        "prototype.scope": [
+          "new",
+          "major"
+        ],
+        "prototype.artifact": [
+          "product_asset",
+          "none"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "新界面／重要改版没有实际界面打样；产品素材不等于界面方案。"
+    },
+    {
+      "id": "prototype.not-implemented",
+      "area": "prototype",
+      "when": {
+        "prototype.implemented": [
+          "different_structure",
+          "static_only"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "采用的界面结构未落实到实际运行成品。"
+    },
+    {
+      "id": "reference.not-viewed-new",
+      "area": "reference",
+      "when": {
+        "prototype.scope": [
+          "new",
+          "major"
+        ],
+        "reference.observed": [
+          "name_only",
+          "none"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "新界面／重要改版只提名称或未看对应作品，缺少实际参考。"
+    },
+    {
+      "id": "theme.missing-second",
+      "area": "theme",
+      "when": {
+        "theme.requirement": [
+          "both"
+        ],
+        "theme.observed": [
+          "one_readable"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "要求深浅两种主题，但实际只看到一种。"
+    },
+    {
+      "id": "theme.visible-failure",
+      "area": "theme",
+      "when": {
+        "theme.observed": [
+          "overflow_or_unreadable"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "实际显示有遮挡、溢出或不可读现象。"
+    },
+    {
+      "id": "theme.not-opened",
+      "area": "theme",
+      "when": {
+        "theme.observed": [
+          "not_opened"
+        ]
+      },
+      "outcome": "unverified",
+      "reason": "尚未打开成品查看主题和可读性。"
+    },
+    {
+      "id": "authorship.wrong-source",
+      "area": "authorship",
+      "when": {
+        "authorship.assigned": [
+          "named"
+        ],
+        "authorship.actual": [
+          "implementer",
+          "mixed"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "指定作者的可见文案范围被制作侧代写或混入其他来源。"
+    },
+    {
+      "id": "request.ui-not-delivered",
+      "area": "request",
+      "when": {
+        "request.expected": [
+          "working_ui"
+        ],
+        "request.actual": [
+          "still",
+          "source",
+          "absent",
+          "playable"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "要求可操作界面，实际只有静态图、源码或没有成品。"
+    },
+    {
+      "id": "request.playback-not-delivered",
+      "area": "request",
+      "when": {
+        "request.expected": [
+          "playable"
+        ],
+        "request.actual": [
+          "still",
+          "source",
+          "absent",
+          "working_ui"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "要求可播放作品，实际只有静态图、源码或没有成品。"
+    },
+    {
+      "id": "request.still-not-delivered",
+      "area": "request",
+      "when": {
+        "request.expected": [
+          "still"
+        ],
+        "request.actual": [
+          "source",
+          "absent"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "要求视觉稿／方案，实际尚无对应可查看成品。"
+    },
+    {
+      "id": "theme.default-light",
+      "area": "theme",
+      "when": {
+        "theme.requirement": [
+          "both"
+        ],
+        "theme.initial": [
+          "light"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "新界面要求默认深色，实际初次显示浅色。"
+    },
+    {
+      "id": "theme.preference-reset",
+      "area": "theme",
+      "when": {
+        "theme.requirement": [
+          "both"
+        ],
+        "theme.remembered": [
+          "reset"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "手动选择的主题在刷新后没有保留。"
+    },
+    {
+      "id": "layout.prose-carries-relation@first",
+      "area": "layout",
+      "when": {
+        "layout.relation_carrier@first": [
+          "sentences_only"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "至少一项界面关系只有说明句，没有对应的布局表达。将关系落实为对象安排；不能只删句、换成短口号或以“内容正确”豁免。",
+      "surface": "first"
+    },
+    {
+      "id": "layout.prose-carries-relation@second",
+      "area": "layout",
+      "when": {
+        "layout.relation_carrier@second": [
+          "sentences_only"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "至少一项界面关系只有说明句，没有对应的布局表达。将关系落实为对象安排；不能只删句、换成短口号或以“内容正确”豁免。",
+      "surface": "second"
+    },
+    {
+      "id": "layout.unreadable-without-copy@first",
+      "area": "layout",
+      "when": {
+        "layout.without_supporting_copy@first": [
+          "missing_or_ambiguous"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "隐藏辅助段落后，实际关系无法定位；应重做对应布局，再回到实际界面复查。",
+      "surface": "first"
+    },
+    {
+      "id": "layout.unreadable-without-copy@second",
+      "area": "layout",
+      "when": {
+        "layout.without_supporting_copy@second": [
+          "missing_or_ambiguous"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "隐藏辅助段落后，实际关系无法定位；应重做对应布局，再回到实际界面复查。",
+      "surface": "second"
+    },
+    {
+      "id": "interaction.row-opens-detail",
+      "area": "interaction",
+      "when": {
+        "interaction.selection_detail": [
+          "opens_detail_too"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "在选择与详情已有独立入口的场景，单击行正文同时打开详情。应分开选择与详情动作；项目明确的选择联动预览不按此项阻断。"
+    },
+    {
+      "id": "interaction.keyboard-focus-body",
+      "area": "interaction",
+      "when": {
+        "interaction.keyboard_focus_target": [
+          "body_or_html"
+        ]
+      },
+      "outcome": "blocked",
+      "reason": "适用的 Web 同页主动作由键盘触发后，实际焦点落到 BODY／HTML。应修复该动作完成后的焦点去向，并立即复查，不能用之后再按 Tab 能找到控件代替。"
+    }
+  ],
+  "limits": "程序根据提交的具体观察计算状态，不自动证明观察真实，也不以程序计算冒充对任何未来任务的保证。",
+  "surfaces": [
+    {
+      "id": "first",
+      "name": "First public screen",
+      "entry": "/demo#first"
+    },
+    {
+      "id": "second",
+      "name": "Second public screen",
+      "entry": "/demo#second"
+    }
+  ]
+}
